@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import { normalizeTick, validateSequenceAndFreshness } from '../src/market/tick.mjs';
-import { createMarketStream, websocketAcceptKey, isAllowedSymbol } from '../src/market/stream.mjs';
-import { verifyWebSocketAccess } from '../src/market/ws-transport.mjs';
+import { normalizeTick, validateSequenceAndFreshness } from './tick.mjs';
+
+import { createMarketStream, websocketAcceptKey, isAllowedSymbol } from './market/stream.mjs';
+
+import { verifyWebSocketAccess } from './market/ws-transport.mjs';
 
 const now = new Date().toISOString();
 const good = { symbol: 'NIFTY 50', sequence: 1, price: 25000, asOf: now };
