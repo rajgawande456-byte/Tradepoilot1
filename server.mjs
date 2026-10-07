@@ -3,7 +3,8 @@ import crypto from 'node:crypto';
 import { createProvider, MarketDataProviderError } from './market/provider.mjs';
 import { createMarketStream } from './market/stream.mjs';
 import { isWebSocketUpgrade, upgradeResponseHeaders, createWebSocketClient, verifyWebSocketAccess } from './market/ws-transport.mjs';
-
+import { isWebSocketUpgrade, upgradeResponseHeaders, createWebSocketClient, verifyWebSocketAccess } from './market/ws-transport.mjs';
+import { handleAuthRequest } from './auth/routes.mjs';
 const PORT = Number(process.env.PORT || 8787);
 const ALLOWED_ORIGINS = new Set((process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean));
 const MARKET_DATA_PROVIDER = process.env.MARKET_DATA_PROVIDER || '';
