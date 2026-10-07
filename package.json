@@ -11,5 +11,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "pg": "^8.16.3"
   }
 }
