@@ -1,1 +1,15 @@
-
+{
+  "name": "tradepilot-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TradePilot AI - trading analytics and trader-development platform",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test market-stream.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
