@@ -3,1410 +3,252 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TradePilot AI — Market Analytics</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>TradePilot — Trading Dashboard</title>
   <link rel="stylesheet" href="style.css">
-<meta name="tradepilot-step" content="Step 33 - Trader Regime Adaptation Step 30 - Trader Context-Aware Pattern Intelligence Engine Process Intelligence Engine">
-
-<style>
-.habit-performance{margin-top:18px}.hp-hero{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:18px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.02)}.hp-hero h3{margin:7px 0 6px}.hp-hero p{margin:0;color:var(--muted);max-width:850px}.hp-score{min-width:145px;text-align:right}.hp-score span,.hp-score small{display:block;color:var(--muted);font-size:11px}.hp-score b{display:block;font-size:32px;margin:3px 0}.hp-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0}.hp-stat,.hp-item{padding:12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.018)}.hp-stat span,.hp-stat small,.hp-item small{display:block;color:var(--muted);font-size:11px}.hp-stat b,.hp-item b{display:block;margin:4px 0;font-size:17px}.hp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.hp-grid-3{grid-template-columns:repeat(3,1fr)}.hp-panel{padding:16px;border:1px solid var(--border);border-radius:14px}.hp-panel h3{margin:5px 0 12px}.hp-item{margin:7px 0}.hp-bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:7px}.hp-bar i{display:block;height:100%;background:currentColor;border-radius:99px}.hp-warning{padding:10px;border-radius:10px;background:rgba(255,170,0,.07);border:1px solid rgba(255,170,0,.18);color:var(--muted);font-size:12px;margin-top:8px}@media(max-width:900px){.hp-stats{grid-template-columns:repeat(3,1fr)}.hp-grid,.hp-grid-3{grid-template-columns:1fr}.hp-hero{align-items:flex-start}.hp-score{text-align:left}}@media(max-width:560px){.hp-stats{grid-template-columns:repeat(2,1fr)}.hp-hero{flex-direction:column}}
-</style>
-
-<style>
-.guardrail-intel{margin-top:18px}.gi-hero{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-top:14px;padding:15px;border:1px solid rgba(170,130,255,.17);border-radius:14px;background:rgba(170,130,255,.022)}.gi-hero h3{margin:5px 0 0;font-size:18px}.gi-hero p{margin:7px 0 0;color:#7d899b;font-size:10px;line-height:1.55;max-width:820px}.gi-score{text-align:right;min-width:165px}.gi-score span,.gi-score small{display:block;color:var(--muted);font-size:9px}.gi-score b{display:block;font-size:29px;margin:3px 0}.gi-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px}.gi-stat{padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.018)}.gi-stat span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase}.gi-stat b{display:block;margin-top:5px;font-size:12px}.gi-stat small{display:block;margin-top:4px;color:#687589;font-size:8px;line-height:1.35}.gi-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}.gi-grid-3{grid-template-columns:repeat(3,1fr)}.gi-panel,.gi-evidence{padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.018)}.gi-panel h3,.gi-evidence h3{margin:5px 0 10px;font-size:14px}.gi-item{padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.025);margin-bottom:7px}.gi-item:last-child{margin-bottom:0}.gi-item>div{display:flex;justify-content:space-between;gap:8px}.gi-item span{font-size:9px;color:#8793a5}.gi-item b{font-size:10px}.gi-item small{display:block;margin-top:4px;color:#687589;font-size:8px;line-height:1.4}.gi-bar{height:6px;margin-top:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.gi-bar i{display:block;height:100%;border-radius:99px;background:rgba(170,130,255,.58)}.gi-warning{padding:10px;border-radius:9px;background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.15);color:#8995a7;font-size:9px;line-height:1.45;margin-bottom:7px}.gi-evidence{margin-top:12px}@media(max-width:1100px){.gi-stats{grid-template-columns:repeat(3,1fr)}.gi-grid-3{grid-template-columns:1fr 1fr}.gi-grid-3 .gi-panel:last-child{grid-column:1/-1}}@media(max-width:760px){.gi-hero{grid-template-columns:1fr}.gi-score{text-align:left}.gi-grid,.gi-grid-3{grid-template-columns:1fr}.gi-grid-3 .gi-panel:last-child{grid-column:auto}.gi-stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.gi-stats{grid-template-columns:1fr}}
-</style>
-
-<style>
-.rll{margin-top:18px}.rll-hero{display:flex;justify-content:space-between;gap:20px;padding:22px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}.rll-hero h3{margin:6px 0 8px}.rll-hero p{max-width:820px}.rll-score{min-width:150px;text-align:right}.rll-score span,.rll-score small{display:block;color:var(--muted);font-size:11px}.rll-score b{display:block;font-size:38px;line-height:1.1;margin:7px 0}.rll-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0}.rll-stat{padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}.rll-stat span,.rll-stat small{display:block;color:var(--muted);font-size:10px}.rll-stat b{display:block;font-size:19px;margin:5px 0}.rll-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.rll-toolbar select,.rll-toolbar button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px}.rll-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}.rll-panel,.rll-history,.rll-evidence{border:1px solid var(--line);border-radius:14px;padding:16px;background:rgba(255,255,255,.018)}.rll-panel h3,.rll-history h3,.rll-evidence h3{margin:5px 0 12px}.rll-item{padding:11px 0;border-bottom:1px solid var(--line)}.rll-item:last-child{border-bottom:0}.rll-item>div{display:flex;justify-content:space-between;gap:12px}.rll-item span{color:var(--muted);font-size:12px}.rll-item b{font-size:13px}.rll-item small,.rll-note{display:block;color:var(--muted);font-size:11px;line-height:1.5;margin-top:4px}.rll-rulebox{padding:14px;border:1px solid var(--line);border-radius:12px}.rll-rulebox strong{display:block;font-size:15px;margin-bottom:7px}.rll-tag{display:inline-block;font-size:10px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted);margin-bottom:8px}.rll-good{color:#72e6a2}.rll-warn{color:#ffd166}.rll-danger{color:#ff7d7d}.rll-history-row{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}.rll-history-row:last-child{border-bottom:0}.rll-history-row small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.rll-empty{color:var(--muted);font-size:12px;padding:12px 0}.rll-warning{padding:10px 12px;border-left:3px solid #ffd166;background:rgba(255,209,102,.05);margin:6px 0;font-size:12px}.rll-note{padding:8px 0}
-@media(max-width:900px){.rll-stats{grid-template-columns:repeat(3,1fr)}.rll-grid{grid-template-columns:1fr}.rll-hero{flex-direction:column}.rll-score{text-align:left}.rll-history-row{grid-template-columns:1fr 1fr}.rll-history-row>div:last-child{grid-column:1/-1}}
-@media(max-width:560px){.rll-stats{grid-template-columns:repeat(2,1fr)}.rll-toolbar>*{width:100%}}
-</style>
 </head>
+
 <body>
-  <div class="app-shell">
+
+  <header class="topbar">
+    <div class="logo">
+      <span class="logo-mark">T</span>
+      <span>TradePilot</span>
+    </div>
+
+    <div class="market-status">
+      <span class="status-dot"></span>
+      Market Dashboard
+    </div>
+
+    <button class="profile-btn">Trader</button>
+  </header>
+
+  <div class="layout">
+
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">TP</div>
-        <div>
-          <div class="brand-name">TradePilot</div>
-          <div class="brand-sub">AI Market Analytics</div>
-        </div>
-      </div>
-
-      <nav class="nav">
-        <div class="nav-label">WORKSPACE</div>
-        <a class="nav-item active" href="#"><span>▦</span> Dashboard</a>
-        <a class="nav-item" href="#traderCommand"><span>◈</span> Trader Profile</a>
-        <a class="nav-item" href="#setupAnalytics"><span>▥</span> Setup Analytics</a>
-        <a class="nav-item" href="#setupQuality"><span>◇</span> Setup Quality</a>
-        <a class="nav-item" href="#"><span>◉</span> Market Overview</a>
-        <a class="nav-item" href="#"><span>⌗</span> Option Chain</a>
-        <a class="nav-item" href="#"><span>✓</span> Premium Verify</a>
-        <a class="nav-item" href="#"><span>⌁</span> Trade Scanner</a>
-        <a class="nav-item" href="#"><span>✦</span> AI Signals</a>
-
-        <div class="nav-label second">TOOLS</div>
-        <a class="nav-item" href="#decisionWorkflow"><span>▤</span> Decision Workflow</a>
-        <a class="nav-item" href="#improvementLoop"><span>↻</span> Improvement Loop</a>
-        <a class="nav-item" href="#coachingHabits"><span>◎</span> Coaching Habits</a>
-        <a class="nav-item" href="#habitPerformance"><span>↗</span> Habit × Performance</a>
-        <a class="nav-item" href="#behavioralRisk"><span>⚠</span> Behavioral Risk</a>
-        <a class="nav-item" href="#processGuardrails"><span>▣</span> Process Guardrails</a>
-        <a class="nav-item" href="#guardrailIntelligence"><span>◈</span> Guardrail Intelligence</a>
-        <a class="nav-item" href="#behavioralRecovery"><span>◇</span> Behavioral Recovery</a>
-        <a class="nav-item" href="#recoveryLearning"><span>↝</span> Recovery Learning</a>
-        <a class="nav-item" href="#recoveryLearningLoop"><span>↻</span> Recovery Learning Loop</a>
-        <a class="nav-item" href="#personalRuleLifecycle"><span>◈</span> Personal Rule Lifecycle</a>
-<a class="nav-item" href="#processPlaybook"><span>◈</span> Process Playbook</a>
-        <a class="nav-item" href="#processAttribution"><span>▣</span> Process Attribution</a>
-        <a class="nav-item" href="#performanceBlueprint"><span>✦</span> Performance Blueprint</a>
-        <a class="nav-item" href="#dailyOperatingSystem"><span>◫</span> Daily Operating System</a>
-        <a class="nav-item" href="#unifiedTraderOS"><span>◈</span> Unified Trader OS</a>
-        <a class="nav-item" href="#liveBehaviorMonitor"><span>◉</span> Live Behavior Monitor</a>
-        <a class="nav-item" href="#sessionEventStream"><span>⌁</span> Session Event Stream</a>
-        <a class="nav-item" href="#sessionReplay"><span>◉</span> Session Replay</a>
-        <a class="nav-item" href="#adaptivePlaybookEngine"><span>◇</span> Adaptive Playbook</a>
-        <a class="nav-item" href="#playbookExecution"><span>✓</span> Playbook Execution</a><a class="nav-item" href="#sessionPerformanceLearning"><span>◎</span> Performance Learning</a><a class="nav-item" href="#personalProcessAttribution"><span>✦</span> Personal Attribution</a><a class="nav-item" href="#blueprintEvolution"><span>✦</span> Blueprint Evolution</a><a class="nav-item" href="#operatingProfile"><span>◉</span> Operating Profile</a><a class="nav-item" href="#operatingProfileEvolution"><span>↗</span> Profile Evolution</a><a class="nav-item" href="#adaptiveProcessMode"><span>◈</span> Process Mode</a><a class="nav-item" href="#modeExecutionTracker"><span>✓</span> Mode Execution</a><a class="nav-item" href="#modePerformanceLearning"><span>↗</span> Mode Learning</a><a class="nav-item" href="#realTimeMarketSession"><span>◌</span> Market Session</a>
-
-
-        <a class="nav-item" href="#traderProgress"><span>◒</span> Progress Dashboard</a>
-        <a class="nav-item" href="#behaviorEvolution"><span>◈</span> Behavioral Evolution</a>
-        <a class="nav-item" href="#patternDiscovery"><span>⌬</span> Pattern Discovery</a>
-        <a class="nav-item" href="#advancedAnalytics"><span>✧</span> Personalization</a>
-        <a class="nav-item" href="#contextPatternIntelligence"><span>◈</span> Context Pattern Intelligence</a>
-<a class="nav-item" href="#regimeIntelligence"><span>◌</span> Regime Intelligence</a>
-        <a class="nav-item" href="#regimeAdaptation"><span>↺</span> Regime Adaptation</a>
-        <a class="nav-item" href="#journal"><span>▤</span> Trading Journal</a>
-        <a class="nav-item" href="#"><span>◌</span> Risk Manager</a>
-        <a class="nav-item" href="#"><span>⚙</span> Settings</a>
+      <nav>
+        <a class="active" href="#">Dashboard</a>
+        <a href="#markets">Markets</a>
+        <a href="#strategies">Strategies</a>
+        <a href="#risk">Risk Management</a>
+        <a href="#journal">Trade Journal</a>
       </nav>
 
-      <div class="prototype-box">
-        <span class="pulse"></span>
-        <div>
-          <strong>Prototype Mode</strong>
-          <p>Illustrative market data</p>
-        </div>
+      <div class="sidebar-bottom">
+        <span>TradePilot</span>
+        <small>Trading Intelligence</small>
       </div>
     </aside>
 
-    
-<section class="panel sr-engine-panel">
-  <div class="panel-head">
-    <div>
-      <div class="panel-title">Automatic Support / Resistance</div>
-      <div class="panel-subtitle">Swing structure • touches • rejection • volume • VWAP • previous levels • pivots</div>
-    </div>
-    <span class="badge badge-purple">AUTO S/R ENGINE</span>
-  </div>
+    <main class="main">
 
-  <div class="sr-grid">
-    <div class="sr-side resistance">
-      <div class="sr-side-head">
-        <span>Resistance</span><span id="srResistanceSummary">—</span>
-      </div>
-      <div id="resistanceLevels"></div>
-    </div>
-
-    <div class="sr-side support">
-      <div class="sr-side-head">
-        <span>Support</span><span id="srSupportSummary">—</span>
-      </div>
-      <div id="supportLevels"></div>
-    </div>
-  </div>
-
-  <div class="sr-method">
-    <span>S/R Strength inputs</span>
-    <span>• Swing High/Low</span>
-    <span>• Multiple Touches</span>
-    <span>• Rejection</span>
-    <span>• Volume</span>
-    <span>• VWAP Proximity</span>
-    <span>• Prev High/Low</span>
-    <span>• Day Open</span>
-    <span>• Pivot Levels</span>
-    <span>• Market Structure</span>
-  </div>
-</section>
-
-<main class="main">
-      <header class="topbar">
+      <section class="welcome">
         <div>
-          <div class="eyebrow">MARKET ANALYTICS</div>
-          <h1>Dashboard</h1>
+          <p class="eyebrow">TRADING TERMINAL</p>
+          <h1>Good evening, Trader.</h1>
+          <p class="muted">
+            Monitor markets, analyse setups and manage your risk.
+          </p>
         </div>
-        <div class="top-actions">
-          <span class="market-open"><i></i> Market Session</span>
-          <button class="icon-btn">⌕</button>
-          <button class="avatar">TP</button>
-        </div>
-      </header>
 
-      <section class="command-center card" id="traderCommand">
-        <div class="card-head"><div><span class="muted">STEP 18 · PERSONALIZED DASHBOARD</span><h2>Trader Command Center</h2></div><span class="tiny-tag">PROCESS ANALYTICS</span></div>
-        <div class="command-hero">
-          <div><span class="muted">Your current trading profile</span><strong id="commandProfile">BUILDING PROFILE</strong><p id="commandSummary">Journal, risk and behavior evidence will shape this workspace.</p></div>
-          <div class="command-score"><span>DNA</span><b id="commandDnaScore">—</b><small>/100</small></div>
-        </div>
-        <div class="command-grid">
-          <div class="command-card"><span>Best Instrument</span><b id="commandInstrument">—</b><small id="commandInstrumentEvidence">Awaiting evidence</small></div>
-          <div class="command-card"><span>Best Timeframe</span><b id="commandTimeframe">—</b><small id="commandTimeframeEvidence">Awaiting evidence</small></div>
-          <div class="command-card"><span>Preferred Setup</span><b id="commandSetup">—</b><small>Most repeated journal setup</small></div>
-          <div class="command-card"><span>Execution Style</span><b id="commandExecution">—</b><small>Observed from journal behaviour</small></div>
-          <div class="command-card"><span>Risk Behaviour</span><b id="commandRisk">—</b><small>Based on configured risk + behaviour</small></div>
-          <div class="command-card"><span>Emotional Pattern</span><b id="commandEmotion">—</b><small>Most frequent recorded state</small></div>
-        </div>
-        <div class="command-fit">
-          <div><div class="command-fit-head"><span>Current workspace vs your DNA</span><b id="commandFitScore">—</b></div><div class="command-fit-bar"><i id="commandFitBar"></i></div><p id="commandFitText">The dashboard compares the selected instrument/timeframe with your journal profile. It does not generate a trade recommendation.</p></div>
-          <div class="command-tags" id="commandTags"><span>Journal evidence</span><span>Risk context</span><span>Mistake AI</span><span>Market analytics</span></div>
-        </div>
-        <div class="command-lower">
-          <div><span class="section-kicker">PROCESS STRENGTHS</span><ul id="commandStrengths"><li>Awaiting evidence</li></ul></div>
-          <div><span class="section-kicker">PROCESS WATCHLIST</span><ul id="commandWeaknesses"><li>Awaiting evidence</li></ul></div>
-          <div><span class="section-kicker">CURRENT MARKET CONTEXT</span><strong id="commandMarketContext">—</strong><p id="commandMarketNote">Market context is analytical only.</p></div>
-        </div>
-        <div class="command-disclaimer">Personalized analytics only • No BUY/SELL signal • No CE/PE call • No entry, SL or target recommendation • No probability claim</div>
+        <button class="primary-btn">+ New Trade</button>
       </section>
 
-      <section class="instrument-row">
-        <button class="instrument active" data-symbol="NIFTY 50">NIFTY 50 <small>25,486.40</small></button>
-        <button class="instrument" data-symbol="BANKNIFTY">BANKNIFTY <small>57,214.80</small></button>
-        <button class="instrument" data-symbol="FINNIFTY">FINNIFTY <small>24,981.15</small></button>
-        <span class="data-note">SIMULATED DATA • PROTOTYPE</span>
+      <section class="market-grid" id="markets">
+
+        <article class="market-card">
+          <div class="card-top">
+            <span>NIFTY 50</span>
+            <span class="positive">+0.84%</span>
+          </div>
+          <h2>24,850.30</h2>
+          <p class="positive">+206.45</p>
+        </article>
+
+        <article class="market-card">
+          <div class="card-top">
+            <span>BANKNIFTY</span>
+            <span class="positive">+0.62%</span>
+          </div>
+          <h2>56,420.15</h2>
+          <p class="positive">+348.20</p>
+        </article>
+
+        <article class="market-card">
+          <div class="card-top">
+            <span>FINNIFTY</span>
+            <span class="negative">-0.18%</span>
+          </div>
+          <h2>26,180.75</h2>
+          <p class="negative">-47.30</p>
+        </article>
+
       </section>
 
-      <section class="hero-grid">
-        <div class="card market-card">
-          <div class="card-head">
-            <div>
-              <span class="muted">Current Price</span>
-              <div class="price" id="price">25,486.40</div>
-            </div>
-            <span class="status-badge green" id="trendBadge">BULLISH</span>
-          </div>
-          <div class="price-change">+142.60 <span>(+0.56%)</span></div>
-          <div class="mini-metrics">
-            <div><span>VWAP</span><b>25,431.20</b></div>
-            <div><span>EMA 5</span><b>25,472.80</b></div>
-            <div><span>RSI</span><b>62.4</b></div>
-            <div><span>ATR</span><b>84.6</b></div>
-          </div>
-        </div>
+      <section class="dashboard-grid">
 
-        <div class="card score-card">
-          <div class="card-head">
-            <div>
-              <span class="muted">Trend Alignment</span>
-              <h2>Overall Market Read</h2>
-            </div>
-            <span class="score-ring"><strong id="alignment">78</strong><small>/100</small></span>
-          </div>
-          <div class="score-bar"><span style="width:78%"></span></div>
-          <div class="score-foot">
-            <span>EMA aligned</span><span>VWAP support</span><span>Momentum positive</span>
-          </div>
-        </div>
+        <div class="chart-panel">
 
-        <div class="card direction-card">
-          <div class="card-head"><span class="muted">Directional Strength</span><span class="verified-dot">●</span></div>
-          <div class="strength-row"><span>CE Strength</span><strong id="ceStrength">76</strong><div class="meter"><i style="width:76%"></i></div></div>
-          <div class="strength-row"><span>PE Strength</span><strong id="peStrength">38</strong><div class="meter pe"><i style="width:38%"></i></div></div>
-          <div class="direction-note">CE side shows stronger alignment. This is analytics only.</div>
-        </div>
-      </section>
-
-      <section class="workspace-grid">
-        <div class="card chart-placeholder">
-          <div class="card-head chart-head">
+          <div class="panel-header">
             <div>
-              <span class="muted">Price Structure</span>
-              <h2 id="chartTitle">NIFTY 50 · 5 Minute</h2>
+              <span class="panel-label">MARKET CHART</span>
+              <h2>NIFTY 50</h2>
             </div>
+
             <div class="timeframes">
-              <button class="active">5m</button><button>15m</button><button>30m</button><button>1h</button>
+              <button>1m</button>
+              <button class="selected">5m</button>
+              <button>15m</button>
+              <button>1H</button>
             </div>
           </div>
-          <div class="chart-area" id="chart"></div>
-          <div class="chart-legend"><span>● Price</span><span>━ EMA 5</span><span>━ VWAP</span><span>◆ HH / HL</span><span>◇ LH / LL</span><span class="prototype-label">SIMULATED OHLC</span></div>
-        </div>
 
-        <div class="card structure-card">
-          <div class="card-head">
-            <div><span class="muted">Market Structure</span><h2>HH / HL / LH / LL</h2></div>
-            <span class="tiny-tag">AUTO</span>
-          </div>
-          <div class="structure-main">
-            <div class="structure-badge" id="structureBias">BULLISH STRUCTURE</div>
-            <div class="structure-score"><strong id="structureScore">72</strong><span>/100</span></div>
-          </div>
-          <div class="structure-grid">
-            <div><span>Last High</span><b id="lastHH">HH</b></div>
-            <div><span>Last Low</span><b id="lastHL">HL</b></div>
-            <div><span>Previous High</span><b id="lastLH">—</b></div>
-            <div><span>Previous Low</span><b id="lastLL">—</b></div>
-          </div>
-          <div class="structure-context" id="structureContext">Higher highs and higher lows are controlling the recent swing sequence.</div>
-          <div class="structure-break" id="structureBreak">Context: continuation / rejection watch</div>
-        </div>
-      </section>
+          <div class="chart">
+            <div class="chart-grid"></div>
 
-
-      <section class="sr-engine-panel card">
-        <div class="card-head">
-          <div><span class="muted">Step 6 + Step 7 Engine</span><h2>Automatic Support / Resistance</h2></div>
-          <span class="tiny-tag">CHART INTEGRATED</span>
-        </div>
-        <div class="sr-grid">
-          <div class="sr-side resistance"><div class="sr-side-head"><span>Resistance</span><span id="srResistanceSummary">Nearest —</span></div><div id="resistanceLevels"></div></div>
-          <div class="sr-side support"><div class="sr-side-head"><span>Support</span><span id="srSupportSummary">Nearest —</span></div><div id="supportLevels"></div></div>
-        </div>
-        <div class="sr-method"><span>Swing High/Low</span><span>Touches</span><span>Rejection</span><span>Volume</span><span>VWAP</span><span>Prev High/Low</span><span>Pivot R1/R2/S1/S2</span><span>Structure Context</span></div>
-      </section>
-
-      <section class="structure-detail card">
-        <div class="card-head"><div><span class="muted">Market Structure Engine</span><h2>Structure Sequence</h2></div><span class="tiny-tag">ANALYTICS ONLY</span></div>
-        <div id="structureSequence" class="structure-sequence"></div>
-      </section>
-
-      <section class="option-chain-engine card">
-        <div class="card-head"><div><span class="muted">Step 11 Engine</span><h2>Option Chain Analytics</h2></div><span class="tiny-tag">SYNTHETIC PROTOTYPE DATA</span></div>
-        <div class="oc-summary">
-          <div><span>ATM Strike</span><strong id="ocAtm">—</strong></div>
-          <div><span>PCR (OI)</span><strong id="ocPcr">—</strong></div>
-          <div><span>CE Strength</span><strong id="ocCeStrength">—/100</strong></div>
-          <div><span>PE Strength</span><strong id="ocPeStrength">—/100</strong></div>
-          <div><span>OI Resistance</span><strong id="ocResistance">—</strong></div>
-          <div><span>OI Support</span><strong id="ocSupport">—</strong></div>
-        </div>
-        <div class="oc-table-wrap">
-          <table class="oc-table">
-            <thead><tr><th>CE OI</th><th>Δ OI</th><th>CE Vol</th><th>IV</th><th>Δ</th><th>Strike</th><th>Δ</th><th>IV</th><th>PE Vol</th><th>Δ OI</th><th>PE OI</th></tr></thead>
-            <tbody id="optionChainRows"></tbody>
-          </table>
-        </div>
-        <div class="oc-greeks" id="optionChainGreeks"></div>
-        <p id="ocRead" class="oc-read">Calculating option-chain structure.</p>
-        <div class="indicator-note"><span>OI + Change OI</span><span>Volume</span><span>IV</span><span>Delta</span><span>Gamma</span><span>Theta</span><span>Vega</span><span>PCR</span><span>OI S/R</span></div>
-      </section>
-
-      <section class="scanner-engine card">
-        <div class="card-head"><div><span class="muted">Step 12 Engine</span><h2>Trade Scanner</h2></div><span class="tiny-tag">ANALYTICS ONLY</span></div>
-        <div class="scanner-summary">
-          <div><span>Scanner State</span><strong id="scannerState">SCANNING</strong></div>
-          <div><span>Markets Checked</span><strong>3 / 3</strong></div>
-          <div><span>Highest Alignment</span><strong id="scannerBest">—/100</strong></div>
-          <div><span>MTF Confirmed</span><strong id="scannerMtf">—</strong></div>
-        </div>
-        <div id="scannerRows" class="scanner-rows"></div>
-        <p id="scannerRead" class="scanner-read">Combining indicators, market structure, support/resistance, option-chain context, MTF and premium verification.</p>
-        <div class="indicator-note"><span>MTF</span><span>Indicators</span><span>Structure</span><span>S/R</span><span>Option Chain</span><span>Premium Verify</span><span>Unified Decision</span></div>
-      </section>
-
-      <section class="risk-engine card" id="riskManager">
-        <div class="card-head"><div><span class="muted">Step 15 Engine</span><h2>Risk Manager</h2></div><span class="tiny-tag">RISK CONTROL ONLY</span></div>
-        <div class="risk-summary">
-          <div><span>Risk Per Trade</span><strong id="riskAmount">₹0</strong></div>
-          <div><span>Max Daily Loss</span><strong id="dailyRiskAmount">₹0</strong></div>
-          <div><span>Suggested Qty</span><strong id="riskQty">0</strong></div>
-          <div><span>Risk / Reward</span><strong id="riskRR">—</strong></div>
-          <div><span>Drawdown</span><strong id="riskDrawdown">0%</strong></div>
-        </div>
-        <div class="risk-grid">
-          <div class="risk-form">
-            <div class="risk-field"><label>Capital</label><input id="rCapital" type="number" min="0" step="1000" value="100000"></div>
-            <div class="risk-field"><label>Risk / Trade %</label><input id="rRiskPct" type="number" min="0" max="100" step="0.1" value="1"></div>
-            <div class="risk-field"><label>Max Daily Loss %</label><input id="rDailyPct" type="number" min="0" max="100" step="0.1" value="2"></div>
-            <div class="risk-field"><label>Entry</label><input id="rEntry" type="number" min="0" step="0.01" placeholder="0.00"></div>
-            <div class="risk-field"><label>Stop Distance</label><input id="rStop" type="number" min="0" step="0.01" placeholder="Points"></div>
-            <div class="risk-field"><label>Target Distance</label><input id="rTarget" type="number" min="0" step="0.01" placeholder="Points"></div>
-            <div class="risk-field"><label>Current Equity</label><input id="rEquity" type="number" min="0" step="1000" value="100000"></div>
-            <div class="risk-field"><label>Peak Equity</label><input id="rPeak" type="number" min="0" step="1000" value="100000"></div>
-          </div>
-          <div class="risk-readout">
-            <div class="risk-meter"><div><span>Capital Risk</span><b id="riskMeterLabel">Within configured limit</b></div><i id="riskMeterBar"></i></div>
-            <div class="risk-checks">
-              <div><span>Max Daily Loss</span><b id="riskDailyCheck">₹0</b></div>
-              <div><span>Position Size Basis</span><b id="riskPositionBasis">Stop distance required</b></div>
-              <div><span>Exposure Note</span><b id="riskExposure">No position recommendation</b></div>
-              <div><span>Drawdown Status</span><b id="riskDrawdownStatus">No drawdown</b></div>
+            <div class="candles">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
             </div>
-            <p id="riskRead" class="risk-read">Configure your risk limits. This engine calculates risk capacity and position-size math only; it does not generate a trade call.</p>
-          </div>
-        </div>
-        <div class="indicator-note"><span>Capital</span><span>Risk %</span><span>Daily Loss Limit</span><span>Position Size Math</span><span>R:R</span><span>Drawdown</span><span>No BUY/SELL</span></div>
-      </section>
 
-      <section class="journal-engine card" id="journal">
-        <div class="card-head"><div><span class="muted">Step 14 Engine</span><h2>Trading Journal</h2></div><span class="tiny-tag">LOCAL PROTOTYPE</span></div>
-        <div class="journal-summary">
-          <div><span>Total Trades</span><strong id="journalTotal">0</strong></div>
-          <div><span>Net P&amp;L</span><strong id="journalPnl">₹0</strong></div>
-          <div><span>Wins</span><strong id="journalWins">0</strong></div>
-          <div><span>Losses</span><strong id="journalLosses">0</strong></div>
-          <div><span>Win Rate</span><strong id="journalWinRate">—</strong></div>
-        </div>
-        <form id="journalForm" class="journal-form">
-          <div class="journal-field"><label>Date</label><input id="jDate" type="date" required></div>
-          <div class="journal-field"><label>Trade Time</label><input id="jTime" type="time"> </div>
-          <div class="journal-field"><label>Instrument</label><select id="jInstrument"><option>NIFTY 50</option><option>BANKNIFTY</option><option>FINNIFTY</option></select></div>
-          <div class="journal-field"><label>Timeframe</label><select id="jTimeframe"><option>5m</option><option>15m</option><option>30m</option><option>1h</option></select></div>
-          <div class="journal-field"><label>Side</label><select id="jSide"><option>LONG</option><option>SHORT</option></select></div>
-          <div class="journal-field"><label>Entry</label><input id="jEntry" type="number" step="0.01" placeholder="0.00" required></div>
-          <div class="journal-field"><label>Exit</label><input id="jExit" type="number" step="0.01" placeholder="0.00" required></div>
-          <div class="journal-field"><label>Quantity</label><input id="jQty" type="number" step="1" min="1" value="1" required></div>
-          <div class="journal-field"><label>P&amp;L</label><input id="jPnl" type="number" step="0.01" placeholder="Auto / override"></div>
-          <div class="journal-field journal-wide"><label>Setup</label><input id="jSetup" type="text" placeholder="e.g. MTF + pullback + structure"></div>
-          <div class="journal-field"><label>Emotion</label><select id="jEmotion"><option>CALM</option><option>CONFIDENT</option><option>FEARFUL</option><option>GREEDY</option><option>REVENGE</option><option>FOMO</option></select></div>
-          <div class="journal-field journal-wide"><label>Mistake / Lesson</label><input id="jMistake" type="text" placeholder="What went wrong or what worked?"></div>
-          <div class="journal-field journal-full"><label>Notes</label><textarea id="jNotes" rows="2" placeholder="Trade context, execution, market conditions..."></textarea></div>
-          <div class="journal-actions journal-full"><button type="submit" class="journal-add">Add Trade</button><button type="button" id="journalClear" class="journal-secondary">Clear Journal</button><button type="button" id="journalExport" class="journal-secondary">Export CSV</button></div>
-        </form>
-        <div class="journal-table-wrap">
-          <table class="journal-table"><thead><tr><th>Date</th><th>Instrument</th><th>TF</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>Emotion</th><th>Setup / Lesson</th><th></th></tr></thead><tbody id="journalRows"></tbody></table>
-        </div>
-        <p class="journal-note">Journal data is stored locally in this prototype browser. It will later connect to the account database in the production/auth step.</p>
-      </section>
-
-      <section class="mistake-ai-engine card" id="mistakeAI">
-        <div class="card-head"><div><span class="muted">Step 16 Engine</span><h2>Trader Mistake AI</h2></div><span class="tiny-tag">BEHAVIOR ANALYTICS</span></div>
-        <div class="mistake-summary">
-          <div><span>Pattern Risk</span><strong id="mistakeRisk">LOW</strong></div>
-          <div><span>Trades Analysed</span><strong id="mistakeTrades">0</strong></div>
-          <div><span>Loss Streak</span><strong id="mistakeStreak">0</strong></div>
-          <div><span>Top Pattern</span><strong id="mistakeTop">—</strong></div>
-        </div>
-        <div class="mistake-grid">
-          <div class="mistake-patterns" id="mistakePatterns"></div>
-          <div class="mistake-coach">
-            <span class="muted">AI Coaching Read</span>
-            <h3 id="mistakeCoachTitle">Add journal trades to detect recurring patterns.</h3>
-            <p id="mistakeCoachText">The engine analyses your journal locally. It looks for repeated behavioral markers such as revenge, FOMO, moved stops, overtrading, trend-against notes and recurring mistakes.</p>
-            <div class="mistake-rules"><span>Journal evidence only</span><span>No trade calls</span><span>Local prototype</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="dna-engine card" id="tradingDNA">
-        <div class="card-head"><div><span class="muted">Step 17 Engine</span><h2>Personalized Trading DNA</h2></div><span class="tiny-tag">PERSONALIZED ANALYTICS</span></div>
-        <div class="dna-summary">
-          <div><span>Trading DNA Score</span><strong id="dnaScore">—/100</strong></div>
-          <div><span>Best Instrument</span><strong id="dnaInstrument">—</strong></div>
-          <div><span>Best Timeframe</span><strong id="dnaTimeframe">—</strong></div>
-          <div><span>Preferred Setup</span><strong id="dnaSetup">—</strong></div>
-          <div><span>Risk Behaviour</span><strong id="dnaRisk">—</strong></div>
-          <div><span>Execution Style</span><strong id="dnaExecution">—</strong></div>
-        </div>
-        <div class="dna-grid">
-          <div class="dna-panel">
-            <div class="dna-panel-head"><div><span class="muted">Trader Profile</span><h3>Behavioral fingerprint</h3></div><span id="dnaConsistency" class="dna-pill">CONSISTENCY —</span></div>
-            <div class="dna-traits">
-              <div><span>Emotional Pattern</span><b id="dnaEmotion">—</b></div>
-              <div><span>Discipline</span><b id="dnaDiscipline">—/100</b></div>
-              <div><span>Consistency</span><b id="dnaConsistencyScore">—/100</b></div>
-              <div><span>Risk Control</span><b id="dnaRiskScore">—/100</b></div>
+            <div class="chart-label">
+              Market data will appear here
             </div>
-            <div class="dna-meter"><div><span>Trading DNA Score</span><b id="dnaMeterLabel">Awaiting journal evidence</b></div><i id="dnaMeterBar"></i></div>
-            <p id="dnaRead" class="dna-read">Add journal trades and configure Risk Manager to build a personalized trading profile.</p>
           </div>
-          <div class="dna-panel">
-            <div class="dna-panel-head"><div><span class="muted">Strengths &amp; Weaknesses</span><h3>What the data says</h3></div></div>
-            <div class="dna-sw-grid">
-              <div><span>Strengths</span><ul id="dnaStrengths"><li>—</li></ul></div>
-              <div><span>Weaknesses</span><ul id="dnaWeaknesses"><li>—</li></ul></div>
+
+        </div>
+
+        <div class="signal-panel">
+
+          <div class="panel-header">
+            <div>
+              <span class="panel-label">TRADE SIGNAL</span>
+              <h2>Current Setup</h2>
+            </div>
+          </div>
+
+          <div class="signal-box">
+            <span class="signal-neutral">WAITING</span>
+            <h3>No active signal</h3>
+            <p>
+              Connect a verified market-data provider to receive live signals.
+            </p>
+          </div>
+
+          <div class="levels">
+            <div>
+              <span>Entry</span>
+              <strong>—</strong>
+            </div>
+
+            <div>
+              <span>Stop Loss</span>
+              <strong>—</strong>
+            </div>
+
+            <div>
+              <span>Target</span>
+              <strong>—</strong>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="stats-grid" id="risk">
+
+        <article class="stat-card">
+          <span>TRADING CAPITAL</span>
+          <strong>₹0</strong>
+          <small>Configure your capital</small>
+        </article>
+
+        <article class="stat-card">
+          <span>RISK / TRADE</span>
+          <strong>1%</strong>
+          <small>Recommended starting point</small>
+        </article>
+
+        <article class="stat-card">
+          <span>TODAY'S P&L</span>
+          <strong>₹0</strong>
+          <small>No trades recorded</small>
+        </article>
+
+        <article class="stat-card">
+          <span>WIN RATE</span>
+          <strong>—</strong>
+          <small>Trade journal empty</small>
+        </article>
+
+      </section>
+
+      <section class="bottom-grid">
+
+        <div class="strategy-panel" id="strategies">
+          <div class="panel-header">
+            <div>
+              <span class="panel-label">STRATEGIES</span>
+              <h2>Trading Systems</h2>
+            </div>
+          </div>
+
+          <div class="strategy-list">
+            <div class="strategy">
+              <div>
+                <strong>EMA 9 / 15</strong>
+                <span>Trend + Retest</span>
+              </div>
+              <span class="tag">5M</span>
+            </div>
+
+            <div class="strategy">
+              <div>
+                <strong>Opening Breakout</strong>
+                <span>First candle breakout</span>
+              </div>
+              <span class="tag">5M</span>
+            </div>
+
+            <div class="strategy">
+              <div>
+                <strong>Custom Strategy</strong>
+                <span>Configure your setup</span>
+              </div>
+              <span class="tag">NEW</span>
             </div>
           </div>
         </div>
-        <div class="dna-evidence" id="dnaEvidence"></div>
-        <div class="indicator-note"><span>Journal</span><span>Risk Profile</span><span>Mistake AI</span><span>Instrument</span><span>Timeframe</span><span>Setup</span><span>Execution</span><span>No Trade Calls</span></div>
-      </section>
 
-      <section class="setup-analytics card" id="setupAnalytics">
-        <div class="card-head"><div><span class="muted">STEP 19 · JOURNAL EVIDENCE</span><h2>Personalized Setup Analytics</h2></div><span class="tiny-tag">HISTORICAL ANALYTICS</span></div>
-        <div class="setup-controls">
-          <label>Instrument<select id="setupFilterInstrument"><option value="ALL">All instruments</option><option>NIFTY 50</option><option>BANKNIFTY</option><option>FINNIFTY</option></select></label>
-          <label>Timeframe<select id="setupFilterTf"><option value="ALL">All timeframes</option><option>5m</option><option>15m</option><option>30m</option><option>1h</option></select></label>
-          <label>Setup<select id="setupFilterName"><option value="ALL">All setups</option></select></label>
-          <button type="button" id="setupReset" class="setup-reset">Reset filters</button>
-        </div>
-        <div class="setup-summary">
-          <div><span>Trades Analysed</span><strong id="setupTotal">0</strong></div>
-          <div><span>Net P&amp;L</span><strong id="setupNetPnl">₹0</strong></div>
-          <div><span>Historical Win Rate</span><strong id="setupWinRate">—</strong></div>
-          <div><span>Avg P&amp;L / Trade</span><strong id="setupAvgPnl">—</strong></div>
-          <div><span>Profit Factor</span><strong id="setupProfitFactor">—</strong></div>
-        </div>
-        <div class="setup-grid">
-          <div class="setup-panel"><div class="setup-panel-head"><div><span class="muted">Setup Performance Matrix</span><h3>Observed journal outcomes</h3></div><span class="setup-evidence" id="setupEvidence">0 trades</span></div><div class="setup-table-wrap"><table class="setup-table"><thead><tr><th>Setup</th><th>Trades</th><th>Historical Win Rate</th><th>Net P&amp;L</th><th>Avg P&amp;L</th><th>Avg Win</th><th>Avg Loss</th><th>PF</th><th>Consistency</th></tr></thead><tbody id="setupMatrixRows"></tbody></table></div></div>
-          <div class="setup-panel"><div class="setup-panel-head"><div><span class="muted">Current Filter View</span><h3>Evidence snapshot</h3></div></div><div class="setup-breakdown" id="setupBreakdown"></div><div class="setup-observation" id="setupObservation">Add journal trades with setup names to build historical setup analytics.</div></div>
-        </div>
-        <div class="setup-secondary-grid">
-          <div class="setup-panel"><div class="setup-panel-head"><div><span class="muted">Instrument Performance</span><h3>Historical by market</h3></div></div><div class="setup-mini-grid" id="instrumentAnalytics"></div></div>
-          <div class="setup-panel"><div class="setup-panel-head"><div><span class="muted">Timeframe Performance</span><h3>Historical by timeframe</h3></div></div><div class="setup-mini-grid" id="tfAnalytics"></div></div>
-        </div>
-        <div class="setup-disclaimer">Descriptive journal analytics only • Historical/observed results are not predictive • Low-sample groups are flagged • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="setup-quality card" id="setupQuality">
-        <div class="card-head"><div><span class="muted">STEP 20 · PERSONALIZED CONTEXT</span><h2>Personalized Setup Quality Engine</h2></div><span class="tiny-tag">EVIDENCE + CONTEXT</span></div>
-        <div class="setup-quality-head">
-          <div><span class="muted">Selected setup profile</span><h3 id="qualitySetupName">—</h3><p id="qualitySummary">Waiting for journal evidence and current analytical context.</p></div>
-          <div class="quality-score"><span>Quality Context</span><b id="qualityScore">—</b><small>/100 · analytical score</small></div>
-        </div>
-        <div class="quality-context"><span id="qualityWorkspace">Workspace —</span><span id="qualityContextState">Context —</span><span id="qualityEvidenceState">Evidence —</span></div>
-        <div class="quality-grid">
-          <div class="quality-panel"><div class="quality-panel-head"><div><span class="muted">Historical Evidence</span><h3>What the journal shows</h3></div></div><div class="quality-metrics" id="qualityHistorical"></div></div>
-          <div class="quality-panel"><div class="quality-panel-head"><div><span class="muted">Current Analytical Context</span><h3>What the engines show now</h3></div></div><div class="quality-metrics" id="qualityCurrent"></div></div>
-          <div class="quality-panel"><div class="quality-panel-head"><div><span class="muted">Context Match</span><h3>Evidence-to-workspace comparison</h3></div></div><div class="quality-match" id="qualityMatch"></div></div>
-        </div>
-        <div class="quality-observation" id="qualityObservation">No quality assessment available yet.</div>
-        <div class="setup-disclaimer">Descriptive decision-support only • Historical evidence does not predict future outcomes • Context match is not a trade signal • No BUY/SELL • No CE/PE • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="adaptive-workspace card" id="adaptiveWorkspace">
-        <div class="card-head"><div><span class="muted">STEP 21 · PERSONALIZED WORKSPACE</span><h2>Adaptive Trader Workspace</h2></div><span class="tiny-tag">DNA + EVIDENCE + CONTEXT</span></div>
-        <div class="adaptive-hero">
-          <div><span class="muted">Workspace profile</span><h3 id="adaptiveHeadline">Building your personalized workspace</h3><p id="adaptiveSummary">The engine will organize the dashboard around your journal evidence, Trading DNA and current analytical context.</p></div>
-          <div class="adaptive-state"><span>Personalization</span><b id="adaptiveScore">—</b><small>/100 context fit</small></div>
-        </div>
-        <div class="adaptive-grid">
-          <div class="adaptive-panel"><span class="muted">Profile Focus</span><h3>Recommended workspace focus</h3><div id="adaptiveFocus" class="adaptive-list"></div></div>
-          <div class="adaptive-panel"><span class="muted">Evidence Priority</span><h3>What has usable history</h3><div id="adaptiveEvidence" class="adaptive-list"></div></div>
-          <div class="adaptive-panel"><span class="muted">Current Context</span><h3>Live analytical workspace</h3><div id="adaptiveContext" class="adaptive-list"></div></div>
-        </div>
-        <div class="adaptive-actions"><div><span class="muted">Workspace alignment</span><strong id="adaptiveAlignment">—</strong><p id="adaptiveAlignmentText">No personalization assessment yet.</p></div><button id="adaptiveApply" type="button">Align workspace to profile</button></div>
-        <div class="adaptive-priority" id="adaptivePriority"></div>
-        <div class="setup-disclaimer">Personalization is based on journal history and current analytical context. It prioritizes information; it does not generate a BUY/SELL call, CE/PE call, entry, SL, target or future-probability claim.</div>
-      </section>
-
-      <section class="decision-workflow card" id="decisionWorkflow">
-        <div class="card-head"><div><span class="muted">STEP 22 · PROCESS WORKFLOW</span><h2>Trader Workflow & Decision Journal</h2></div><span class="tiny-tag">PRE → OBSERVE → REVIEW</span></div>
-        <div class="workflow-hero">
-          <div><span class="muted">Current workflow state</span><h3 id="workflowHeadline">Build a documented trading process</h3><p id="workflowSummary">Capture your analytical context before an observation, then record what happened and review the process afterward. This workflow does not generate a trade recommendation.</p></div>
-          <div class="workflow-state"><span>Process readiness</span><b id="workflowScore">—</b><small>/100 workflow score</small></div>
-        </div>
-        <div class="workflow-steps">
-          <button class="workflow-step active" data-workflow-tab="pre"><span>01</span><b>Pre-Trade Context</b><small>Snapshot the analytical workspace</small></button>
-          <button class="workflow-step" data-workflow-tab="observe"><span>02</span><b>Observation</b><small>Record the decision context</small></button>
-          <button class="workflow-step" data-workflow-tab="review"><span>03</span><b>Post-Trade Review</b><small>Evaluate process and outcome</small></button>
-        </div>
-        <div class="workflow-panel" id="workflowPrePanel">
-          <div class="workflow-panel-head"><div><span class="muted">PRE-TRADE CONTEXT</span><h3>Analytical snapshot</h3></div><button id="workflowCapture" type="button">Capture Snapshot</button></div>
-          <div class="workflow-context-grid" id="workflowContextGrid"></div>
-          <textarea id="workflowPreNote" rows="3" placeholder="What are you observing? Note structure, indicators, MTF, S/R, option-chain context and conflicts — not an instruction to trade."></textarea>
-        </div>
-        <div class="workflow-panel hidden" id="workflowObservePanel">
-          <div class="workflow-panel-head"><div><span class="muted">OBSERVATION</span><h3>Document the decision process</h3></div></div>
-          <div class="workflow-form-grid">
-            <label>Observation state<select id="workflowState"><option>WAIT / OBSERVE</option><option>CONTEXT ALIGNED</option><option>CONFLICTING EVIDENCE</option><option>NO CLEAR CONTEXT</option></select></label>
-            <label>Process emotion<select id="workflowEmotion"><option>CALM</option><option>CONFIDENT</option><option>FEARFUL</option><option>GREEDY</option><option>REVENGE</option><option>FOMO</option></select></label>
-            <label class="workflow-full">Observation notes<textarea id="workflowObserveNote" rows="3" placeholder="What did you see, what evidence agreed, and what evidence conflicted?"></textarea></label>
-          </div>
-        </div>
-        <div class="workflow-panel hidden" id="workflowReviewPanel">
-          <div class="workflow-panel-head"><div><span class="muted">POST-TRADE / POST-OBSERVATION REVIEW</span><h3>Review process quality</h3></div></div>
-          <div class="workflow-form-grid">
-            <label>Process quality<select id="workflowQuality"><option>DISCIPLINED</option><option>MIXED</option><option>PROCESS DEVIATION</option></select></label>
-            <label>Lesson category<select id="workflowLesson"><option>NONE</option><option>GOOD EXECUTION</option><option>RISK DRIFT</option><option>FOMO</option><option>REVENGE</option><option>EARLY EXIT</option><option>OVERSIZING</option><option>OTHER</option></select></label>
-            <label class="workflow-full">Review notes<textarea id="workflowReviewNote" rows="3" placeholder="What worked? What failed? What should be repeated or corrected in the process?"></textarea></label>
-          </div>
-        </div>
-        <div class="workflow-history"><div class="workflow-history-head"><div><span class="muted">LOCAL WORKFLOW HISTORY</span><h3>Recent process records</h3></div><span id="workflowCount">0 records</span></div><div id="workflowRows"></div></div>
-        <div class="setup-disclaimer">Process documentation only • Journal evidence is retrospective • Market context is analytical • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="review-intelligence card" id="reviewIntelligence">
-        <div class="card-head"><div><span class="muted">STEP 23 · PERFORMANCE INTELLIGENCE</span><h2>Trader Review & Performance Intelligence</h2></div><span class="tiny-tag">WHAT → WHY → PATTERN → IMPROVE</span></div>
-        <div class="review-hero"><div><span class="muted">Review intelligence</span><h3 id="reviewHeadline">Turn journal history into process evidence</h3><p id="reviewSummary">Combines journal outcomes, workflow records, Mistake AI and Trading DNA to describe what happened and where the process repeatedly deviated. It is retrospective and non-predictive.</p></div><div class="review-score"><span>Process intelligence</span><b id="reviewScore">—</b><small>/100 descriptive score</small></div></div>
-        <div class="review-summary-grid" id="reviewSummaryGrid"></div>
-        <div class="review-grid">
-          <div class="review-panel"><span class="muted">WHAT HAPPENED</span><h3>Observed performance</h3><div id="reviewOutcomes" class="review-list"></div></div>
-          <div class="review-panel"><span class="muted">WHY IT HAPPENED</span><h3>Process drivers</h3><div id="reviewDrivers" class="review-list"></div></div>
-          <div class="review-panel"><span class="muted">REPEATED PATTERNS</span><h3>Evidence signals</h3><div id="reviewPatterns" class="review-list"></div></div>
-        </div>
-        <div class="review-improve"><div><span class="muted">IMPROVEMENT AREAS</span><h3 id="reviewImproveTitle">Build your next review cycle</h3><p id="reviewImproveText">Use repeated evidence to refine process habits. No trade recommendation is generated.</p></div><div id="reviewActions" class="review-actions"></div></div>
-        <div class="review-evidence"><div class="review-evidence-head"><div><span class="muted">EVIDENCE BASE</span><h3>Sources used in this review</h3></div><span id="reviewEvidenceCount">0 items</span></div><div id="reviewEvidenceRows"></div></div>
-        <div class="setup-disclaimer">Retrospective performance intelligence only • Historical journal metrics are descriptive • Workflow patterns are process evidence • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="improvement-loop card" id="improvementLoop">
-        <div class="card-head"><div><span class="muted">STEP 24 · TRADER IMPROVEMENT LOOP</span><h2>Trader Improvement Loop</h2></div><span class="tiny-tag">PATTERN → ACTION → REVIEW → PROGRESS</span></div>
-        <div class="improve-hero"><div><span class="muted">Personalized process improvement</span><h3 id="improveHeadline">Turn review evidence into a repeatable process</h3><p id="improveSummary">Uses retrospective journal, workflow, Mistake AI, Trading DNA and review intelligence to create process-improvement actions. It does not generate a trade recommendation.</p></div><div class="improve-state"><span>Loop progress</span><b id="improveProgress">—</b><small id="improveProgressLabel">0 active cycles</small></div></div>
-        <div class="improve-grid">
-          <div class="improve-panel"><span class="muted">01 · PATTERN</span><h3>Evidence pattern</h3><div id="improvePattern" class="improve-list"></div></div>
-          <div class="improve-panel"><span class="muted">02 · ROOT CAUSE</span><h3>Likely process driver</h3><div id="improveCause" class="improve-list"></div></div>
-          <div class="improve-panel"><span class="muted">03 · PROCESS RULE</span><h3>Suggested rule to test</h3><div id="improveRule" class="improve-list"></div></div>
-        </div>
-        <div class="improve-cycle">
-          <div class="improve-cycle-head"><div><span class="muted">ACTIVE IMPROVEMENT CYCLE</span><h3 id="improveCycleTitle">No cycle started</h3></div><button type="button" id="improveStart">Start cycle</button></div>
-          <div class="improve-cycle-steps" id="improveCycleSteps"></div>
-          <div class="improve-cycle-note"><textarea id="improveNote" rows="3" placeholder="Record what you practiced, what changed, and what you observed during review."></textarea><button type="button" id="improveSave">Save progress</button></div>
-        </div>
-        <div class="improve-history"><div class="improve-history-head"><div><span class="muted">LOCAL IMPROVEMENT HISTORY</span><h3>Recent improvement cycles</h3></div><span id="improveHistoryCount">0 cycles</span></div><div id="improveHistoryRows"></div></div>
-        <div class="setup-disclaimer">Process-improvement support only • Recommendations here are process habits to test, not trading recommendations • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="progress-dashboard card" id="traderProgress">
-        <div class="card-head"><div><span class="muted">STEP 25 · TRADER PROGRESS & CONSISTENCY</span><h2>Trader Progress Dashboard</h2></div><span class="tiny-tag">LONG-TERM PROCESS INTELLIGENCE</span></div>
-        <div class="progress-hero"><div><span class="muted">Long-term development</span><h3 id="progressHeadline">Build enough evidence to measure progress</h3><p id="progressSummary">Combines journal, workflow, Mistake AI, Trading DNA and Improvement Loop history. Metrics are retrospective/descriptive only.</p></div><div class="progress-score"><span>Progress Index</span><b id="progressIndex">—</b><small>/100 process metric</small></div></div>
-        <div class="progress-filter"><button class="progress-range active" data-progress-range="ALL">All evidence</button><button class="progress-range" data-progress-range="30">30D</button><button class="progress-range" data-progress-range="90">90D</button><button class="progress-range" data-progress-range="180">180D</button></div>
-        <div class="progress-stats" id="progressStats"></div>
-        <div class="progress-grid">
-          <div class="progress-panel"><div class="progress-panel-head"><div><span class="muted">PERFORMANCE TREND</span><h3>Historical outcomes</h3></div><span id="progressPerformanceLabel">—</span></div><div id="progressPerformance" class="progress-bars"></div></div>
-          <div class="progress-panel"><div class="progress-panel-head"><div><span class="muted">PROCESS TREND</span><h3>Discipline & consistency</h3></div><span id="progressProcessLabel">—</span></div><div id="progressProcess" class="progress-bars"></div></div>
-        </div>
-        <div class="progress-grid progress-grid-3">
-          <div class="progress-panel"><span class="muted">IMPROVEMENT LOOP</span><h3>Cycle progress</h3><div id="progressImprovement" class="progress-list"></div></div>
-          <div class="progress-panel"><span class="muted">MISTAKE RECURRENCE</span><h3>Behaviour pattern</h3><div id="progressMistakes" class="progress-list"></div></div>
-          <div class="progress-panel"><span class="muted">DNA MOVEMENT</span><h3>Profile progression</h3><div id="progressDNA" class="progress-list"></div></div>
-        </div>
-        <div class="progress-baseline"><div><span class="muted">CURRENT VS BASELINE</span><h3 id="progressBaselineTitle">Waiting for enough historical evidence</h3><p id="progressBaselineText">The dashboard compares earlier and later evidence when sufficient records exist. It does not forecast future trading outcomes.</p></div><div id="progressMilestones" class="progress-milestones"></div></div>
-        <div class="progress-evidence"><div><span class="muted">DATA COVERAGE</span><h3>Evidence quality</h3></div><div id="progressEvidenceRows" class="progress-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Retrospective progress intelligence only • Scores describe observed process evidence • Low-sample data may be unreliable • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="advanced-personalization card" id="advancedAnalytics">
-        <div class="card-head"><div><span class="muted">STEP 26 · ADVANCED TRADER ANALYTICS</span><h2>Personalization Intelligence</h2></div><span class="tiny-tag">PROFILE × EVIDENCE × WORKFLOW</span></div>
-        <div class="personal-hero"><div><span class="muted">Personalized operating profile</span><h3 id="personalHeadline">Build more evidence to unlock deeper personalization</h3><p id="personalSummary">Combines Trader DNA, Setup Analytics, Progress, Workflow and Improvement Loop evidence to identify where the trader's process is most established and where documentation needs attention.</p></div><div class="personal-score"><span>Personalization Index</span><b id="personalIndex">—</b><small>/100 descriptive metric</small></div></div>
-        <div class="personal-grid">
-          <div class="personal-panel"><span class="muted">PROFILE FIT</span><h3>Operating profile</h3><div id="personalProfile" class="personal-list"></div></div>
-          <div class="personal-panel"><span class="muted">EVIDENCE DEPTH</span><h3>What is established</h3><div id="personalEvidence" class="personal-list"></div></div>
-          <div class="personal-panel"><span class="muted">PROCESS FOCUS</span><h3>Areas to strengthen</h3><div id="personalFocus" class="personal-list"></div></div>
-        </div>
-        <div class="personal-matrix"><div class="personal-matrix-head"><div><span class="muted">PERSONALIZATION MATRIX</span><h3>Evidence by instrument / timeframe</h3></div><span id="personalMatrixLabel">—</span></div><div id="personalMatrix" class="personal-table-wrap"></div></div>
-        <div class="personal-actions"><div><span class="muted">NEXT PROCESS CHECK</span><h3 id="personalNextTitle">Keep documenting comparable observations</h3><p id="personalNextText">The engine surfaces process-management priorities only. It does not create a market trade instruction.</p></div><div id="personalBadges" class="personal-badges"></div></div>
-        <div class="setup-disclaimer">Personalization intelligence only • Descriptive evidence and workflow prioritization • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="evolution-timeline card" id="behaviorEvolution">
-        <div class="card-head"><div><span class="muted">STEP 27 · TRADER INTELLIGENCE TIMELINE</span><h2>Behavioral Evolution</h2></div><span class="tiny-tag">HISTORY × PROCESS × CHANGE</span></div>
-        <div class="evolution-hero"><div><span class="muted">Retrospective trader journey</span><h3 id="evolutionHeadline">Build dated evidence to map your evolution</h3><p id="evolutionSummary">Combines journal outcomes, workflow quality, improvement cycles and documented behavior into historical phases. This engine describes what changed; it does not forecast trading outcomes.</p></div><div class="evolution-score"><span>Evolution Index</span><b id="evolutionIndex">—</b><small>/100 descriptive metric</small></div></div>
-        <div class="evolution-filter"><button class="evolution-range active" data-evolution-range="ALL">All history</button><button class="evolution-range" data-evolution-range="90">90D</button><button class="evolution-range" data-evolution-range="180">180D</button><button class="evolution-range" data-evolution-range="365">1Y</button></div>
-        <div class="evolution-stats" id="evolutionStats"></div>
-        <div class="evolution-grid">
-          <div class="evolution-panel"><div class="evolution-panel-head"><div><span class="muted">BEHAVIOURAL TIMELINE</span><h3>Historical phases</h3></div><span id="evolutionPhaseLabel">—</span></div><div id="evolutionTimeline" class="evolution-timeline-list"></div></div>
-          <div class="evolution-panel"><div class="evolution-panel-head"><div><span class="muted">PROCESS EVOLUTION</span><h3>Earlier → later evidence</h3></div><span id="evolutionCompareLabel">—</span></div><div id="evolutionCompare" class="evolution-compare"></div></div>
-        </div>
-        <div class="evolution-grid evolution-grid-3">
-          <div class="evolution-panel"><span class="muted">RECURRING BEHAVIOUR</span><h3>Patterns over time</h3><div id="evolutionPatterns" class="evolution-list"></div></div>
-          <div class="evolution-panel"><span class="muted">IMPROVEMENT MILESTONES</span><h3>Documented change</h3><div id="evolutionMilestones" class="evolution-list"></div></div>
-          <div class="evolution-panel"><span class="muted">CURRENT PHASE</span><h3>What the history says</h3><div id="evolutionCurrent" class="evolution-list"></div></div>
-        </div>
-        <div class="evolution-evidence"><div><span class="muted">EVOLUTION EVIDENCE</span><h3>Coverage & limitations</h3></div><div id="evolutionEvidence" class="evolution-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Retrospective behavioral intelligence only • Historical descriptions, not predictions • Low-sample evidence may be unreliable • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="correlation-engine card" id="patternCorrelation">
-        <div class="card-head"><div><span class="muted">STEP 29 · PATTERN CORRELATION & CONTEXT</span><h2>Pattern Context Intelligence</h2></div><span class="tiny-tag">PATTERN × MARKET × PROCESS</span></div>
-        <div class="corr-hero"><div><span class="muted">Historical context correlation</span><h3 id="corrHeadline">Connect recurring patterns with the context in which they were observed</h3><p id="corrSummary">Correlates journal pattern clusters with market-structure, indicator, multi-timeframe and workflow context. This is descriptive evidence, not a forecast or trading instruction.</p></div><div class="corr-score"><span>Context Correlation Index</span><b id="corrIndex">—</b><small>/100 evidence metric</small></div></div>
-        <div class="corr-filter"><button class="corr-range active" data-corr-range="ALL">All history</button><button class="corr-range" data-corr-range="90">90D</button><button class="corr-range" data-corr-range="180">180D</button><button class="corr-range" data-corr-range="365">1Y</button></div>
-        <div class="corr-stats" id="corrStats"></div>
-        <div class="corr-grid"><div class="corr-panel"><div class="corr-panel-head"><div><span class="muted">PATTERN CONTEXT MAP</span><h3>Historical pattern clusters</h3></div><span id="corrTopLabel">—</span></div><div id="corrTable" class="corr-table-wrap"></div></div><div class="corr-panel"><span class="muted">CURRENT WORKSPACE</span><h3>Market context snapshot</h3><div id="corrCurrent" class="corr-list"></div></div></div>
-        <div class="corr-grid corr-grid-3"><div class="corr-panel"><span class="muted">MARKET CONTEXT</span><h3>Observed context</h3><div id="corrMarket" class="corr-list"></div></div><div class="corr-panel"><span class="muted">PROCESS CORRELATION</span><h3>Workflow relationship</h3><div id="corrProcess" class="corr-list"></div></div><div class="corr-panel"><span class="muted">CONTEXT GAPS</span><h3>Evidence watchlist</h3><div id="corrWatch" class="corr-list"></div></div></div>
-        <div class="corr-evidence"><div><span class="muted">CORRELATION EVIDENCE</span><h3>Coverage & limitations</h3></div><div id="corrEvidence" class="corr-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Historical context correlation only • Current market snapshot is illustrative analytical context • Correlation does not imply causation or future performance • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="context-pattern-intelligence card" id="contextPatternIntelligence">
-        <div class="card-head"><div><span class="muted">STEP 30 · CONTEXT-AWARE PATTERN INTELLIGENCE</span><h2>Context Pattern Intelligence</h2></div><span class="tiny-tag">PATTERN × REGIME × MTF × PROCESS</span></div>
-        <div class="cpi-hero"><div><span class="muted">Full context profile</span><h3 id="cpiHeadline">Build a complete evidence profile for recurring trader patterns</h3><p id="cpiSummary">Combines recurring setup patterns with observed market regime, structure, indicators, multi-timeframe context and workflow behavior. Descriptive historical intelligence only.</p></div><div class="cpi-score"><span>Context Profile Index</span><b id="cpiIndex">—</b><small>/100 evidence metric</small></div></div>
-        <div class="cpi-filter"><button class="cpi-range active" data-cpi-range="ALL">All history</button><button class="cpi-range" data-cpi-range="90">90D</button><button class="cpi-range" data-cpi-range="180">180D</button><button class="cpi-range" data-cpi-range="365">1Y</button></div>
-        <div class="cpi-stats" id="cpiStats"></div>
-        <div class="cpi-grid"><div class="cpi-panel"><div class="cpi-panel-head"><div><span class="muted">PATTERN PROFILE</span><h3>Recurring context profiles</h3></div><span id="cpiTopLabel">—</span></div><div id="cpiTable" class="cpi-table-wrap"></div></div><div class="cpi-panel"><span class="muted">CURRENT WORKSPACE</span><h3>Context fingerprint</h3><div id="cpiCurrent" class="cpi-list"></div></div></div>
-        <div class="cpi-grid cpi-grid-3"><div class="cpi-panel"><span class="muted">MARKET REGIME</span><h3>Observed environment</h3><div id="cpiRegime" class="cpi-list"></div></div><div class="cpi-panel"><span class="muted">ANALYTICAL STACK</span><h3>Structure + indicators + MTF</h3><div id="cpiStack" class="cpi-list"></div></div><div class="cpi-panel"><span class="muted">PROCESS FINGERPRINT</span><h3>Workflow behavior</h3><div id="cpiProcess" class="cpi-list"></div></div></div>
-        <div class="cpi-evidence"><div><span class="muted">EVIDENCE COVERAGE</span><h3>Profile depth & limitations</h3></div><div id="cpiEvidence" class="cpi-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Context-aware historical intelligence only • Profile index is an evidence/context metric • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="regime-intelligence card" id="regimeIntelligence">
-        <div class="card-head"><div><span class="muted">STEP 31 · TRADER REGIME INTELLIGENCE</span><h2>Market Regime Intelligence</h2></div><span class="tiny-tag">REGIME × PATTERN × PROCESS</span></div>
-        <div class="ri-hero"><div><span class="muted">Current analytical regime</span><h3 id="riHeadline">Classifying the current market environment from existing analytics</h3><p id="riSummary">Describes the current market regime using structure, alignment, momentum and volatility context, then compares it with your historical journal evidence. This is analytical context, not a trade instruction.</p></div><div class="ri-score"><span>Regime Clarity Index</span><b id="riIndex">—</b><small>/100 context metric</small></div></div>
-        <div class="ri-filter"><button class="ri-range active" data-ri-range="ALL">All history</button><button class="ri-range" data-ri-range="90">90D</button><button class="ri-range" data-ri-range="180">180D</button><button class="ri-range" data-ri-range="365">1Y</button></div>
-        <div class="ri-stats" id="riStats"></div>
-        <div class="ri-grid"><div class="ri-panel"><div class="ri-panel-head"><div><span class="muted">REGIME PROFILE</span><h3>Current environment</h3></div><span id="riCurrentLabel">—</span></div><div id="riCurrent" class="ri-list"></div></div><div class="ri-panel"><span class="muted">HISTORICAL REGIMES</span><h3>Observed journal context</h3><div id="riHistorical" class="ri-list"></div></div></div>
-        <div class="ri-grid ri-grid-3"><div class="ri-panel"><span class="muted">REGIME SIGNALS</span><h3>Analytical components</h3><div id="riSignals" class="ri-list"></div></div><div class="ri-panel"><span class="muted">PATTERN CONTEXT</span><h3>Historical pattern distribution</h3><div id="riPatterns" class="ri-list"></div></div><div class="ri-panel"><span class="muted">PROCESS CONTEXT</span><h3>Workflow by regime</h3><div id="riProcess" class="ri-list"></div></div></div>
-        <div class="ri-evidence"><div><span class="muted">REGIME EVIDENCE</span><h3>Coverage & limitations</h3></div><div id="riEvidence" class="ri-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Market-regime classification is descriptive analytical context • Historical regime relationships do not imply future performance • Low-sample evidence may be unreliable • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="pattern-discovery card" id="patternDiscovery">
-        <div class="card-head"><div><span class="muted">STEP 28 · TRADER PATTERN DISCOVERY</span><h2>Setup Behavior Patterns</h2></div><span class="tiny-tag">SETUP × CONTEXT × PROCESS</span></div>
-        <div class="pattern-hero"><div><span class="muted">Historical pattern discovery</span><h3 id="patternHeadline">Build comparable journal evidence to discover recurring patterns</h3><p id="patternSummary">Finds repeated setup, instrument, timeframe and direction combinations and describes their historical outcomes and process context. It does not forecast or create a trade instruction.</p></div><div class="pattern-score"><span>Pattern Evidence Index</span><b id="patternIndex">—</b><small>/100 evidence metric</small></div></div>
-        <div class="pattern-filter"><button class="pattern-range active" data-pattern-range="ALL">All history</button><button class="pattern-range" data-pattern-range="90">90D</button><button class="pattern-range" data-pattern-range="180">180D</button><button class="pattern-range" data-pattern-range="365">1Y</button></div>
-        <div class="pattern-stats" id="patternStats"></div>
-        <div class="pattern-grid"><div class="pattern-panel"><div class="pattern-panel-head"><div><span class="muted">RECURRING COMBINATIONS</span><h3>Observed setup patterns</h3></div><span id="patternTopLabel">—</span></div><div id="patternTable" class="pattern-table-wrap"></div></div><div class="pattern-panel"><span class="muted">BEHAVIOUR MAP</span><h3>What repeats</h3><div id="patternBehavior" class="pattern-list"></div></div></div>
-        <div class="pattern-grid pattern-grid-3"><div class="pattern-panel"><span class="muted">CONTEXT FIT</span><h3>Instrument × timeframe</h3><div id="patternContext" class="pattern-list"></div></div><div class="pattern-panel"><span class="muted">PROCESS CONTEXT</span><h3>Workflow evidence</h3><div id="patternProcess" class="pattern-list"></div></div><div class="pattern-panel"><span class="muted">WATCHLIST</span><h3>Evidence gaps</h3><div id="patternWatch" class="pattern-list"></div></div></div>
-        <div class="pattern-evidence"><div><span class="muted">PATTERN EVIDENCE</span><h3>Coverage & limitations</h3></div><div id="patternEvidence" class="pattern-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Historical pattern intelligence only • Minimum-sample caution • Descriptive outcomes/process context • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="rad-engine card" id="regimeAdaptation">
-        <div class="card-head"><div><span class="muted">STEP 33 · REGIME ADAPTATION & PROCESS INTELLIGENCE</span><h2>Trader Regime Adaptation</h2></div><span class="tiny-tag">REGIME × PROCESS × BEHAVIOR</span></div>
-        <div class="rad-hero"><div><span class="muted">Behavior across observed market environments</span><h3 id="radHeadline">Understand how your process changes across regimes</h3><p id="radSummary">Compares recorded journal and workflow evidence across market regimes. It describes adaptation, discipline and recurring behavior; it does not forecast or create a trading instruction.</p></div><div class="rad-score"><span>Adaptation Context Index</span><b id="radIndex">—</b><small>/100 evidence metric</small></div></div>
-        <div class="rad-filter"><button class="rad-range active" data-rad-range="ALL">All history</button><button class="rad-range" data-rad-range="90">90D</button><button class="rad-range" data-rad-range="180">180D</button><button class="rad-range" data-rad-range="365">1Y</button></div>
-        <div class="rad-stats" id="radStats"></div>
-        <div class="rad-grid"><div class="rad-panel"><div class="rad-panel-head"><div><span class="muted">REGIME ADAPTATION MATRIX</span><h3>Process behavior by regime</h3></div><span id="radTopLabel">—</span></div><div id="radMatrix" class="rad-table-wrap"></div></div><div class="rad-panel"><span class="muted">CURRENT ENVIRONMENT</span><h3>Current vs historical process</h3><div id="radCurrent" class="rad-list"></div></div></div>
-        <div class="rad-grid rad-grid-3"><div class="rad-panel"><span class="muted">DISCIPLINE</span><h3>Process quality</h3><div id="radDiscipline" class="rad-list"></div></div><div class="rad-panel"><span class="muted">BEHAVIOR</span><h3>Emotion & mistakes</h3><div id="radBehavior" class="rad-list"></div></div><div class="rad-panel"><span class="muted">ADAPTATION WATCH</span><h3>Areas to review</h3><div id="radWatch" class="rad-list"></div></div></div>
-        <div class="rad-evidence"><div><span class="muted">ADAPTATION EVIDENCE</span><h3>Coverage & limitations</h3></div><div id="radEvidence" class="rad-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Descriptive process intelligence only • Regime labels are analytical context • Historical behavior does not imply future performance • Low-sample groups require caution • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="rrp-engine card" id="regimePatternPerformance">
-        <div class="card-head"><div><span class="muted">STEP 32 · REGIME × PATTERN PERFORMANCE INTELLIGENCE</span><h2>Regime × Pattern Evidence Matrix</h2></div><span class="tiny-tag">REGIME × SETUP × CONTEXT</span></div>
-        <div class="rrp-hero"><div><span class="muted">Historical evidence layer</span><h3 id="rrpHeadline">Compare recurring setups across observed market regimes</h3><p id="rrpSummary">Combines journal outcomes with regime, instrument, timeframe and process context. Historical/descriptive only; it does not forecast or create a trading instruction.</p></div><div class="rrp-score"><span>Context Evidence Index</span><b id="rrpIndex">—</b><small>/100 evidence metric</small></div></div>
-        <div class="rrp-filter"><button class="rrp-range active" data-rrp-range="ALL">All history</button><button class="rrp-range" data-rrp-range="90">90D</button><button class="rrp-range" data-rrp-range="180">180D</button><button class="rrp-range" data-rrp-range="365">1Y</button></div>
-        <div class="rrp-stats" id="rrpStats"></div>
-        <div class="rrp-grid"><div class="rrp-panel"><div class="rrp-panel-head"><div><span class="muted">REGIME × SETUP MATRIX</span><h3>Historical outcome evidence</h3></div><span id="rrpTopLabel">—</span></div><div id="rrpMatrix" class="rrp-table-wrap"></div></div><div class="rrp-panel"><span class="muted">CURRENT CONTEXT</span><h3>Workspace vs history</h3><div id="rrpCurrent" class="rrp-list"></div></div></div>
-        <div class="rrp-grid rrp-grid-3"><div class="rrp-panel"><span class="muted">INSTRUMENT × TIMEFRAME</span><h3>Context evidence</h3><div id="rrpContext" class="rrp-list"></div></div><div class="rrp-panel"><span class="muted">PROCESS BY REGIME</span><h3>Workflow evidence</h3><div id="rrpProcess" class="rrp-list"></div></div><div class="rrp-panel"><span class="muted">EVIDENCE WATCH</span><h3>Coverage limits</h3><div id="rrpWatch" class="rrp-list"></div></div></div>
-        <div class="rrp-evidence"><div><span class="muted">EVIDENCE COVERAGE</span><h3>How much history supports the view</h3></div><div id="rrpEvidence" class="rrp-evidence-grid"></div></div>
-        <div class="setup-disclaimer">Historical regime × pattern intelligence only • Outcome metrics describe recorded journal history • Low-sample groups are not reliable conclusions • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-      </section>
-
-      <section class="ai-read-engine card">
-        <div class="card-head"><div><span class="muted">Step 13 Engine</span><h2>AI Market Read</h2></div><span class="tiny-tag">EXPLAINABLE ANALYTICS</span></div>
-        <div class="ai-read-summary">
-          <div><span>Market Context</span><strong id="aiReadContext">—</strong></div>
-          <div><span>Confidence Context</span><strong id="aiReadConfidence">—/100</strong></div>
-          <div><span>Decision State</span><strong id="aiReadDecision">—</strong></div>
-        </div>
-        <div class="ai-read-grid">
-          <div class="ai-read-main"><div class="ai-read-label">Why the engine sees this context</div><p id="aiReadSummary">Generating an explainable market read from the scanner engines.</p></div>
-          <div class="ai-read-factors"><div class="ai-factor"><span>Trend / Structure</span><b id="aiFactorTrend">—</b></div><div class="ai-factor"><span>MTF</span><b id="aiFactorMtf">—</b></div><div class="ai-factor"><span>Indicators</span><b id="aiFactorIndicators">—</b></div><div class="ai-factor"><span>Option Chain</span><b id="aiFactorOptions">—</b></div><div class="ai-factor"><span>S/R</span><b id="aiFactorSR">—</b></div><div class="ai-factor"><span>Premium Verify</span><b id="aiFactorPremium">—</b></div></div>
-        </div>
-        <div class="ai-read-notes"><span>Explains evidence</span><span>Highlights conflicts</span><span>No BUY/SELL call</span><span>No win probability</span></div>
-      </section>
-
-      <section class="mtf-engine card">
-        <div class="card-head"><div><span class="muted">Step 10 Engine</span><h2>Multi-Timeframe Analysis</h2></div><span class="tiny-tag">5m · 15m · 30m · 1h</span></div>
-        <div class="mtf-summary">
-          <div><span>Combined Direction</span><strong id="mtfDirection">MIXED</strong></div>
-          <div><span>MTF Alignment</span><strong id="mtfScore">—/100</strong></div>
-          <div><span>Higher TF Confirmation</span><strong id="mtfConfirmation">—</strong></div>
-        </div>
-        <div id="mtfRows" class="mtf-rows"></div>
-        <p id="mtfRead" class="mtf-read">Calculating multi-timeframe confirmation.</p>
-      </section>
-
-      <section class="indicator-engine card">
-        <div class="card-head"><div><span class="muted">Step 9 Engine</span><h2>Complete Indicator Analysis</h2></div><span class="tiny-tag">ANALYTICS ONLY</span></div>
-        <div class="indicator-grid">
-          <div class="indicator-tile"><span>EMA 5</span><b id="indEma5">—</b><small id="indEma5State">—</small></div>
-          <div class="indicator-tile"><span>VWAP</span><b id="indVwap">—</b><small id="indVwapState">—</small></div>
-          <div class="indicator-tile"><span>RSI</span><b id="indRsi">—</b><small id="indRsiState">—</small></div>
-          <div class="indicator-tile"><span>MACD</span><b id="indMacd">—</b><small id="indMacdState">—</small></div>
-          <div class="indicator-tile"><span>Bollinger Bands</span><b id="indBb">—</b><small id="indBbState">—</small></div>
-          <div class="indicator-tile"><span>Supertrend</span><b id="indSupertrend">—</b><small id="indSupertrendState">—</small></div>
-          <div class="indicator-tile"><span>ATR</span><b id="indAtr">—</b><small id="indAtrState">Volatility</small></div>
-          <div class="indicator-tile"><span>Volume</span><b id="indVolume">—</b><small id="indVolumeState">—</small></div>
-        </div>
-        <div class="indicator-alignment">
-          <div><span>Multi-indicator alignment</span><strong id="indicatorAlignment">—/100</strong></div>
-          <div class="indicator-bar"><i id="indicatorAlignmentBar"></i></div>
-          <p id="indicatorRead">Calculating indicator alignment from the displayed synthetic OHLC data.</p>
-        </div>
-        <div class="indicator-note"><span>EMA 5</span><span>VWAP</span><span>RSI</span><span>MACD</span><span>Bollinger</span><span>Supertrend</span><span>ATR</span><span>Volume</span></div>
-      </section>
-
-      <section class="lower-grid">
-        <div class="card premium-card">
-          <div class="card-head">
-            <div><span class="muted">Core Feature</span><h2>Premium Verify Setup</h2></div>
-            <span class="status-badge green" id="verifyStatus">VERIFIED</span>
-          </div>
-          <p class="explain">Same-timestamp index and option-premium candles are compared per candle. No direct BUY/SELL recommendation is generated.</p>
-          <div class="verify-table">
-            <div class="table-row table-head"><span>Metric</span><span>Value</span><span>Check</span></div>
-            <div class="table-row"><span>Timestamp</span><b>10:35</b><span class="check">✓ Same candle</span></div>
-            <div class="table-row"><span>NIFTY movement/value</span><b>161.95</b><span>Index candle</span></div>
-            <div class="table-row"><span>CE Premium</span><b>82.10</b><span>× 2 = 164.20</span></div>
-            <div class="table-row"><span>PE Premium</span><b>41.20</b><span>× 2 = 82.40</span></div>
-          </div>
-        </div>
-
-        <div class="card candle-card">
-          <div class="card-head">
-            <div><span class="muted">Selected Candle</span><h2>10:35 · Green</h2></div>
-            <span class="candle-direction">▲ BULLISH</span>
-          </div>
-          <div class="candle-stats">
-            <div><span>Index</span><b>+161.95</b></div>
-            <div><span>CE × 2</span><b>164.20</b></div>
-            <div><span>PE × 2</span><b>82.40</b></div>
-          </div>
-          <div class="verification-result">
-            <span>Premium confirmation</span>
-            <strong>VERIFIED</strong>
-          </div>
-          <div class="strength-pills"><span>CE 82</span><span>PE 34</span></div>
-        </div>
-
-        <div class="card ai-card">
-          <div class="card-head"><div><span class="muted">AI Market Read</span><h2>Decision Support</h2></div><span class="ai-spark">✦</span></div>
-          <div class="ai-status" id="unifiedStatus">VERIFIED</div>
-          <p id="aiReadText">Price is above EMA 5 and VWAP. Momentum is positive and the selected bullish candle has matching premium confirmation.</p>
-          <div class="engine-breakdown">
-            <div><span>Trend</span><b id="engineTrend">BULLISH</b></div>
-            <div><span>Alignment</span><b id="engineAlignment">78/100</b></div>
-            <div><span>Premium</span><b id="enginePremium">VERIFIED</b></div>
-          </div>
-          <div class="disclaimer">Analytics only • Not a trading recommendation</div>
-        </div>
-      </section>
-
-      
-      <section class="premium-engine card">
-        <div class="card-head">
-          <div><span class="muted">Proprietary Verification Engine</span><h2>Premium Verify — Per Candle</h2></div>
-          <span class="tiny-tag">SAME TIMESTAMP ONLY</span>
-        </div>
-        <div class="pv-controls">
-          <button class="pv-candle active" data-index="0">10:35</button>
-          <button class="pv-candle" data-index="1">10:40</button>
-          <button class="pv-candle" data-index="2">10:45</button>
-          <button class="pv-candle" data-index="3">10:50</button>
-          <span class="pv-rule">Index candle ↔ option candle at identical timestamp</span>
-        </div>
-        <div class="pv-grid">
-          <div class="pv-candle-panel">
-            <div class="pv-panel-title">Selected Index Candle</div>
-            <div class="pv-direction" id="pvDirection">▲ GREEN / BULLISH</div>
-            <div class="pv-values">
-              <div><span>Timestamp</span><b id="pvTime">10:35</b></div>
-              <div><span>Index Movement</span><b id="pvMove">161.95</b></div>
-              <div><span>Reference</span><b id="pvRef">161.95</b></div>
+        <div class="journal-panel" id="journal">
+          <div class="panel-header">
+            <div>
+              <span class="panel-label">TRADE JOURNAL</span>
+              <h2>Recent Trades</h2>
             </div>
           </div>
-          <div class="pv-option">
-            <div class="pv-panel-title">CE Premium</div>
-            <div class="pv-big"><span id="cePremium">82.10</span><small>× 2</small></div>
-            <div class="pv-calc" id="ceCalc">82.10 × 2 = 164.20</div>
-            <div class="pv-strength"><span>CE Strength</span><strong id="pvCeStrength">82/100</strong></div>
-          </div>
-          <div class="pv-option">
-            <div class="pv-panel-title">PE Premium</div>
-            <div class="pv-big"><span id="pePremium">41.20</span><small>× 2</small></div>
-            <div class="pv-calc" id="peCalc">41.20 × 2 = 82.40</div>
-            <div class="pv-strength pe-strength"><span>PE Strength</span><strong id="pvPeStrength">34/100</strong></div>
-          </div>
-          <div class="pv-result">
-            <span class="muted">Verification Result</span>
-            <strong id="pvResult">VERIFIED</strong>
-            <p id="pvReason">Bullish index candle has matching CE premium confirmation at 10:35.</p>
-            <div class="pv-disclaimer">Decision support only • No BUY/SELL signal</div>
+
+          <div class="empty-state">
+            <div class="empty-icon">+</div>
+            <h3>No trades yet</h3>
+            <p>Your executed trades will appear here.</p>
           </div>
         </div>
+
       </section>
 
-<!-- STEP 34 — Adaptive Coaching -->
-<section class="card" id="adaptiveCoaching" style="margin-top:18px">
-  <div class="card-head"><div><span class="muted">STEP 34 • PROCESS INTELLIGENCE</span><h2>Adaptive Coaching</h2></div><span class="tiny-tag">EVIDENCE-BASED</span></div>
-  <div class="command-grid">
-    <div class="stat-card"><span>COACHING INDEX</span><b id="acIndex">—</b><small>Process-development context</small></div>
-    <div class="stat-card"><span>TOP FOCUS</span><b id="acFocus">—</b><small>Most visible process gap</small></div>
-    <div class="stat-card"><span>EVIDENCE</span><b id="acEvidence">0</b><small>Journal/workflow records</small></div>
-  </div>
-  <div class="grid-2" style="margin-top:14px">
-    <div class="panel"><h3>Coaching Plan</h3><div id="acPlan"></div></div>
-    <div class="panel"><h3>Current Context</h3><div id="acContext"></div></div>
-  </div>
-  <div class="panel" style="margin-top:14px"><h3>Practice → Review</h3><div id="acPractice"></div><div class="disclaimer">Process coaching only • No trading recommendation, entry, stop-loss, target or probability.</div></div>
-</section>
-
-<section class="habit-engine card" id="coachingHabits">
-  <div class="card-head"><div><span class="muted">STEP 35 • HABIT FORMATION</span><h2>Coaching Progress & Habit Formation</h2></div><span class="tiny-tag">PRACTICE → ADHERENCE → REVIEW</span></div>
-  <div class="habit-hero"><div><span class="muted">Adaptive coaching follow-through</span><h3 id="habitHeadline">Turn coaching rules into measurable habits</h3><p id="habitSummary">Tracks documented coaching cycles, practice adherence and review evidence. This is a process-development metric only.</p></div><div class="habit-score"><span>Habit Progress</span><b id="habitIndex">—</b><small>/100 process metric</small></div></div>
-  <div class="habit-stats" id="habitStats"></div>
-  <div class="habit-grid">
-    <div class="habit-panel"><span class="muted">ACTIVE HABIT</span><h3 id="habitTitle">No active coaching habit</h3><div id="habitActive"></div><div class="habit-actions"><button type="button" id="habitStart">Start habit</button><button type="button" id="habitCheck">Log practice</button><button type="button" id="habitReview">Log review</button></div></div>
-    <div class="habit-panel"><span class="muted">ADHERENCE</span><h3>Practice consistency</h3><div id="habitAdherence"></div></div>
-  </div>
-  <div class="habit-grid habit-grid-3">
-    <div class="habit-panel"><span class="muted">COACHING SOURCE</span><h3>Current evidence</h3><div id="habitSource"></div></div>
-    <div class="habit-panel"><span class="muted">MILESTONE</span><h3>Next checkpoint</h3><div id="habitMilestone"></div></div>
-    <div class="habit-panel"><span class="muted">HISTORY</span><h3>Habit cycles</h3><div id="habitHistory"></div></div>
-  </div>
-  <div class="setup-disclaimer">Habit/coaching intelligence only • User-entered practice and review history • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="habit-performance card" id="habitPerformance">
-  <div class="card-head"><div><span class="muted">STEP 36 • RETROSPECTIVE CORRELATION</span><h2>Habit × Performance Correlation</h2></div><span class="tiny-tag">DESCRIPTIVE ONLY</span></div>
-  <div class="hp-hero"><div><span class="muted">Process consistency vs historical journal outcomes</span><h3 id="hpHeadline">Measure whether stronger documented habit periods coincide with stronger process and outcome records</h3><p id="hpSummary">This module compares historical groups; it does not establish causation or predict future performance.</p></div><div class="hp-score"><span>Correlation Context</span><b id="hpIndex">—</b><small>/100 context metric</small></div></div>
-  <div class="hp-stats" id="hpStats"></div>
-  <div class="hp-grid">
-    <div class="hp-panel"><span class="muted">HISTORICAL COMPARISON</span><h3>Habit vs outcome periods</h3><div id="hpCompare"></div></div>
-    <div class="hp-panel"><span class="muted">PROCESS RELATIONSHIP</span><h3>Adherence & discipline</h3><div id="hpProcess"></div></div>
-  </div>
-  <div class="hp-grid hp-grid-3">
-    <div class="hp-panel"><span class="muted">CONTEXT MAP</span><h3>Setup × habit evidence</h3><div id="hpSetup"></div></div>
-    <div class="hp-panel"><span class="muted">CURRENT VS BASELINE</span><h3>Recent process state</h3><div id="hpBaseline"></div></div>
-    <div class="hp-panel"><span class="muted">EVIDENCE</span><h3>Coverage & caveats</h3><div id="hpEvidence"></div></div>
-  </div>
-  <div class="setup-disclaimer">Retrospective habit/process correlation only • Correlation is not causation • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="behavior-risk card" id="behavioralRisk">
-  <div class="card-head"><div><span class="muted">STEP 37 • BEHAVIORAL RISK</span><h2>Behavioral Risk & Consistency Intelligence</h2></div><span class="tiny-tag">PROCESS PROFILE • RETROSPECTIVE</span></div>
-  <div class="br-hero"><div><span class="muted">Trader process stability</span><h3 id="brHeadline">Build a behavioral risk profile from documented history</h3><p id="brSummary">Combines journal behavior, workflow quality, mistake patterns and coaching-habit adherence. It describes process risk; it does not predict market outcomes.</p></div><div class="br-score"><span>Behavioral Stability</span><b id="brScore">—</b><small>/100 process metric</small></div></div>
-  <div class="br-stats" id="brStats"></div>
-  <div class="br-grid">
-    <div class="br-panel"><span class="muted">RISK DIMENSIONS</span><h3>Behavioral profile</h3><div id="brDimensions"></div></div>
-    <div class="br-panel"><span class="muted">PRIMARY WATCHLIST</span><h3>Process risks to review</h3><div id="brWatchlist"></div></div>
-  </div>
-  <div class="br-grid br-grid-3">
-    <div class="br-panel"><span class="muted">EMOTIONAL PATTERN</span><h3>Execution state</h3><div id="brEmotion"></div></div>
-    <div class="br-panel"><span class="muted">HABIT RELATIONSHIP</span><h3>Adherence context</h3><div id="brHabit"></div></div>
-    <div class="br-panel"><span class="muted">RECOVERY</span><h3>Consistency after setbacks</h3><div id="brRecovery"></div></div>
-  </div>
-  <div class="br-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Profile coverage</h3><div id="brEvidence"></div></div>
-  <div class="setup-disclaimer">Behavioral/process intelligence only • Historical descriptive analysis • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="guardrail-engine card" id="processGuardrails">
-  <div class="card-head"><div><span class="muted">STEP 38 • ADAPTIVE PROCESS GUARDRAILS</span><h2>Behavioral Risk → Process Guardrails</h2></div><span class="tiny-tag">PRE-CHECK • REVIEW • DISCIPLINE</span></div>
-  <div class="gr-hero"><div><span class="muted">Personalized process protection layer</span><h3 id="grHeadline">Turn documented behavioral risks into repeatable process checks</h3><p id="grSummary">Guardrails are derived from your historical journal, workflow, habit and behavioral-risk evidence. They support process discipline only.</p></div><div class="gr-score"><span>Guardrail Readiness</span><b id="grScore">—</b><small>/100 process metric</small></div></div>
-  <div class="gr-stats" id="grStats"></div>
-  <div class="gr-grid">
-    <div class="gr-panel"><span class="muted">PRE-SESSION</span><h3>Personal checks</h3><div id="grPreChecks"></div><div class="gr-actions"><button id="grLogCheck">Log completed check</button><button id="grResetChecks">Reset today</button></div></div>
-    <div class="gr-panel"><span class="muted">ACTIVE GUARDRAILS</span><h3>Process rules</h3><div id="grRules"></div></div>
-  </div>
-  <div class="gr-grid gr-grid-3">
-    <div class="gr-panel"><span class="muted">RISK SOURCE</span><h3>Why these checks exist</h3><div id="grSources"></div></div>
-    <div class="gr-panel"><span class="muted">REVIEW CHECKPOINTS</span><h3>After-session review</h3><div id="grReview"></div></div>
-    <div class="gr-panel"><span class="muted">STATUS</span><h3>Current discipline</h3><div id="grStatus"></div></div>
-  </div>
-  <div class="gr-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Guardrail coverage</h3><div id="grEvidence"></div></div>
-  <div class="setup-disclaimer">Process guardrail intelligence only • Historical/user-entered evidence • Guardrails are not trading signals • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="guardrail-intel card" id="guardrailIntelligence">
-  <div class="card-head"><div><span class="muted">STEP 39 • GUARDRAIL INTELLIGENCE</span><h2>Guardrail Adherence & Violation Intelligence</h2></div><span class="tiny-tag">FOLLOW • SKIP • REPEAT</span></div>
-  <div class="gi-hero"><div><span class="muted">Behavioral process audit</span><h3 id="giHeadline">Understand how consistently your personal guardrails are followed</h3><p id="giSummary">This retrospective layer compares completed, skipped and repeatedly missed process checks with workflow, habit and journal evidence.</p></div><div class="gi-score"><span>Adherence Index</span><b id="giScore">—</b><small>/100 process metric</small></div></div>
-  <div class="gi-stats" id="giStats"></div>
-  <div class="gi-grid">
-    <div class="gi-panel"><span class="muted">GUARDRAIL RECORD</span><h3>Check history</h3><div id="giChecks"></div></div>
-    <div class="gi-panel"><span class="muted">VIOLATION PATTERNS</span><h3>Repeated misses</h3><div id="giViolations"></div></div>
-  </div>
-  <div class="gi-grid gi-grid-3">
-    <div class="gi-panel"><span class="muted">PROCESS RELATIONSHIP</span><h3>Workflow & habit context</h3><div id="giProcess"></div></div>
-    <div class="gi-panel"><span class="muted">HISTORICAL OUTCOMES</span><h3>Journal context</h3><div id="giOutcomes"></div></div>
-    <div class="gi-panel"><span class="muted">NEXT REVIEW</span><h3>Process focus</h3><div id="giFocus"></div></div>
-  </div>
-  <div class="gi-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Interpretation</h3><div id="giEvidence"></div></div>
-  <div class="setup-disclaimer">Retrospective process intelligence only • User-entered guardrail history • No causal or predictive claim • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="recovery-engine card" id="behavioralRecovery">
-  <div class="card-head"><div><span class="muted">STEP 40 • BEHAVIORAL RECOVERY</span><h2>Behavioral Intervention & Recovery</h2></div><span class="tiny-tag">RESET • RECOVER • REVIEW</span></div>
-  <div class="rc-hero"><div><span class="muted">Personalized process-reset layer</span><h3 id="rcHeadline">Convert repeated process risk into a structured recovery cycle</h3><p id="rcSummary">Recovery mode is based on documented guardrail misses, behavioral risk and process evidence. It is designed to slow down execution and restore process discipline.</p></div><div class="rc-score"><span>Recovery Readiness</span><b id="rcScore">—</b><small>/100 process metric</small></div></div>
-  <div class="rc-stats" id="rcStats"></div>
-  <div class="rc-grid">
-    <div class="rc-panel"><span class="muted">RECOVERY MODE</span><h3>Current intervention</h3><div id="rcMode"></div><div class="rc-actions"><button id="rcStart">Start recovery</button><button id="rcComplete">Complete checkpoint</button><button id="rcReset">Reset cycle</button></div></div>
-    <div class="rc-panel"><span class="muted">RESET CHECKLIST</span><h3>Process reset</h3><div id="rcChecklist"></div></div>
-  </div>
-  <div class="rc-grid rc-grid-3">
-    <div class="rc-panel"><span class="muted">COOLDOWN</span><h3>Execution pause</h3><div id="rcCooldown"></div></div>
-    <div class="rc-panel"><span class="muted">RECOVERY REVIEW</span><h3>Checkpoint questions</h3><div id="rcReview"></div></div>
-    <div class="rc-panel"><span class="muted">HISTORY</span><h3>Recovery cycles</h3><div id="rcHistory"></div></div>
-  </div>
-  <div class="rc-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Interpretation</h3><div id="rcEvidence"></div></div>
-  <div class="setup-disclaimer">Behavioral recovery intelligence only • Process intervention, not trading advice • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="recovery-effectiveness card" id="recoveryEffectiveness">
-  <div class="card-head"><div><span class="muted">STEP 41 • RECOVERY EFFECTIVENESS</span><h2>Recovery Effectiveness & Behavioral Change</h2></div><span class="tiny-tag">BEFORE × AFTER • RETROSPECTIVE</span></div>
-  <div class="re-hero"><div><span class="muted">Recovery outcome intelligence</span><h3 id="reHeadline">Measure documented process change around completed recovery cycles</h3><p id="reSummary">Compares recorded pre-recovery and post-recovery process states. It describes historical change only and does not establish causation or predict future outcomes.</p></div><div class="re-score"><span>Change Index</span><b id="reScore">—</b><small>/100 descriptive metric</small></div></div>
-  <div class="re-stats" id="reStats"></div>
-  <div class="re-grid">
-    <div class="re-panel"><span class="muted">BEFORE × AFTER</span><h3>Process state changes</h3><div id="reCompare"></div></div>
-    <div class="re-panel"><span class="muted">RECOVERY HISTORY</span><h3>Completed cycles</h3><div id="reCycles"></div></div>
-  </div>
-  <div class="re-grid re-grid-3">
-    <div class="re-panel"><span class="muted">BEHAVIOR</span><h3>Behavioral stability</h3><div id="reBehavior"></div></div>
-    <div class="re-panel"><span class="muted">GUARDRAILS</span><h3>Adherence change</h3><div id="reGuardrails"></div></div>
-    <div class="re-panel"><span class="muted">WORKFLOW</span><h3>Process quality</h3><div id="reWorkflow"></div></div>
-  </div>
-  <div class="re-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Interpretation</h3><div id="reEvidence"></div></div>
-  <div class="setup-disclaimer">Recovery effectiveness intelligence only • Historical before/after process comparison • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="recovery-learning card" id="recoveryLearning">
-  <div class="card-head"><div><span class="muted">STEP 42 • RECOVERY LEARNING</span><h2>Behavioral Change Timeline & Recovery Learning</h2></div><span class="tiny-tag">TIMELINE • LEARNING • RETROSPECTIVE</span></div>
-  <div class="rl-hero"><div><span class="muted">Long-term recovery intelligence</span><h3 id="rlHeadline">Turn documented recovery cycles into a behavioral learning history</h3><p id="rlSummary">Tracks recorded recovery changes, setbacks and process-learning themes over time. It summarizes history only; it does not predict future behavior or market outcomes.</p></div><div class="rl-score"><span>Learning Index</span><b id="rlScore">—</b><small>/100 descriptive metric</small></div></div>
-  <div class="rl-filters" id="rlFilters">
-    <button data-window="90">90D</button><button data-window="180">180D</button><button data-window="365">1Y</button><button class="active" data-window="all">ALL HISTORY</button>
-  </div>
-  <div class="rl-stats" id="rlStats"></div>
-  <div class="rl-grid">
-    <div class="rl-panel"><span class="muted">RECOVERY TIMELINE</span><h3>Behavioral evolution</h3><div id="rlTimeline"></div></div>
-    <div class="rl-panel"><span class="muted">LEARNING THEMES</span><h3>What the recovery history documents</h3><div id="rlThemes"></div></div>
-  </div>
-  <div class="rl-grid rl-grid-3">
-    <div class="rl-panel"><span class="muted">CHANGE</span><h3>Successful process shifts</h3><div id="rlWins"></div></div>
-    <div class="rl-panel"><span class="muted">SETBACKS</span><h3>Recurring friction</h3><div id="rlSetbacks"></div></div>
-    <div class="rl-panel"><span class="muted">CURRENT</span><h3>Latest documented state</h3><div id="rlCurrent"></div></div>
-  </div>
-  <div class="rl-evidence"><span class="muted">EVIDENCE & LIMITATIONS</span><h3>Interpretation</h3><div id="rlEvidence"></div></div>
-  <div class="setup-disclaimer">Recovery learning intelligence only • Historical behavioral/process timeline • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="process-playbook card" id="processPlaybook">
-  <div class="card-head"><div><span class="muted">STEP 43 • PROCESS PLAYBOOK</span><h2>Personalized Trader Process Playbook</h2></div><span class="tiny-tag">LEARNING → RULES → ROUTINE</span></div>
-  <div class="pp-hero"><div><span class="muted">Personal operating guide</span><h3 id="ppHeadline">Build a repeatable process from documented behavioral learning</h3><p id="ppSummary">This playbook organizes historical recovery learning into practical pre-session, guardrail, recovery and review routines. It is a process tool, not a trading signal.</p></div><div class="pp-score"><span>Playbook Readiness</span><b id="ppScore">—</b><small>/100 process metric</small></div></div>
-  <div class="pp-stats" id="ppStats"></div>
-  <div class="pp-grid">
-    <div class="pp-panel"><span class="muted">PERSONAL PRINCIPLES</span><h3>Operating principles</h3><div id="ppPrinciples"></div></div>
-    <div class="pp-panel"><span class="muted">PRE-SESSION</span><h3>Start-of-session routine</h3><div id="ppPre"></div></div>
-  </div>
-  <div class="pp-grid pp-grid-3">
-    <div class="pp-panel"><span class="muted">GUARDRAILS</span><h3>Process rules</h3><div id="ppRules"></div></div>
-    <div class="pp-panel"><span class="muted">RECOVERY</span><h3>Reset protocol</h3><div id="ppRecovery"></div></div>
-    <div class="pp-panel"><span class="muted">REVIEW</span><h3>End-of-session review</h3><div id="ppReview"></div></div>
-  </div>
-  <div class="pp-evidence"><span class="muted">PLAYBOOK BASIS</span><h3>Why these rules are here</h3><div id="ppEvidence"></div></div>
-  <div class="setup-disclaimer">Personalized process playbook only • Based on documented historical behavior and recovery learning • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<a class="nav-item" href="#playbookAdherence"><span>◈</span> Playbook Adherence</a>
-
-<section class="playbook-adherence card" id="playbookAdherence">
-  <div class="card-head"><div><span class="muted">STEP 44 • PLAYBOOK EVOLUTION</span><h2>Process Playbook Adherence & Evolution</h2></div><span class="tiny-tag">FOLLOWED → SKIPPED → REPEATED → IMPROVED</span></div>
-  <div class="pa-hero"><div><span class="muted">Daily process tracking</span><h3 id="paHeadline">Turn the playbook into a measurable daily routine</h3><p id="paSummary">Log whether your personalized process rules were followed, skipped or improved. This module tracks process behavior over time and does not evaluate market direction.</p></div><div class="pa-score"><span>Adherence Index</span><b id="paScore">—</b><small>/100 process metric</small></div></div>
-  <div class="pa-actions">
-    <div><span class="muted">TODAY'S PLAYBOOK CHECK</span><h3 id="paTodayTitle">Complete today's process review</h3><p id="paTodaySummary">Record actual adherence after your session. One entry represents one documented playbook review.</p></div>
-    <div class="pa-buttons"><button id="paFollow">Log Followed</button><button id="paSkip">Log Skipped</button><button id="paImprove">Log Improved</button></div>
-  </div>
-  <div class="pa-stats" id="paStats"></div>
-  <div class="pa-grid">
-    <div class="pa-panel"><span class="muted">ADHERENCE TREND</span><h3>Playbook evolution</h3><div id="paTrend"></div></div>
-    <div class="pa-panel"><span class="muted">RULE HEALTH</span><h3>What needs attention</h3><div id="paRules"></div></div>
-  </div>
-  <div class="pa-grid pa-grid-3">
-    <div class="pa-panel"><span class="muted">FOLLOWED</span><h3>Stable rules</h3><div id="paFollowed"></div></div>
-    <div class="pa-panel"><span class="muted">SKIPPED</span><h3>Repeated friction</h3><div id="paSkipped"></div></div>
-    <div class="pa-panel"><span class="muted">IMPROVED</span><h3>Documented evolution</h3><div id="paImproved"></div></div>
-  </div>
-  <div class="pa-evidence"><span class="muted">EVOLUTION LOG</span><h3>Recent playbook history</h3><div id="paHistory"></div></div>
-  <div class="setup-disclaimer">Process playbook adherence intelligence only • User-entered historical process records • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="process-attribution card" id="processAttribution">
-  <div class="card-head"><div><span class="muted">STEP 46 • PROCESS ATTRIBUTION</span><h2>Trader Process Performance Attribution</h2></div><span class="tiny-tag">OBSERVED PROCESS CONTEXT</span></div>
-  <div class="prat-hero"><div><span class="muted">Historical process intelligence</span><h3 id="pratHeadline">Map documented process dimensions around historical journal outcomes</h3><p id="pratSummary">This engine describes which documented process dimensions were present on matched historical dates. It does not assign causality or predict future outcomes.</p></div><div class="prat-score"><span>Attribution Coverage</span><b id="pratScore">—</b><small>/100 evidence metric</small></div></div>
-  <div class="prat-stats" id="pratStats"></div>
-  <div class="prat-grid">
-    <div class="prat-panel"><span class="muted">PROCESS DIMENSIONS</span><h3>Observed evidence map</h3><div id="pratDimensions"></div></div>
-    <div class="prat-panel"><span class="muted">OUTCOME CONTEXT</span><h3>Matched historical outcomes</h3><div id="pratOutcomes"></div></div>
-  </div>
-  <div class="prat-grid prat-grid-3">
-    <div class="prat-panel"><span class="muted">PLAYBOOK</span><h3>Adherence context</h3><div id="pratPlaybook"></div></div>
-    <div class="prat-panel"><span class="muted">BEHAVIOR</span><h3>Risk & mistakes</h3><div id="pratBehavior"></div></div>
-    <div class="prat-panel"><span class="muted">RECOVERY</span><h3>Habit & recovery context</h3><div id="pratRecovery"></div></div>
-  </div>
-  <div class="prat-evidence"><span class="muted">METHOD & LIMITATIONS</span><h3>Interpretation guardrails</h3><div id="pratEvidence"></div></div>
-  <div class="setup-disclaimer">Process performance attribution intelligence only • Historical matched-record analysis • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="performance-blueprint card" id="performanceBlueprint">
-  <div class="card-head"><div><span class="muted">STEP 47 • PERFORMANCE BLUEPRINT</span><h2>Personal Performance Blueprint</h2></div><span class="tiny-tag">EVIDENCE → PRINCIPLES → BLUEPRINT</span></div>
-  <div class="pb-hero"><div><span class="muted">Personal operating profile</span><h3 id="pbHeadline">Build a personal performance blueprint from documented process evidence</h3><p id="pbSummary">Historical process attribution is organized into strengths, friction areas, documented conditions and operating principles. This is descriptive process intelligence, not a trading signal.</p></div><div class="pb-score"><span>Blueprint Strength</span><b id="pbScore">—</b><small>/100 evidence metric</small></div></div>
-  <div class="pb-stats" id="pbStats"></div>
-  <div class="pb-grid pb-grid-3">
-    <div class="pb-panel"><span class="muted">STRENGTHS</span><h3>Strong process factors</h3><div id="pbStrengths"></div></div>
-    <div class="pb-panel"><span class="muted">FRICTION</span><h3>Process friction factors</h3><div id="pbFriction"></div></div>
-    <div class="pb-panel"><span class="muted">CONDITIONS</span><h3>Documented best context</h3><div id="pbConditions"></div></div>
-  </div>
-  <div class="pb-grid">
-    <div class="pb-panel"><span class="muted">OPERATING PRINCIPLES</span><h3>Personal rules to preserve</h3><div id="pbPrinciples"></div></div>
-    <div class="pb-panel"><span class="muted">RECOVERY</span><h3>Recovery patterns</h3><div id="pbRecovery"></div></div>
-  </div>
-  <div class="pb-evidence"><span class="muted">BLUEPRINT BASIS</span><h3>Evidence and limitations</h3><div id="pbEvidence"></div></div>
-  <div class="setup-disclaimer">Personal performance blueprint only • Historical/documented process evidence • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="daily-operating-system card" id="dailyOperatingSystem">
-  <div class="card-head"><div><span class="muted">STEP 48 • DAILY OPERATING SYSTEM</span><h2>Adaptive Daily Operating System</h2></div><span class="tiny-tag">PRE → OBSERVE → CHECK → REVIEW → LEARN</span></div>
-  <div class="dos-hero"><div><span class="muted">Today’s process cockpit</span><h3 id="dosHeadline">Turn your personal blueprint into a repeatable daily workflow</h3><p id="dosSummary">Complete the process checkpoints you actually perform. The system records process state and learning; it does not tell you what trade to take.</p></div><div class="dos-score"><span>Daily Readiness</span><b id="dosScore">—</b><small>/100 process metric</small></div></div>
-  <div class="dos-stats" id="dosStats"></div>
-  <div class="dos-grid">
-    <div class="dos-panel"><span class="muted">1 • PRE-SESSION</span><h3>Prepare</h3><div id="dosPre"></div></div>
-    <div class="dos-panel"><span class="muted">2 • LIVE OBSERVATION</span><h3>Observe</h3><div id="dosObserve"></div></div>
-    <div class="dos-panel"><span class="muted">3 • PROCESS CHECK</span><h3>Check</h3><div id="dosCheck"></div></div>
-  </div>
-  <div class="dos-grid">
-    <div class="dos-panel"><span class="muted">4 • BEHAVIORAL GUARDRAIL</span><h3>Protect process</h3><div id="dosGuard"></div></div>
-    <div class="dos-panel"><span class="muted">5 • POST-SESSION REVIEW</span><h3>Review</h3><div id="dosReview"></div></div>
-    <div class="dos-panel"><span class="muted">6 • LEARNING LOOP</span><h3>Learn</h3><div id="dosLearn"></div></div>
-  </div>
-  <div class="dos-actions"><button id="dosComplete">Complete Today’s OS</button><button id="dosReset">Reset Today</button></div>
-  <div class="dos-history"><span class="muted">OPERATING HISTORY</span><h3>Recent daily process records</h3><div id="dosHistory"></div></div>
-  <div class="setup-disclaimer">Adaptive daily process system only • User-entered workflow completion • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="unified-trader-os card" id="unifiedTraderOS">
-  <div class="card-head"><div><span class="muted">STEP 50 • UNIFIED TRADER INTELLIGENCE</span><h2>Unified Trader OS</h2></div><span class="tiny-tag">MARKET → PROFILE → PROCESS → LEARNING</span></div>
-  <div class="uto-hero"><div><span class="muted">One operating cockpit</span><h3 id="utoHeadline">Unify your market context and personal process intelligence</h3><p id="utoSummary">This dashboard summarizes existing TradePilot intelligence layers. It is a navigation and process-context layer, not a trading signal.</p></div><div class="uto-score"><span>OS Coverage</span><b id="utoScore">—</b><small>/100 evidence coverage</small></div></div>
-  <div class="uto-stats" id="utoStats"></div><div class="uto-grid uto-grid-3" id="utoModules"></div>
-  <div class="uto-grid"><div class="uto-panel"><span class="muted">CURRENT CONTEXT</span><h3>Market & workspace snapshot</h3><div id="utoMarket"></div></div><div class="uto-panel"><span class="muted">PERSONAL PROFILE</span><h3>Trader operating profile</h3><div id="utoProfile"></div></div></div>
-  <div class="uto-grid"><div class="uto-panel"><span class="muted">PROCESS HEALTH</span><h3>Daily process cockpit</h3><div id="utoProcess"></div></div><div class="uto-panel"><span class="muted">LEARNING LOOP</span><h3>Recovery & improvement context</h3><div id="utoLearning"></div></div></div>
-  <div class="uto-evidence"><span class="muted">SYSTEM METHOD</span><h3>Unified view, not a new signal engine</h3><div id="utoEvidence"></div></div>
-  <div class="setup-disclaimer">Unified trader intelligence only • Existing analytics and user-entered process data • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="live-behavior-monitor card" id="liveBehaviorMonitor">
-  <div class="card-head"><div><span class="muted">STEP 52 • LIVE BEHAVIORAL & PROCESS MONITOR</span><h2>Live Behavior Monitor</h2></div><span class="tiny-tag">SESSION → GUARDRAILS → PROCESS HEALTH</span></div>
-  <div class="lbm-hero"><div><span class="muted">Real-time process observation</span><h3 id="lbmHeadline">Monitor the trader process while the session is active</h3><p id="lbmSummary">This layer watches documented session state, guardrail follow-through, observation frequency and process drift. It does not interpret market direction or generate trade calls.</p></div><div class="lbm-score"><span>Process Health</span><b id="lbmScore">—</b><small>/100 process metric</small></div></div>
-  <div class="lbm-stats" id="lbmStats"></div>
-  <div class="lbm-actions"><button id="lbmStart">Start Session</button><button id="lbmObs">Log Observation</button><button id="lbmCheck">Process Check</button><button id="lbmEnd">End Session</button></div>
-  <div class="lbm-grid lbm-grid-3">
-    <div class="lbm-panel"><span class="muted">SESSION STATE</span><h3>Current session</h3><div id="lbmSession"></div></div>
-    <div class="lbm-panel"><span class="muted">BEHAVIOR STATE</span><h3>Trader-state monitor</h3><div id="lbmBehavior"></div></div>
-    <div class="lbm-panel"><span class="muted">GUARDRAILS</span><h3>Adherence monitor</h3><div id="lbmGuardrails"></div></div>
-  </div>
-  <div class="lbm-grid">
-    <div class="lbm-panel"><span class="muted">PROCESS DRIFT</span><h3>Live process checks</h3><div id="lbmDrift"></div></div>
-    <div class="lbm-panel"><span class="muted">OBSERVATION RHYTHM</span><h3>Session activity</h3><div id="lbmRhythm"></div></div>
-  </div>
-  <div class="lbm-history"><span class="muted">SESSION HISTORY</span><h3>Recent monitored sessions</h3><div id="lbmHistory"></div></div>
-  <div class="lbm-evidence"><span class="muted">MONITORING METHOD</span><h3>How this layer works</h3><div id="lbmEvidence"></div></div>
-  <div class="setup-disclaimer">Live behavioral/process monitoring only • User-entered session events • Descriptive process metrics • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-
-
-
-<section class="session-event-stream card" id="sessionEventStream">
-  <div class="card-head"><div><span class="muted">STEP 53 • SESSION EVENT STREAM</span><h2>Session Event Stream</h2></div><span class="tiny-tag">TIMELINE → EVENTS → SESSION REPLAY</span></div>
-  <div class="ses-hero"><div><span class="muted">Timestamped process timeline</span><h3 id="sesHeadline">Turn documented session activity into a reviewable timeline</h3><p id="sesSummary">This layer organizes session observations and process checks into a chronological event stream. It is a process-review tool, not a trading signal.</p></div><div class="ses-score"><span>Timeline Coverage</span><b id="sesScore">—</b><small>/100 documented coverage</small></div></div>
-  <div class="ses-stats" id="sesStats"></div>
-  <div class="ses-toolbar"><select id="sesFilter"><option value="ALL">All events</option><option value="OBSERVATION">Observations</option><option value="PROCESS_CHECK">Process checks</option><option value="SESSION">Session events</option></select><button id="sesRefresh">Refresh timeline</button></div>
-  <div class="ses-grid">
-    <div class="ses-panel"><span class="muted">CURRENT SESSION</span><h3>Live event feed</h3><div id="sesLive"></div></div>
-    <div class="ses-panel"><span class="muted">EVENT MIX</span><h3>Session activity profile</h3><div id="sesMix"></div></div>
-  </div>
-  <div class="ses-timeline"><div class="ses-timeline-head"><div><span class="muted">CHRONOLOGICAL STREAM</span><h3>Session timeline</h3></div><span id="sesCount" class="tiny-tag">0 events</span></div><div id="sesTimeline"></div></div>
-  <div class="ses-replay"><span class="muted">SESSION REPLAY</span><h3>Completed-session history</h3><div id="sesReplay"></div></div>
-  <div class="ses-evidence"><span class="muted">METHOD & EVIDENCE</span><h3>How the timeline is interpreted</h3><div id="sesEvidence"></div></div>
-  <div class="setup-disclaimer">Session process timeline only • Timestamped user-entered events • Historical session replay • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="session-replay card" id="sessionReplay">
-  <div class="card-head"><div><span class="muted">STEP 54 • SESSION REPLAY & BEHAVIOR</span><h2>Session Replay & Behavioral Pattern Analysis</h2></div><span class="tiny-tag">REPLAY → PATTERNS → LEARNING</span></div>
-  <div class="srp-hero"><div><span class="muted">Documented session replay</span><h3 id="srpHeadline">Turn completed session records into a reviewable behavioral profile</h3><p id="srpSummary">This layer replays recorded session events and identifies recurring documented process patterns. It does not reconstruct missing activity or predict future performance.</p></div><div class="srp-score"><span>Replay Quality</span><b id="srpScore">—</b><small>/100 documented replay depth</small></div></div>
-  <div class="srp-stats" id="srpStats"></div>
-  <div class="srp-toolbar"><select id="srpSession"><option value="LATEST">Latest completed session</option></select><button id="srpRefresh">Refresh replay</button></div>
-  <div class="srp-grid">
-    <div class="srp-panel"><span class="muted">SESSION SNAPSHOT</span><h3>Selected session</h3><div id="srpSnapshot"></div></div>
-    <div class="srp-panel"><span class="muted">BEHAVIORAL PATTERNS</span><h3>Documented pattern profile</h3><div id="srpPatterns"></div></div>
-  </div>
-  <div class="srp-timeline"><div class="srp-timeline-head"><div><span class="muted">REPLAY STREAM</span><h3>Recorded event sequence</h3></div><span id="srpCount" class="tiny-tag">0 events</span></div><div id="srpTimeline"></div></div>
-  <div class="srp-learning"><span class="muted">SESSION LEARNING</span><h3>Review themes</h3><div id="srpLearning"></div></div>
-  <div class="srp-history"><span class="muted">SESSION COMPARISON</span><h3>Recent replay summaries</h3><div id="srpHistory"></div></div>
-  <div class="srp-evidence"><span class="muted">METHOD & EVIDENCE</span><h3>How replay is calculated</h3><div id="srpEvidence"></div></div>
-  <div class="setup-disclaimer">Session replay and documented behavioral analysis only • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="session-evolution card" id="sessionEvolution">
-  <div class="card-head"><div><span class="muted">STEP 55 • SESSION-TO-SESSION EVOLUTION</span><h2>Behavioral Evolution Across Sessions</h2></div><span class="tiny-tag">COMPARE → EVOLVE → LEARN</span></div>
-  <div class="sev-hero"><div><span class="muted">Longitudinal process intelligence</span><h3 id="sevHeadline">Compare documented sessions to understand process evolution</h3><p id="sevSummary">This layer compares preserved session summaries across time. It describes recurring behavior, process improvement, drift and recovery patterns without inferring missing activity.</p></div><div class="sev-score"><span>Evolution Index</span><b id="sevScore">—</b><small>/100 descriptive metric</small></div></div>
-  <div class="sev-stats" id="sevStats"></div>
-  <div class="sev-toolbar"><select id="sevWindow"><option value="ALL">All sessions</option><option value="5">Last 5 sessions</option><option value="10">Last 10 sessions</option><option value="20">Last 20 sessions</option></select><button id="sevRefresh">Refresh evolution</button></div>
-  <div class="sev-grid"><div class="sev-panel"><span class="muted">BEHAVIORAL TREND</span><h3>Session-by-session profile</h3><div id="sevTrend"></div></div><div class="sev-panel"><span class="muted">RECURRING PATTERNS</span><h3>What repeats across sessions</h3><div id="sevPatterns"></div></div></div>
-  <div class="sev-comparison"><span class="muted">EARLIER → LATER</span><h3>Process change comparison</h3><div id="sevComparison"></div></div>
-  <div class="sev-learning"><span class="muted">EVOLUTION LEARNING</span><h3>Improvement, drift & recovery themes</h3><div id="sevLearning"></div></div>
-  <div class="sev-history"><span class="muted">LONGITUDINAL HISTORY</span><h3>Documented session history</h3><div id="sevHistory"></div></div>
-  <div class="sev-evidence"><span class="muted">METHOD & EVIDENCE</span><h3>How evolution is calculated</h3><div id="sevEvidence"></div></div>
-  <div class="setup-disclaimer">Longitudinal behavioral/process intelligence only • Historical comparison, not prediction • Low-sample evidence requires caution • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-
-<section class="recovery-attribution card" id="recoveryAttribution">
-  <div class="card-head"><div><span class="muted">STEP 56 • RECOVERY & BEHAVIORAL CHANGE ATTRIBUTION</span><h2>Recovery & Behavioral Change Attribution</h2></div><span class="tiny-tag">RECOVERY → PROCESS → CHANGE</span></div>
-  <div class="rat-hero"><div><span class="muted">Cross-layer recovery learning</span><h3 id="ratHeadline">Connect documented recovery cycles with later process change</h3><p id="ratSummary">This layer maps preserved recovery evidence against subsequent session evolution, guardrail adherence, habits and workflow context. It describes documented co-occurrence only.</p></div><div class="rat-score"><span>Recovery Learning Index</span><b id="ratScore">—</b><small>/100 descriptive metric</small></div></div>
-  <div class="rat-stats" id="ratStats"></div>
-  <div class="rat-toolbar"><select id="ratWindow"><option value="ALL">All recovery evidence</option><option value="3">Last 3 recovery cycles</option><option value="5">Last 5 recovery cycles</option><option value="10">Last 10 recovery cycles</option></select><button id="ratRefresh">Refresh attribution</button></div>
-  <div class="rat-grid"><div class="rat-panel"><span class="muted">RECOVERY CYCLES</span><h3>Before → after evidence</h3><div id="ratCycles"></div></div><div class="rat-panel"><span class="muted">PROCESS CHANGE</span><h3>Post-recovery session context</h3><div id="ratProcess"></div></div></div>
-  <div class="rat-grid"><div class="rat-panel"><span class="muted">GUARDRAILS & HABITS</span><h3>Supporting process context</h3><div id="ratSupport"></div></div><div class="rat-panel"><span class="muted">LEARNING THEMES</span><h3>Documented change themes</h3><div id="ratLearning"></div></div></div>
-  <div class="rat-history"><span class="muted">ATTRIBUTION HISTORY</span><h3>Recovery learning record</h3><div id="ratHistory"></div></div>
-  <div class="rat-evidence"><span class="muted">METHOD & EVIDENCE</span><h3>How attribution is handled</h3><div id="ratEvidence"></div></div>
-  <div class="setup-disclaimer">Recovery/process attribution only • Historical co-occurrence, not causation • Low-sample evidence requires caution • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="rll card" id="recoveryLearningLoop">
-  <div class="card-head"><div><span class="muted">STEP 57 • RECOVERY LEARNING LOOP</span><h2>Recovery Learning Loop</h2></div><span class="tiny-tag">RECOVERY → RULE → PRACTICE → REVIEW</span></div>
-  <div class="rll-hero"><div><span class="muted">Reusable personal process learning</span><h3 id="rllHeadline">Turn documented recovery learning into reusable process rules</h3><p id="rllSummary">This layer converts preserved recovery and behavioral-change evidence into reviewable personal rules, practice habits and future checkpoints. It never creates a market signal.</p></div><div class="rll-score"><span>Loop Readiness</span><b id="rllScore">—</b><small>/100 process metric</small></div></div>
-  <div class="rll-stats" id="rllStats"></div>
-  <div class="rll-toolbar"><select id="rllWindow"><option value="ALL">All recovery evidence</option><option value="3">Last 3 cycles</option><option value="5">Last 5 cycles</option><option value="10">Last 10 cycles</option></select><button id="rllRefresh">Refresh learning</button><button id="rllGenerate">Generate learning rule</button></div>
-  <div class="rll-grid"><div class="rll-panel"><span class="muted">LEARNING SOURCES</span><h3>What the evidence says</h3><div id="rllSources"></div></div><div class="rll-panel"><span class="muted">PERSONAL RULE</span><h3>Reusable process rule</h3><div id="rllRule"></div></div></div>
-  <div class="rll-grid"><div class="rll-panel"><span class="muted">PRACTICE</span><h3>Habit checkpoint</h3><div id="rllPractice"></div></div><div class="rll-panel"><span class="muted">REVIEW</span><h3>Future review checkpoint</h3><div id="rllReview"></div></div></div>
-  <div class="rll-history"><span class="muted">LEARNING HISTORY</span><h3>Reusable rules created from recovery evidence</h3><div id="rllHistory"></div></div>
-  <div class="rll-evidence"><span class="muted">METHOD & EVIDENCE</span><h3>Learning-loop safeguards</h3><div id="rllEvidence"></div></div>
-  <div class="setup-disclaimer">Recovery learning and process coaching only • Historical evidence is descriptive • Rules are user-reviewable, not trading recommendations • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="prl card" id="personalRuleLifecycle">
-  <div class="card-head"><div><span class="muted">STEP 58 • PERSONAL RULE LIFECYCLE</span><h2>Personal Rule Lifecycle & Playbook Integration</h2></div><span class="tiny-tag">DRAFT → TESTING → VALIDATED → RETIRED</span></div>
-  <div class="prl-hero"><div><span class="muted">Evidence-governed process rules</span><h3 id="prlHeadline">Manage recovery-derived rules without prematurely treating them as permanent</h3><p id="prlSummary">Rules created from documented recovery learning move through a reviewable lifecycle. Status changes are process records only and never create a market signal.</p></div><div class="prl-score"><span>Lifecycle Readiness</span><b id="prlScore">—</b><small>/100 process metric</small></div></div>
-  <div class="prl-stats" id="prlStats"></div>
-  <div class="prl-toolbar"><select id="prlFilter"><option value="ALL">All rules</option><option value="DRAFT">Draft</option><option value="TESTING">Testing</option><option value="VALIDATED">Validated</option><option value="RETIRED">Retired</option></select><button id="prlRefresh">Refresh lifecycle</button><button id="prlImport">Sync Recovery Learning</button></div>
-  <div class="prl-grid"><div class="prl-panel"><span class="muted">CURRENT RULE</span><h3>Lifecycle control</h3><div id="prlCurrent"></div></div><div class="prl-panel"><span class="muted">PLAYBOOK INTEGRATION</span><h3>Promotion readiness</h3><div id="prlPromotion"></div></div></div>
-  <div class="prl-list"><span class="muted">RULE REGISTER</span><h3>Personal process rules</h3><div id="prlRules"></div></div>
-  <div class="prl-evidence"><span class="muted">METHOD & SAFEGUARDS</span><h3>Lifecycle rules</h3><div id="prlEvidence"></div></div>
-  <div class="setup-disclaimer">Personal process-rule lifecycle only • Historical/review evidence is descriptive • Promotion does not imply performance improvement • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="ape card" id="adaptivePlaybookEngine">
-  <div class="card-head"><div><span class="muted">STEP 59 • ADAPTIVE PLAYBOOK ENGINE</span><h2>Adaptive Playbook Engine</h2></div><span class="tiny-tag">PRE → LIVE → POST</span></div>
-  <div class="ape-hero"><div><span class="muted">Context-organized personal process</span><h3 id="apeHeadline">Organize validated process rules into the right workflow stage</h3><p id="apeSummary">This engine surfaces human-reviewed personal rules by workflow stage. It adapts the playbook structure, not market direction, and never creates a trading signal.</p></div><div class="ape-score"><span>Playbook Fit</span><b id="apeScore">—</b><small>/100 process metric</small></div></div>
-  <div class="ape-toolbar"><select id="apeStage"><option value="PRE">Pre-Session</option><option value="LIVE">Live Observation</option><option value="POST">Post-Session</option></select><select id="apeStatus"><option value="ELIGIBLE">Validated + Testing</option><option value="VALIDATED">Validated only</option><option value="TESTING">Testing only</option></select><button id="apeRefresh">Refresh engine</button></div>
-  <div class="ape-grid"><div class="ape-panel"><span class="muted">ACTIVE LAYER</span><h3 id="apeStageTitle">Pre-Session Playbook</h3><div id="apeStageBody"></div></div><div class="ape-panel"><span class="muted">ADAPTATION LOGIC</span><h3>Why these rules are shown</h3><div id="apeLogic"></div></div></div>
-  <div class="ape-rules"><span class="muted">RULE STACK</span><h3>Context-matched personal rules</h3><div id="apeRules"></div></div>
-  <div class="ape-grid"><div class="ape-panel"><span class="muted">CHECKPOINTS</span><h3>Stage checklist</h3><div id="apeChecks"></div></div><div class="ape-panel"><span class="muted">EVIDENCE</span><h3>Playbook safeguards</h3><div id="apeEvidence"></div></div></div>
-  <div class="setup-disclaimer">Adaptive personal process organization only • Validated means lifecycle criteria were documented, not performance proof • User remains in control of activation • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="pex card" id="playbookExecution">
-  <div class="card-head"><div><span class="muted">STEP 60 • PLAYBOOK EXECUTION TRACKER</span><h2>Adaptive Playbook Execution Tracker</h2></div><span class="tiny-tag">PENDING → IN PROGRESS → COMPLETED / SKIPPED → REVIEWED</span></div>
-  <div class="pex-hero"><div><span class="muted">Session-level process adherence</span><h3 id="pexHeadline">Track the selected playbook through the live workflow</h3><p id="pexSummary">This tracker records whether personal process checkpoints were started, completed, skipped or reviewed. It does not instruct trades or infer market direction.</p></div><div class="pex-score"><span>Execution Adherence</span><b id="pexScore">—</b><small>/100 process metric</small></div></div>
-  <div class="pex-toolbar"><select id="pexStage"><option value="PRE">Pre-Session</option><option value="LIVE">Live Observation</option><option value="POST">Post-Session</option></select><button id="pexStart">Start / Reset Session</button><button id="pexRefresh">Refresh</button></div>
-  <div class="pex-stats" id="pexStats"></div>
-  <div class="pex-grid"><div class="pex-panel"><span class="muted">CURRENT EXECUTION</span><h3>Checkpoint tracker</h3><div id="pexChecks"></div></div><div class="pex-panel"><span class="muted">PROCESS HEALTH</span><h3>Adherence & drift</h3><div id="pexHealth"></div></div></div>
-  <div class="pex-history"><span class="muted">EXECUTION HISTORY</span><h3>Recent session checkpoints</h3><div id="pexHistory"></div></div>
-  <div class="pex-evidence"><span class="muted">METHOD & SAFEGUARDS</span><h3>Tracker rules</h3><div id="pexEvidence"></div></div>
-  <div class="setup-disclaimer">Process execution tracking only • Completion does not imply a valid trade • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-
-<section class="apm card" id="adaptiveProcessMode">
-  <div class="card-head"><div><span class="muted">STEP 67 • ADAPTIVE PROCESS MODE</span><h2>Adaptive Process Mode Engine</h2></div><span class="tiny-tag">MODE → PRIORITIES</span></div>
-  <div class="apm-hero"><div><span class="muted">Current process mode</span><h3 id="apmMode">—</h3><p id="apmReason">Building a mode from documented process evidence.</p></div><div class="apm-score"><span>Mode Fit</span><b id="apmScore">—</b><small>/100 process metric</small></div></div>
-  <div class="apm-grid" id="apmModes"></div>
-  <div class="apm-panel"><span class="muted">SELECTED MODE PRIORITIES</span><h3 id="apmPriorityTitle">—</h3><div id="apmPriorities"></div></div>
-  <div class="setup-disclaimer">Adaptive workflow organization only • Mode labels are descriptive process states • No BUY/SELL signal • No CE/PE call • No entry, SL, target or future-probability claim</div>
-</section>
-
-<section class="ame card" id="modeExecutionTracker">
-  <div class="card-head"><div><span class="muted">STEP 68 • MODE EXECUTION TRACKER</span><h2>Adaptive Process Mode Execution Tracker</h2></div><span class="tiny-tag">PENDING → ACTIVE → COMPLETED → SKIPPED → REVIEWED</span></div>
-  <div class="ame-hero"><div><span class="muted">Selected mode execution</span><h3 id="ameHeadline">Track the current process mode through the session workflow</h3><p id="ameSummary">Priorities from the Adaptive Process Mode Engine are tracked as user-controlled workflow checkpoints.</p></div><div class="ame-score"><span>Mode Adherence</span><b id="ameScore">—</b><small>/100 process metric</small></div></div>
-  <div class="ame-toolbar"><button id="ameNewSession">New Session</button><button id="ameRefresh">Refresh</button></div>
-  <div class="ame-stats" id="ameStats"></div>
-  <div class="ame-grid"><div class="ame-panel"><span class="muted">CURRENT SESSION</span><h3>Priority execution</h3><div id="ameChecks"></div></div><div class="ame-panel"><span class="muted">MODE ADHERENCE</span><h3>Execution health</h3><div id="ameHealth"></div></div></div>
-  <div class="ame-grid"><div class="ame-panel"><span class="muted">MODE HISTORY</span><h3>Recent execution by mode</h3><div id="ameHistory"></div></div><div class="ame-panel"><span class="muted">MODE EVOLUTION</span><h3>Documented change</h3><div id="ameEvolution"></div></div></div>
-  <div class="setup-disclaimer">Process execution tracking only • Status changes are user-entered workflow evidence • Completion does not imply a valid trade • No BUY/SELL, CE/PE, entry, SL, target or probability recommendation</div>
-</section>
-<footer class="footer">
-        <span>TradePilot AI</span>
-        <span>Market Analytics + Decision Support</span>
-        <span>Prototype data only • Not investment advice</span>
+      <footer>
+        <span>TradePilot © 2026</span>
+        <span>Market data: Not connected</span>
       </footer>
-    
-<section class="spl card" id="sessionPerformanceLearning"><div class="section-head"><div><span class="eyebrow">STEP 61 • PERFORMANCE LEARNING</span><h2>Playbook Execution → Session Performance Learning</h2><p id="splHeadline">Building historical process learning from documented session evidence.</p></div><div class="score-pill" id="splScore">—/100</div></div><p class="muted" id="splSummary">Descriptive learning only. Execution evidence is not treated as causal or predictive.</p><div class="control-row"><select id="splWindow"><option value="5">Last 5 sessions</option><option value="10" selected>Last 10 sessions</option><option value="20">Last 20 sessions</option><option value="all">All sessions</option></select><button class="btn" id="splRefresh">Refresh learning</button></div><div class="metric-grid" id="splMetrics"></div><div class="grid-2"><div class="panel"><h3>Session Quality Context</h3><div id="splQuality"></div></div><div class="panel"><h3>Behavior & Process Context</h3><div id="splBehavior"></div></div></div><div class="panel"><h3>Execution Group Comparison</h3><div id="splGroups"></div></div><div class="panel"><h3>Historical Learning</h3><div id="splLearning"></div></div><div class="panel"><h3>Evidence & Safeguards</h3><div id="splEvidence"></div></div><div class="disclaimer">Process-learning module only. It does not predict market direction, recommend trades, or establish causation.</div></section>
 
-<section class="spm card" id="sessionPerformanceMatrix">
-  <div class="section-head"><div><span class="eyebrow">STEP 62 • ATTRIBUTION MATRIX</span><h2>Session Performance Attribution & Learning Matrix</h2><p id="spmHeadline">Connecting documented execution, process, behavior, habits, recovery and outcomes.</p></div><div class="score-pill" id="spmScore">—/100</div></div>
-  <p class="muted" id="spmSummary">Historical attribution is descriptive co-occurrence only; it does not establish causation or predict future performance.</p>
-  <div class="control-row"><select id="spmWindow"><option value="5">Last 5 sessions</option><option value="10" selected>Last 10 sessions</option><option value="20">Last 20 sessions</option><option value="all">All sessions</option></select><button class="btn" id="spmRefresh">Refresh matrix</button></div>
-  <div class="metric-grid" id="spmMetrics"></div>
-  <div class="spm-matrix panel"><h3>Unified Evidence Matrix</h3><div id="spmTable"></div></div>
-  <div class="grid-2"><div class="panel"><h3>Attribution Context</h3><div id="spmContext"></div></div><div class="panel"><h3>Learning Signals</h3><div id="spmLearning"></div></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="spmEvidence"></div></div>
-  <div class="disclaimer">Historical process attribution only. No market-direction prediction, BUY/SELL recommendation, CE/PE call, entry, SL, target or probability claim.</div>
-</section>
+    </main>
 
-
-<section class="ppa card" id="personalProcessAttribution">
-  <div class="section-head"><div><span class="eyebrow">STEP 63 • PERSONAL PROCESS ATTRIBUTION</span><h2>Personal Process Attribution Engine</h2><p id="ppaHeadline">Identify recurring strengths, friction factors and improvement priorities from documented evidence.</p></div><div class="score-pill" id="ppaScore">—/100</div></div>
-  <p class="muted" id="ppaSummary">Descriptive process intelligence only. Factors are documented co-occurrences, not causal or predictive claims.</p>
-  <div class="control-row"><select id="ppaWindow"><option value="10">Last 10 sessions</option><option value="20">Last 20 sessions</option><option value="50">Last 50 sessions</option><option value="all" selected>All documented evidence</option></select><button class="btn" id="ppaRefresh">Refresh attribution</button></div>
-  <div class="metric-grid" id="ppaMetrics"></div>
-  <div class="grid-2"><div class="panel"><h3>Strong Process Factors</h3><div id="ppaStrengths"></div></div><div class="panel"><h3>Friction Factors</h3><div id="ppaFriction"></div></div></div>
-  <div class="panel"><h3>Evidence Attribution Matrix</h3><div id="ppaMatrix"></div></div>
-  <div class="grid-2"><div class="panel"><h3>Improvement Priorities</h3><div id="ppaPriorities"></div></div><div class="panel"><h3>Blueprint / Playbook Context</h3><div id="ppaBlueprint"></div></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="ppaEvidence"></div></div>
-  <div class="disclaimer">Personal process attribution only • Historical evidence and co-occurrence • No causation • No market-direction prediction • No BUY/SELL, CE/PE, entry, SL, target or probability claim</div>
-</section>
-
-
-<section class="opr card" id="operatingProfile">
-  <div class="section-head"><div><span class="eyebrow">STEP 65 • OPERATING PROFILE</span><h2>Personal Operating Profile</h2><p id="oprHeadline">Unify current process, behavior and playbook evidence into one operating profile.</p></div><div class="score-pill" id="oprScore">—/100</div></div>
-  <p class="muted" id="oprSummary">Descriptive trader-process intelligence only. This profile does not generate market direction or trading recommendations.</p>
-  <div class="control-row"><select id="oprWindow"><option value="10">Last 10 sessions</option><option value="20">Last 20 sessions</option><option value="50">Last 50 sessions</option><option value="all" selected>All evidence</option></select><button class="btn" id="oprRefresh">Refresh profile</button></div>
-  <div class="opr-hero"><div><span class="muted">Current operating mode</span><h3 id="oprMode">—</h3><p id="oprModeText">—</p></div><div class="opr-grade"><span>Profile Coverage</span><b id="oprCoverage">—</b></div></div>
-  <div class="opr-metrics" id="oprMetrics"></div>
-  <div class="grid-2"><div class="panel"><h3>Operating Strengths</h3><div id="oprStrengths"></div></div><div class="panel"><h3>Operating Friction</h3><div id="oprFriction"></div></div></div>
-  <div class="panel"><h3>Current Profile Dimensions</h3><div id="oprDimensions"></div></div>
-  <div class="grid-2"><div class="panel"><h3>Blueprint / Playbook Alignment</h3><div id="oprAlignment"></div></div><div class="panel"><h3>Next Process Focus</h3><div id="oprFocus"></div></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="oprEvidence"></div></div>
-  <div class="disclaimer">Personal operating profile only • Historical/documented process evidence • No market prediction • No BUY/SELL, CE/PE, entry, SL, target or probability claim</div>
-</section>
-
-<section class="ope card" id="operatingProfileEvolution">
-  <div class="section-head"><div><span class="eyebrow">STEP 66 • PROFILE EVOLUTION</span><h2>Personal Operating Profile Evolution & Stability</h2><p id="opeHeadline">Compare recent operating evidence with the prior period.</p></div><div class="score-pill" id="opeScore">—/100</div></div>
-  <div class="control-row"><select id="opeWindow"><option value="10">Last 10 evidence dates</option><option value="20">Last 20 evidence dates</option><option value="all">All evidence dates</option></select><button id="opeRefresh">Refresh Profile</button></div>
-  <div class="ope-hero"><div><span class="muted">Current operating state</span><h3 id="opeState">Evidence Limited</h3><p id="opeStateText">Documented chronology only; no prediction is made.</p></div><div class="ope-grade"><span>Stability Index</span><b id="opeStability">—/100</b></div></div>
-  <div class="ope-grid" id="opeMetrics"></div>
-  <div class="ope-grid-2">
-    <div class="panel"><h3>Period Comparison</h3><div id="opePeriods"></div></div>
-    <div class="panel"><h3>Dimension Evolution</h3><div id="opeDimensions"></div></div>
   </div>
-  <div class="panel"><h3>Operating State Signals</h3><div id="opeSignals"></div></div>
-  <div class="panel"><h3>What Changed</h3><div id="opeChanges"></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="opeEvidence"></div></div>
-  <div class="ope-disclaimer">Descriptive personal-process analytics only • Stable/Improving/Drifting/Emerging labels reflect documented evidence • No market prediction • No BUY/SELL • No CE/PE call • No entry, SL or target recommendation</div>
-</section>
-</main>
-  </div>
-  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-  <script src="app.js"></script>
 
-<section class="bpe card" id="blueprintEvolution">
-  <div class="section-head"><div><span class="eyebrow">STEP 64 • BLUEPRINT EVOLUTION</span><h2>Personal Performance Blueprint Evolution</h2><p id="bpeHeadline">Compare documented process intelligence across earlier, current and emerging phases.</p></div><div class="score-pill" id="bpeScore">—/100</div></div>
-  <div class="control-row"><select id="bpeWindow"><option value="10">Last 10 sessions</option><option value="20">Last 20 sessions</option><option value="all">All evidence</option></select><button id="bpeRefresh">Refresh</button></div>
-  <div class="bpe-grid" id="bpeMetrics"></div>
-  <div class="bpe-three">
-    <div class="panel"><h3>OLD • Baseline</h3><div id="bpeOld"></div></div>
-    <div class="panel"><h3>CURRENT • Established</h3><div id="bpeCurrent"></div></div>
-    <div class="panel"><h3>EMERGING • Recent</h3><div id="bpeEmerging"></div></div>
-  </div>
-  <div class="grid-2"><div class="panel"><h3>Process Evolution</h3><div id="bpeEvolution"></div></div><div class="panel"><h3>Blueprint / Playbook Context</h3><div id="bpeBlueprint"></div></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="bpeEvidence"></div></div>
-</section>
-
-
-<section class="apm card" id="adaptiveProcessModeExecution">
-  <div class="section-head"><div><span class="eyebrow">STEP 68 • MODE EXECUTION</span><h2>Adaptive Process Mode Execution Tracker</h2><p id="apmHeadline">Track the selected process mode through the current session workflow.</p></div><div class="score-pill" id="apmScore">—/100</div></div>
-  <p class="muted" id="apmSummary">Process execution tracking only. Mode priorities are derived from documented process evidence and never generate market or trade instructions.</p>
-  <div class="apm-hero"><div><span class="muted">Selected process mode</span><h3 id="apmMode">Evidence Limited</h3><p id="apmModeText">Document more process evidence before interpreting a stable mode.</p></div><div class="apm-grade"><span>Mode adherence</span><b id="apmAdherence">—/100</b></div></div>
-  <div class="control-row"><button class="btn" id="apmNewSession">Start new tracking session</button><button class="btn" id="apmRefresh">Refresh tracker</button></div>
-  <div class="apm-grid" id="apmMetrics"></div>
-  <div class="grid-2"><div class="panel"><h3>Current Mode Priorities</h3><div id="apmPriorities"></div></div><div class="panel"><h3>Execution State Flow</h3><div class="apm-flow"><span>Pending</span><i>→</i><span>Active</span><i>→</i><span>Completed</span><i>→</i><span>Reviewed</span></div><div class="apm-flow-note">Skipped is retained as a documented outcome and is included in adherence calculations.</div></div></div>
-  <div class="panel"><h3>Mode-wise Adherence</h3><div id="apmModeHistory"></div></div>
-  <div class="panel"><h3>Execution History & Mode Evolution</h3><div id="apmHistory"></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="apmEvidence"></div></div>
-  <div class="apm-disclaimer">Adaptive process execution only • Human-controlled workflow • No market prediction • No BUY/SELL • No CE/PE call • No entry, SL, target or probability recommendation</div>
-</section>
-
-<section class="mpl card" id="modePerformanceLearning">
-  <div class="section-head"><div><span class="eyebrow">STEP 69 • MODE PERFORMANCE LEARNING</span><h2>Adaptive Mode Performance Learning</h2><p id="mplHeadline">Learn from documented process-mode execution without turning it into a trading signal.</p></div><div class="score-pill" id="mplScore">—/100</div></div>
-  <p class="muted" id="mplSummary">This layer compares documented mode execution with available session/process evidence. It does not infer causation, predict markets, or recommend trades.</p>
-  <div class="mpl-hero"><div><span class="muted">Current adaptive mode</span><h3 id="mplMode">Evidence Limited</h3><p id="mplModeText">More dated execution evidence is required before interpreting a mode-level learning pattern.</p></div><div class="mpl-grade"><span>Learning confidence</span><b id="mplConfidence">—/100</b></div></div>
-  <div class="mpl-grid" id="mplMetrics"></div>
-  <div class="grid-2"><div class="panel"><h3>Mode Learning Matrix</h3><div id="mplMatrix"></div></div><div class="panel"><h3>Current Learning Focus</h3><div id="mplFocus"></div></div></div>
-  <div class="panel"><h3>Mode Evolution</h3><div id="mplEvolution"></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="mplEvidence"></div></div>
-  <div class="mpl-disclaimer">Process learning only • Descriptive evidence • No BUY/SELL • No CE/PE call • No entry, SL, target or probability recommendation</div>
-</section>
-
-<section class="udi70 card" id="unifiedDecisionProcessIntelligence">
-  <div class="section-head"><div><span class="eyebrow">STEP 70 • UNIFIED INTELLIGENCE</span><h2>Unified Decision & Process Intelligence</h2><p id="udi70Headline">Connecting market context with your documented process state.</p></div><div class="score-pill" id="udi70Score">—/100</div></div>
-  <p class="muted" id="udi70Summary">This is a descriptive decision-support layer. Market context and personal process evidence are shown separately and never converted into trade instructions.</p>
-  <div class="udi70-hero"><div><span class="muted">Current process mode</span><h3 id="udi70Mode">Evidence Limited</h3><p id="udi70ModeText">Document more process evidence before interpreting a stable process state.</p></div><div class="udi70-grade"><span>Process readiness</span><b id="udi70Readiness">—/100</b></div></div>
-  <div class="udi70-grid" id="udi70Metrics"></div>
-  <div class="grid-2"><div class="panel"><h3>Decision Context</h3><div id="udi70Market"></div></div><div class="panel"><h3>Process Context</h3><div id="udi70Process"></div></div></div>
-  <div class="panel"><h3>Alignment & Conflicts</h3><div id="udi70Alignment"></div></div>
-  <div class="panel"><h3>Next Process Checkpoints</h3><div id="udi70Checkpoints"></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="udi70Evidence"></div></div>
-  <div class="udi70-disclaimer">Decision-support only • Market context ≠ trade instruction • No BUY/SELL • No CE/PE call • No entry, SL, target or probability recommendation</div>
-</section>
-
-<section class="rms71 card" id="realTimeMarketSession">
-  <div class="section-head"><div><span class="eyebrow">STEP 71 • REAL-TIME SESSION</span><h2>Real-Time Market Session Layer</h2><p id="rms71Headline">Session clock and market-state context are synchronized for the current analytical workspace.</p></div><div class="score-pill" id="rms71Score">—/100</div></div>
-  <p class="muted" id="rms71Summary">This layer organizes live-session timing and existing market analytics. It does not generate a trading instruction.</p>
-  <div class="rms71-hero"><div><span class="muted">Session state</span><h3 id="rms71State">Initializing</h3><p id="rms71StateText">Reading the current session clock and existing dashboard context.</p></div><div class="rms71-grade"><span>Session readiness</span><b id="rms71Readiness">—/100</b></div></div>
-  <div class="rms71-grid" id="rms71Metrics"></div>
-  <div class="rms71-controls" id="rms71InstrumentControls"></div>
-  <div class="rms71-grid2"><div class="panel"><h3>Live Session Context</h3><div id="rms71Context"></div></div><div class="panel"><h3>Session Timeline</h3><div class="rms71-timeline" id="rms71Timeline"></div></div></div>
-  <div class="panel"><h3>Market Data Status</h3><div id="rms71DataStatus"></div></div>
-  <div class="panel"><h3>Evidence & Safeguards</h3><div id="rms71Evidence"></div></div>
-  <div class="rms71-disclaimer">Real-time session context only • Existing analytics are displayed without converting them into trade instructions • No BUY/SELL • No CE/PE call • No entry, SL, target or probability recommendation</div>
-</section>
-<section class="lda72 card" id="liveDataArchitecture">
-  <div class="section-head"><div><span class="eyebrow">STEP 72 • LIVE DATA ARCHITECTURE</span><h2>Live Data / API Architecture</h2><p id="lda72Headline">Provider-ready data architecture for future live market connectivity.</p></div><div class="score-pill" id="lda72Score">—/100</div></div>
-  <p class="muted">This layer defines how market feeds can connect to TradePilot AI without exposing credentials or assuming a live feed is connected.</p>
-  <div class="lda72-hero"><div><span class="muted">Architecture state</span><h3 id="lda72State">Provider Ready</h3><p id="lda72StateText">The frontend is prepared for a controlled market-data adapter.</p></div><div class="lda72-grade"><span>Integration readiness</span><b id="lda72Readiness">—/100</b></div></div>
-  <div class="lda72-grid" id="lda72Metrics"></div>
-  <div class="lda72-grid2">
-    <div class="panel"><h3>Data Flow</h3><div class="lda72-flow" id="lda72Flow"></div></div>
-    <div class="panel"><h3>Provider Adapters</h3><div id="lda72Providers"></div></div>
-  </div>
-  <div class="panel"><h3>Connection Contract</h3><div id="lda72Contract"></div></div>
-  <div class="panel"><h3>Integration Checklist</h3><div id="lda72Checklist"></div></div>
-  <div class="panel"><h3>Security & Safeguards</h3><div id="lda72Evidence"></div></div>
-  <div class="lda72-disclaimer">Architecture layer only • API credentials stay server-side • No fabricated live prices • No BUY/SELL • No CE/PE call • No entry, SL, target or probability recommendation</div>
-</section>
-
-<section class="auth73 card" id="authenticationUserAccounts">
-  <div class="section-head"><div><span class="eyebrow">STEP 73 • AUTHENTICATION</span><h2>Authentication & User Accounts</h2><p id="auth73Headline">Secure account foundation for the production subscription app.</p></div><div class="score-pill" id="auth73Score">—/100</div></div>
-  <div class="auth73-hero"><div><span class="muted">Account state</span><h3 id="auth73State">Signed-out prototype</h3><p id="auth73StateText">Frontend account UX is ready; production identity verification belongs on the server.</p></div><div class="auth73-grade"><span>Security readiness</span><b id="auth73Readiness">—/100</b></div></div>
-  <div class="auth73-grid" id="auth73Metrics"></div>
-  <div class="auth73-grid2">
-    <div class="panel"><h3>Account Access</h3><div id="auth73Access"></div></div>
-    <div class="panel"><h3>Identity & Session Contract</h3><div id="auth73Contract"></div></div>
-  </div>
-  <div class="panel"><h3>Production Checklist</h3><div id="auth73Checklist"></div></div>
-  <div class="panel"><h3>Security Safeguards</h3><div id="auth73Evidence"></div></div>
-  <div class="auth73-disclaimer">Prototype account layer • No real credentials are collected here • Passwords/tokens must never be stored in frontend LocalStorage • Server-side authentication required • No trading instructions</div>
-</section>
-<section class="backend75 card" id="backendDatabaseFoundation">
-<div class="b75-hero"><div><span class="eyebrow">STEP 75 • BACKEND + DATABASE</span><h2>Backend & Database Foundation</h2><p>Production-oriented service boundaries for accounts, subscriptions, journals, sessions and market data. This layer defines authoritative server state; the browser remains a presentation/prototype client.</p></div><div class="b75-score"><span>Architecture Readiness</span><b id="b75Score">—</b><small>/100 foundation coverage</small></div></div>
-<div class="b75-grid" id="b75Services"></div>
-<div class="panel" style="margin-top:14px"><h3>Core Data Model</h3><table class="b75-table"><thead><tr><th>Entity</th><th>Purpose</th><th>Authority</th><th>State</th></tr></thead><tbody id="b75Schema"></tbody></table></div>
-<div class="b75-grid" id="b75Contracts"></div>
-<div class="panel" style="margin-top:14px"><h3>API Boundary</h3><pre class="b75-json" id="b75ApiContract"></pre></div>
-<div class="b75-note">⚠ Prototype safety boundary: LocalStorage is not an authoritative database. Paid access, account identity, billing state and protected market-data credentials must be validated server-side. This module provides architecture/contracts only and does not create trading instructions.</div>
-</section>
-
-<section class="p77 card" id="productionPolish">
-  <div class="p77-hero">
-    <div><span class="eyebrow">STEP 77 • PRODUCTION UI/UX</span><h2>Production UI & Mobile Polish</h2><p>Final interface refinement for the analytics workspace: clearer hierarchy, responsive navigation, accessible controls and production-state visibility.</p></div>
-    <div class="p77-score"><span>UX Readiness</span><b id="p77Score">—/100</b><small>interface coverage</small></div>
-  </div>
-  <div class="p77-metrics" id="p77Metrics"></div>
-  <div class="p77-toolbar"><button class="btn" id="p77Density">Compact view</button><button class="btn" id="p77Focus">Focus workspace</button><span class="p77-status" id="p77Status">UI state: Ready</span></div>
-  <div class="p77-grid">
-    <div class="panel"><h3>Workspace Improvements</h3><div id="p77Improvements"></div></div>
-    <div class="panel"><h3>Responsive Behaviour</h3><div id="p77Responsive"></div></div>
-  </div>
-  <div class="panel"><h3>Production Readiness Checklist</h3><div id="p77Checklist"></div></div>
-  <div class="p77-note">Interface polish only • Market analytics remain decision-support • No BUY/SELL, CE/PE, entry, SL, target or probability recommendations • Live credentials and authoritative account state remain server-side.</div>
-</section>
-
-
-<section class="p78 card" id="finalTesting">
-  <div class="p78-hero">
-    <div>
-      <span class="eyebrow">STEP 78 • FINAL TESTING + DEPLOYMENT</span>
-      <h2>Production Validation Center</h2>
-      <p>Final smoke-test and deployment boundary for TradePilot AI. This panel reports implementation checks; it does not generate market direction, orders or probability claims.</p>
-    </div>
-    <div class="p78-score"><span>Validation</span><b id="finalValidationScore">—/100</b><small id="finalValidationState">Pending</small></div>
-  </div>
-  <div class="p78-toolbar">
-    <button class="btn" id="finalRunValidation">Run validation</button>
-    <span class="p78-status" id="finalValidationStatus">Awaiting final smoke test</span>
-  </div>
-  <div class="p78-grid" id="finalValidationTable"></div>
-  <div class="p78-grid2">
-    <div class="panel"><h3>Deployment Gate</h3><div id="finalDeploymentGate"></div></div>
-    <div class="panel"><h3>Security & Data Boundary</h3><div id="finalSecurityGate"></div></div>
-  </div>
-  <div class="p78-note"><b>Final product boundary:</b> analytics and trader-process intelligence only. Live market data must be verified server-side. API/payment/database secrets must remain server-side. LocalStorage is prototype persistence, not authoritative production state.</div>
-</section>
-<section id="marketDataBoundary" aria-label="Market data connection status" style="margin:24px auto;max-width:1200px;padding:14px 16px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.03)"><div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">Verified data boundary</div><div id="marketDataBoundaryStatus" style="margin-top:6px;font-size:13px">Checking server market-data status…</div></section>
 </body>
 </html>
