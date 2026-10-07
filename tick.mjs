@@ -1,4 +1,4 @@
-import { MarketDataProviderError } from './provider.mjs';
+import { MarketDataProviderError } from './market/provider.mjs';
 
 export function normalizeTick(raw, providerName = 'verified-provider') {
   if (!raw || typeof raw !== 'object') throw new MarketDataProviderError('INVALID_PROVIDER_EVENT', 'Provider event must be an object.');
