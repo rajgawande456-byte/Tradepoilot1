@@ -1,1 +1,23 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
 
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Runtime files
+*.pid
+
+# Coverage
+coverage/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
