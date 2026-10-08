@@ -21,7 +21,14 @@ import {
   handleAuthRequest
 } from './auth/routes.mjs';
 
-const PORT = Number(process.env.PORT || 8787);
+import {
+  isDatabaseConfigured,
+  checkDatabaseConnection
+} from './db/client.mjs';
+
+const PORT = Number(
+  process.env.PORT || 8787
+);
 
 const ALLOWED_ORIGINS = new Set(
   (process.env.ALLOWED_ORIGINS || '')
@@ -36,36 +43,55 @@ const MARKET_DATA_PROVIDER =
 const WS_AUTH_TOKEN =
   process.env.WS_AUTH_TOKEN || '';
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 
 let marketProvider = null;
 
 try {
-  marketProvider = createProvider(process.env);
+  marketProvider = createProvider(
+    process.env
+  );
 } catch {
   marketProvider = null;
 }
 
-const marketStream = createMarketStream({
-  provider: marketProvider,
-  maxAgeMs: Number(
-    process.env.MARKET_DATA_MAX_AGE_MS || 15000
-  )
-});
+const marketStream =
+  createMarketStream({
+    provider: marketProvider,
+    maxAgeMs: Number(
+      process.env.MARKET_DATA_MAX_AGE_MS ||
+      15000
+    )
+  });
 
 const rate = new Map();
 
-function json(res, status, body, extra = {}) {
+function json(
+  res,
+  status,
+  body,
+  extra = {}
+) {
   const data = JSON.stringify(body);
 
   res.writeHead(status, {
-    'content-type': 'application/json; charset=utf-8',
-    'content-length': Buffer.byteLength(data),
-    'cache-control': 'no-store',
+    'content-type':
+      'application/json; charset=utf-8',
 
-    'x-content-type-options': 'nosniff',
-    'x-frame-options': 'DENY',
-    'referrer-policy': 'no-referrer',
+    'content-length':
+      Buffer.byteLength(data),
+
+    'cache-control':
+      'no-store',
+
+    'x-content-type-options':
+      'nosniff',
+
+    'x-frame-options':
+      'DENY',
+
+    'referrer-policy':
+      'no-referrer',
 
     'content-security-policy':
       "default-src 'none'; frame-ancestors 'none'",
@@ -84,7 +110,10 @@ function json(res, status, body, extra = {}) {
 function originHeaders(req) {
   const origin = req.headers.origin;
 
-  if (!origin || !ALLOWED_ORIGINS.size) {
+  if (
+    !origin ||
+    !ALLOWED_ORIGINS.size
+  ) {
     return {};
   }
 
@@ -93,8 +122,12 @@ function originHeaders(req) {
   }
 
   return {
-    'access-control-allow-origin': origin,
-    'access-control-allow-credentials': 'true',
+    'access-control-allow-origin':
+      origin,
+
+    'access-control-allow-credentials':
+      'true',
+
     vary: 'Origin'
   };
 }
@@ -104,12 +137,14 @@ function allowed(req) {
     `${req.socket.remoteAddress || 'unknown'}:` +
     `${Math.floor(Date.now() / 60000)}`;
 
-  const count = (rate.get(key) || 0) + 1;
+  const count =
+    (rate.get(key) || 0) + 1;
 
   rate.set(key, count);
 
   return count <= Number(
-    process.env.RATE_LIMIT_PER_MINUTE || 120
+    process.env.RATE_LIMIT_PER_MINUTE ||
+    120
   );
 }
 
@@ -119,10 +154,15 @@ function requestId() {
 
 const server = http.createServer(
   async (req, res) => {
-    const headers = originHeaders(req);
+    const headers =
+      originHeaders(req);
+
     const id = requestId();
 
-    res.setHeader('x-request-id', id);
+    res.setHeader(
+      'x-request-id',
+      id
+    );
 
     if (req.method === 'OPTIONS') {
       return json(
@@ -131,8 +171,10 @@ const server = http.createServer(
         {},
         {
           ...headers,
+
           'access-control-allow-methods':
             'GET,POST,PATCH,DELETE,OPTIONS',
+
           'access-control-allow-headers':
             'content-type, authorization, idempotency-key'
         }
@@ -157,15 +199,15 @@ const server = http.createServer(
     );
 
     /*
-     * Authentication routes
+     * Authentication
      *
-     * Handles:
      * POST /api/v1/auth/signup
      * POST /api/v1/auth/login
      * POST /api/v1/auth/logout
      * GET  /api/v1/me
      */
-    const authResponse = await handleAuthRequest(req);
+    const authResponse =
+      await handleAuthRequest(req);
 
     if (authResponse) {
       return json(
@@ -183,19 +225,52 @@ const server = http.createServer(
     }
 
     /*
-     * Health
+     * API health
+     *
+     * This checks the actual PostgreSQL
+     * connection when DATABASE_URL exists.
      */
     if (
       url.pathname === '/health' &&
       req.method === 'GET'
     ) {
+      let database =
+        'not_configured';
+
+      if (
+        isDatabaseConfigured()
+      ) {
+        try {
+          await checkDatabaseConnection();
+
+          database =
+            'connected';
+        } catch {
+          database =
+            'unavailable';
+        }
+      }
+
+      const healthy =
+        database === 'connected' ||
+        database === 'not_configured';
+
       return json(
         res,
-        200,
+        healthy ? 200 : 503,
         {
-          ok: true,
-          service: 'tradepilot-api',
-          version: VERSION
+          ok: healthy,
+
+          service:
+            'tradepilot-api',
+
+          version:
+            VERSION,
+
+          database,
+
+          requestId:
+            id
         },
         headers
       );
@@ -205,7 +280,8 @@ const server = http.createServer(
      * Market snapshot
      */
     if (
-      url.pathname === '/api/v1/market/snapshot' &&
+      url.pathname ===
+        '/api/v1/market/snapshot' &&
       req.method === 'GET'
     ) {
       if (!marketProvider) {
@@ -213,161 +289,8 @@ const server = http.createServer(
           res,
           503,
           {
-            error: 'MARKET_DATA_NOT_CONFIGURED',
+            error:
+              'MARKET_DATA_NOT_CONFIGURED',
+
             message:
-              'No verified server-side market-data provider is configured. No synthetic live quote is returned.',
-            requestId: id
-          },
-          headers
-        );
-      }
-
-      const symbol =
-        url.searchParams.get('symbol') ||
-        'NIFTY 50';
-
-      try {
-        const snapshot =
-          await marketProvider.snapshot(symbol);
-
-        return json(
-          res,
-          200,
-          {
-            data: snapshot,
-            requestId: id
-          },
-          headers
-        );
-      } catch (err) {
-        const error =
-          err instanceof MarketDataProviderError
-            ? err
-            : new MarketDataProviderError(
-                'MARKET_DATA_UNAVAILABLE',
-                'Market data unavailable.'
-              );
-
-        return json(
-          res,
-          error.status || 503,
-          {
-            error: error.code,
-            message: error.message,
-            requestId: id
-          },
-          headers
-        );
-      }
-    }
-
-    /*
-     * WebSocket stream endpoint.
-     * HTTP polling is intentionally not used as
-     * a substitute for the verified stream.
-     */
-    if (
-      url.pathname === '/api/v1/market/stream' &&
-      req.method === 'GET'
-    ) {
-      return json(
-        res,
-        426,
-        {
-          error: 'WEBSOCKET_UPGRADE_REQUIRED',
-          message:
-            'Use a WebSocket client against the production stream endpoint. HTTP polling is not a substitute for the verified stream.',
-          requestId: id
-        },
-        headers
-      );
-    }
-
-    /*
-     * Unknown route
-     */
-    return json(
-      res,
-      404,
-      {
-        error: 'NOT_FOUND',
-        requestId: id
-      },
-      headers
-    );
-  }
-);
-
-/*
- * WebSocket upgrade
- */
-server.on(
-  'upgrade',
-  (req, socket) => {
-    try {
-      const url = new URL(
-        req.url || '/',
-        `http://${req.headers.host || 'localhost'}`
-      );
-
-      if (
-        url.pathname !==
-        '/api/v1/market/stream'
-      ) {
-        socket.destroy();
-        return;
-      }
-
-      verifyWebSocketAccess(req, {
-        expectedToken: WS_AUTH_TOKEN
-      });
-
-      const symbol =
-        url.searchParams.get('symbol') ||
-        'NIFTY 50';
-
-      const client =
-        createWebSocketClient(socket);
-
-      socket.write(
-        upgradeResponseHeaders(req)
-      );
-
-      const remove =
-        marketStream.addClient(
-          client,
-          symbol
-        );
-
-      socket.on('error', remove);
-      socket.on('close', remove);
-
-      socket.on(
-        'data',
-        (buffer) => {
-          /*
-           * Transport accepts only small text
-           * control frames from clients.
-           *
-           * Provider data is never accepted
-           * from the browser/client.
-           */
-          if (buffer.length > 4096) {
-            client.close(1009);
-          }
-        }
-      );
-    } catch {
-      socket.destroy();
-    }
-  }
-);
-
-server.listen(
-  PORT,
-  () => {
-    console.log(
-      `TradePilot API listening on port ${PORT}`
-    );
-  }
-);
+              'No
