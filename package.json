@@ -1,3 +1,4 @@
+
 {
   "name": "tradepilot-ai",
   "version": "1.0.0",
@@ -8,7 +9,7 @@
   "scripts": {
     "start": "node server.mjs",
     "migrate": "node db/migrate.mjs",
-    "test": "node --test market-stream.test.mjs"
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"
