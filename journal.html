@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradePilot AI — Trade Journal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#080d16;color:#edf2fa;font-family:Arial,sans-serif}
+main{max-width:900px;margin:auto}
+a{color:#8bb4ff}
+h1{margin-bottom:8px}
+.muted{color:#a4b0c3;font-size:13px;line-height:1.6}
+form,.panel{background:#111a28;border:1px solid #263449;border-radius:12px;padding:18px;margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+label{display:block;font-size:12px;color:#aebbd0}
+input,select{width:100%;padding:12px;margin-top:7px;border-radius:7px;border:1px solid #33445d;background:#080f1b;color:white}
+button{border:0;border-radius:7px;background:#3979ef;color:white;padding:12px 16px;cursor:pointer;font-weight:bold}
+button.danger{background:#783344}
+button:focus,input:focus,select:focus{outline:2px solid #7ba7ff}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{background:#111a28;border:1px solid #263449;padding:15px;border-radius:10px}
+.stat span{display:block;color:#aebbd0;font-size:12px}
+.stat strong{display:block;font-size:21px;margin-top:8px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #263449}
+.table-wrap{overflow-x:auto}
+.profit{color:#30d995}
+.loss{color:#ff7b8a}
+@media(max-width:480px){body{padding:12px}form,.panel{padding:12px}h1{font-size:25px}}
+</style>
+</head>
+<body>
+<main>
+<a href="index.html">← Back to Dashboard</a>
+<h1>Trade Journal</h1>
+<p class="muted">Record completed trades and review your results. Trades are saved only in this browser on this device.</p>
+
+<div class="stats">
+  <div class="stat"><span>Total Trades</span><strong id="total">0</strong></div>
+  <div class="stat"><span>Winning Trades</span><strong id="wins">0</strong></div>
+  <div class="stat"><span>Net P&amp;L (₹)</span><strong id="net">₹0.00</strong></div>
+</div>
+
+<form id="trade-form">
+<h2 id="form-title">Add Completed Trade</h2>
+<div class="grid">
+<label>Symbol
+<input id="symbol" required maxlength="30" placeholder="NIFTY 50">
+</label>
+<label>Side
+<select id="side"><option value="BUY">BUY</option><option value="SELL">SELL</option></select>
+</label>
+<label>Entry Price (₹)
+<input id="entry" type="number" min="0.01" step="any" required>
+</label>
+<label>Exit Price (₹)
+<input id="exit" type="number" min="0.01" step="any" required>
+</label>
+<label>Quantity
+<input id="qty" type="number" min="1" step="1" required value="1">
+</label>
+<label>Charges (₹)
+<input id="charges" type="number" min="0" step="any" value="0" required>
+</label>
+</div>
+<div class="actions">
+<button type="submit" id="save-btn">Save Trade</button>
+<button type="reset" style="background:#33445d">Clear Form</button>
+</div>
+<p class="muted" id="message" role="status"></p>
+</form>
+
+<section class="panel">
+<h2>Trade History</h2>
+<div class="actions">
+<button type="button" id="export">Export CSV</button>
+<button type="button" id="clear" class="danger">Delete All Trades</button>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Trade</th><th>Side</th><th>Entry</th><th>Exit</th><th>Qty</th><th>Net P&amp;L</th><th>Action</th></tr></thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+<p id="empty" class="muted">No trades recorded yet.</p>
+</section>
+<p class="muted">P&amp;L = (Exit − Entry) × Quantity for BUY; reversed for SELL; charges are deducted. Options lot sizes, taxes, slippage and brokerage accuracy must be accounted for separately.</p>
+</main>
+
+<script>
+(function(){
+"use strict";
+const KEY="tradepilot_journal_v1";
+let trades=[];
+let editingId=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+function load(){
+ try{
+  const data=JSON.parse(localStorage.getItem(KEY)||"[]");
+  trades=Array.isArray(data)?data.filter(t=>t&&typeof t.id==="string"):[];
+ }catch(e){trades=[];$("message").textContent="Saved data could not be read."}
+}
+function persist(){
+ try{localStorage.setItem(KEY,JSON.stringify(trades));return true}
+ catch(e){$("message").textContent="Could not save. Browser storage may be disabled.";return false}
+}
+function pnl(t){
+ const gross=(Number(t.exit)-Number(t.entry))*Number(t.qty)*(t.side==="BUY"?1:-1);
+ return gross-Number(t.charges||0);
+}
+function render(){
+ $("history").replaceChildren();
+ $("empty").hidden=trades.length>0;
+ trades.forEach(t=>{
+  const tr=document.createElement("tr");
+  const values=[t.symbol,t.side,fmt(t.entry),fmt(t.exit),String(t.qty),fmt(pnl(t))];
+  values.forEach((value,i)=>{
+   const td=document.createElement("td");
+   td.textContent=value;
+   if(i===5)td.className=pnl(t)>=0?"profit":"loss";
+   tr.appendChild(td);
+  });
+  const action=document.createElement("td");
+  const btn=document.createElement("button");
+  btn.textContent="Delete";
+  btn.className="danger";
+  btn.type="button";
+  btn.addEventListener("click",()=>{
+   if(!confirm("Delete this trade?"))return;
+   trades=trades.filter(item=>item.id!==t.id);
+   if(persist())render();
+  });
+  action.appendChild(btn);tr.appendChild(action);
+  $("history").appendChild(tr);
+ });
+ const net=trades.reduce((sum,t)=>sum+pnl(t),0);
+ $("total").textContent=trades.length;
+ $("wins").textContent=trades.filter(t=>pnl(t)>0).length;
+ $("net").textContent=fmt(net);
+ $("net").className=net>=0?"profit":"loss";
+}
+$("trade-form").addEventListener("submit",e=>{
+ e.preventDefault();
+ const symbol=$("symbol").value.trim();
+ const entry=Number($("entry").value),exit=Number($("exit").value);
+ const qty=Number($("qty").value),charges=Number($("charges").value);
+ if(!symbol||!Number.isFinite(entry)||!Number.isFinite(exit)||entry<=0||exit<=0||
+ !Number.isInteger(qty)||qty<1||!Number.isFinite(charges)||charges<0){
+  $("message").textContent="Please check all inputs.";return;
+ }
+ const trade={id:editingId||((Date.now())+"-"+Math.random().toString(36).slice(2)),
+ symbol,side:$("side").value,entry,exit,qty,charges};
+ const previous=trades.slice();
+ if(editingId)trades=trades.map(t=>t.id===editingId?trade:t);
+ else trades.unshift(trade);
+ if(!persist()){trades=previous;return}
+ editingId=null;$("form-title").textContent="Add Completed Trade";
+ $("save-btn").textContent="Save Trade";
+ $("trade-form").reset();$("qty").value="1";$("charges").value="0";
+ $("message").textContent="Trade saved in this browser.";
+ render();
+});
+$("history").addEventListener("dblclick",e=>{
+ const row=e.target.closest("tr");
+ if(!row)return;
+ const index=Array.from($("history").children).indexOf(row);
+ const t=trades[index];
+ if(!t)return;
+ editingId=t.id;
+ $("symbol").value=t.symbol;$("side").value=t.side;
+ $("entry").value=t.entry;$("exit").value=t.exit;
+ $("qty").value=t.qty;$("charges").value=t.charges||0;
+ $("form-title").textContent="Edit Trade";
+ $("save-btn").textContent="Update Trade";
+ $("trade-form").scrollIntoView({behavior:"smooth"});
+ $("message").textContent="Change the values and press Update Trade.";
+});
+$("trade-form").addEventListener("reset",()=>{
+ setTimeout(()=>{
+  editingId=null;$("form-title").textContent="Add Completed Trade";
+  $("save-btn").textContent="Save Trade";
+ },0);
+});
+$("clear").addEventListener("click",()=>{
+ if(!trades.length)return;
+ if(!confirm("Permanently delete all journal trades from this browser?"))return;
+ const previous=trades;trades=[];
+ if(persist()){render();$("message").textContent="All trades deleted."}
+ else trades=previous;
+});
+$("export").addEventListener("click",()=>{
+ const escape=value=>'"'+String(value).replace(/"/g,'""')+'"';
+ const rows=[["Symbol","Side","Entry","Exit","Quantity","Charges","Net P&L"],
+ ...trades.map(t=>[t.symbol,t.side,t.entry,t.exit,t.qty,t.charges,pnl(t)])];
+ const csv=rows.map(r=>r.map(escape).join(",")).join("\r\n");
+ const url=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}));
+ const a=document.createElement("a");a.href=url;a.download="tradepilot-journal.csv";
+ a.click();URL.revokeObjectURL(url);
+});
+load();render();
+})();
+</script>
+</body>
+</html>
