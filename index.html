@@ -1,225 +1,201 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TradePilot — Trading Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <meta name="theme-color" content="#070b12">
+  <title>TradePilot AI — Trading Dashboard</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js"></script>
 </head>
-
 <body>
-
   <header class="topbar">
     <div class="logo">
       <span class="logo-mark">T</span>
-      <span>TradePilot</span>
+      <span>TradePilot AI</span>
     </div>
-
     <div class="market-status">
-      <span class="status-dot"></span>
-      Market Dashboard
+      <span class="status-dot" style="background:#f0b84b"></span>
+      DEMO MODE — NOT LIVE
     </div>
-
-    <button class="profile-btn">Trader</button>
+    <button class="profile-btn" type="button">Trader</button>
   </header>
 
   <div class="layout">
-
     <aside class="sidebar">
       <nav>
-        <a class="active" href="#">Dashboard</a>
+        <a class="active" href="#dashboard">Dashboard</a>
         <a href="#markets">Markets</a>
-        <a href="#strategies">Strategies</a>
-        <a href="#risk">Risk Management</a>
+        <a href="#chart-section">Chart</a>
+        <a href="#risk">Risk Calculator</a>
         <a href="#journal">Trade Journal</a>
       </nav>
-
       <div class="sidebar-bottom">
-        <span>TradePilot</span>
-        <small>Trading Intelligence</small>
+        <span>TradePilot AI</span>
+        <small>Trading Analytics</small>
       </div>
     </aside>
 
-    <main class="main">
-
+    <main class="main" id="dashboard">
       <section class="welcome">
         <div>
           <p class="eyebrow">TRADING TERMINAL</p>
-          <h1>Good evening, Trader.</h1>
-          <p class="muted">
-            Monitor markets, analyse setups and manage your risk.
-          </p>
+          <h1>Trading Dashboard</h1>
+          <p class="muted">Analyse charts and calculate trade risk.</p>
         </div>
-
-        <button class="primary-btn">+ New Trade</button>
+        <button class="primary-btn" id="newTrade" type="button">Risk Calculator</button>
       </section>
+
+      <p style="padding:12px;margin-bottom:18px;border:1px solid #725c29;border-radius:8px;color:#f0c66e;background:#211b10;font-size:12px;line-height:1.6">
+        DEMO DATA ONLY. Prices and candles are simulated for testing.
+        This dashboard is not connected to a live exchange. Do not use
+        demo values to make real trading decisions.
+      </p>
 
       <section class="market-grid" id="markets">
-
-        <article class="market-card">
-          <div class="card-top">
-            <span>NIFTY 50</span>
-            <span class="positive">+0.84%</span>
-          </div>
-          <h2>24,850.30</h2>
-          <p class="positive">+206.45</p>
+        <article class="market-card" data-symbol="NIFTY 50" role="button" tabindex="0">
+          <div class="card-top"><span>NIFTY 50</span><span class="positive">DEMO</span></div>
+          <h2 id="nifty-price">—</h2>
+          <p class="muted">Simulated price</p>
         </article>
-
-        <article class="market-card">
-          <div class="card-top">
-            <span>BANKNIFTY</span>
-            <span class="positive">+0.62%</span>
-          </div>
-          <h2>56,420.15</h2>
-          <p class="positive">+348.20</p>
+        <article class="market-card" data-symbol="BANKNIFTY" role="button" tabindex="0">
+          <div class="card-top"><span>BANKNIFTY</span><span class="positive">DEMO</span></div>
+          <h2 id="banknifty-price">—</h2>
+          <p class="muted">Simulated price</p>
         </article>
-
-        <article class="market-card">
-          <div class="card-top">
-            <span>FINNIFTY</span>
-            <span class="negative">-0.18%</span>
-          </div>
-          <h2>26,180.75</h2>
-          <p class="negative">-47.30</p>
+        <article class="market-card" data-symbol="FINNIFTY" role="button" tabindex="0">
+          <div class="card-top"><span>FINNIFTY</span><span class="positive">DEMO</span></div>
+          <h2 id="finnifty-price">—</h2>
+          <p class="muted">Simulated price</p>
         </article>
-
       </section>
 
-      <section class="dashboard-grid">
-
+      <section class="dashboard-grid" id="chart-section">
         <div class="chart-panel">
-
           <div class="panel-header">
             <div>
-              <span class="panel-label">MARKET CHART</span>
-              <h2>NIFTY 50</h2>
+              <span class="panel-label">SIMULATED MARKET CHART</span>
+              <h2 id="chartTitle">NIFTY 50 · 5m</h2>
             </div>
-
             <div class="timeframes">
-              <button>1m</button>
-              <button class="selected">5m</button>
-              <button>15m</button>
-              <button>1H</button>
+              <button type="button" data-tf="1m">1m</button>
+              <button type="button" class="selected" data-tf="5m">5m</button>
+              <button type="button" data-tf="15m">15m</button>
+              <button type="button" data-tf="1H">1H</button>
             </div>
           </div>
 
-          <div class="chart">
-            <div class="chart-grid"></div>
-
-            <div class="candles">
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-              <span></span><span></span><span></span><span></span>
-            </div>
-
-            <div class="chart-label">
-              Market data will appear here
-            </div>
+          <div id="chart" class="chart" style="height:360px;min-height:280px"></div>
+          <p id="chart-status" class="muted" style="margin-top:10px;font-size:12px">
+            Preparing demo chart…
+          </p>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px">
+            <span style="color:#a78bfa">━ EMA 9</span>
+            <span style="color:#e4b65d">━ VWAP (demo calculation)</span>
           </div>
-
         </div>
 
         <div class="signal-panel">
-
           <div class="panel-header">
             <div>
-              <span class="panel-label">TRADE SIGNAL</span>
-              <h2>Current Setup</h2>
+              <span class="panel-label">SIGNAL STATUS</span>
+              <h2>Trade Analysis</h2>
             </div>
           </div>
-
           <div class="signal-box">
-            <span class="signal-neutral">WAITING</span>
-            <h3>No active signal</h3>
-            <p>
-              Connect a verified market-data provider to receive live signals.
-            </p>
+            <span class="signal-neutral">NOT CONNECTED</span>
+            <h3>No live signal available</h3>
+            <p>Connect a verified market-data source before calculating real-market signals.</p>
           </div>
-
           <div class="levels">
-            <div>
-              <span>Entry</span>
-              <strong>—</strong>
-            </div>
-
-            <div>
-              <span>Stop Loss</span>
-              <strong>—</strong>
-            </div>
-
-            <div>
-              <span>Target</span>
-              <strong>—</strong>
-            </div>
+            <div><span>Entry</span><strong>—</strong></div>
+            <div><span>Stop Loss</span><strong>—</strong></div>
+            <div><span>Target</span><strong>—</strong></div>
           </div>
-
+          <p class="muted" style="margin-top:14px;font-size:12px">
+            No buy or sell recommendation is generated in demo mode.
+          </p>
         </div>
-
       </section>
 
       <section class="stats-grid" id="risk">
-
         <article class="stat-card">
-          <span>TRADING CAPITAL</span>
-          <strong>₹0</strong>
-          <small>Configure your capital</small>
+          <span>TRADING CAPITAL (₹)</span>
+          <strong id="capital-display">₹10,000</strong>
+          <small>Editable below</small>
         </article>
-
         <article class="stat-card">
-          <span>RISK / TRADE</span>
-          <strong>1%</strong>
-          <small>Recommended starting point</small>
+          <span>RISK PER TRADE</span>
+          <strong id="risk-display">₹100</strong>
+          <small>Based on your selected risk %</small>
         </article>
-
         <article class="stat-card">
-          <span>TODAY'S P&L</span>
-          <strong>₹0</strong>
-          <small>No trades recorded</small>
+          <span>MAX LOSS PER UNIT</span>
+          <strong id="loss-display">₹10</strong>
+          <small>Entry minus stop loss</small>
         </article>
-
         <article class="stat-card">
-          <span>WIN RATE</span>
-          <strong>—</strong>
-          <small>Trade journal empty</small>
+          <span>ESTIMATED QUANTITY</span>
+          <strong id="quantity-display">10</strong>
+          <small>Before fees and slippage</small>
         </article>
-
       </section>
 
-      <section class="bottom-grid">
+      <section class="chart-panel" style="margin-top:18px" aria-labelledby="risk-heading">
+        <div class="panel-header">
+          <div>
+            <span class="panel-label">POSITION SIZING</span>
+            <h2 id="risk-heading">Risk Calculator</h2>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+          <label style="font-size:12px;color:#9ba8bb">
+            Capital (₹)
+            <input id="capital" type="number" min="1" value="10000"
+              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          </label>
+          <label style="font-size:12px;color:#9ba8bb">
+            Risk (%)
+            <input id="risk-percent" type="number" min="0.1" max="100" step="0.1" value="1"
+              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          </label>
+          <label style="font-size:12px;color:#9ba8bb">
+            Entry price (₹)
+            <input id="entry" type="number" min="0.01" step="0.05" value="100"
+              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          </label>
+          <label style="font-size:12px;color:#9ba8bb">
+            Stop-loss price (₹)
+            <input id="stop" type="number" min="0.01" step="0.05" value="90"
+              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          </label>
+        </div>
+        <p id="risk-message" role="status" style="margin-top:14px;color:#9ba8bb;font-size:13px">
+          Enter your trade details to calculate position size.
+        </p>
+      </section>
 
-        <div class="strategy-panel" id="strategies">
+      <section class="bottom-grid" style="margin-top:18px">
+        <div class="strategy-panel">
           <div class="panel-header">
             <div>
               <span class="panel-label">STRATEGIES</span>
-              <h2>Trading Systems</h2>
+              <h2>Available Concepts</h2>
             </div>
           </div>
-
           <div class="strategy-list">
             <div class="strategy">
-              <div>
-                <strong>EMA 9 / 15</strong>
-                <span>Trend + Retest</span>
-              </div>
-              <span class="tag">5M</span>
+              <div><strong>EMA 9</strong><span>Short-term trend indicator</span></div>
+              <span class="tag">DEMO</span>
             </div>
-
             <div class="strategy">
-              <div>
-                <strong>Opening Breakout</strong>
-                <span>First candle breakout</span>
-              </div>
-              <span class="tag">5M</span>
+              <div><strong>VWAP</strong><span>Volume-weighted average price</span></div>
+              <span class="tag">DEMO</span>
             </div>
-
             <div class="strategy">
-              <div>
-                <strong>Custom Strategy</strong>
-                <span>Configure your setup</span>
-              </div>
-              <span class="tag">NEW</span>
+              <div><strong>Risk Management</strong><span>Position sizing calculator</span></div>
+              <span class="tag">READY</span>
             </div>
           </div>
         </div>
@@ -231,24 +207,267 @@
               <h2>Recent Trades</h2>
             </div>
           </div>
-
           <div class="empty-state">
             <div class="empty-icon">+</div>
-            <h3>No trades yet</h3>
-            <p>Your executed trades will appear here.</p>
+            <h3>No trades recorded</h3>
+            <p>This version does not save trades permanently.</p>
           </div>
         </div>
-
       </section>
 
       <footer>
-        <span>TradePilot © 2026</span>
-        <span>Market data: Not connected</span>
+        <span>TradePilot AI © 2026</span>
+        <span>Market data: Demo only · Not connected</span>
       </footer>
-
     </main>
-
   </div>
 
+  <script>
+  (() => {
+    "use strict";
+
+    const instruments = {
+      "NIFTY 50": { base: 25000, id: "nifty-price" },
+      "BANKNIFTY": { base: 56000, id: "banknifty-price" },
+      "FINNIFTY": { base: 26000, id: "finnifty-price" }
+    };
+
+    let symbol = "NIFTY 50";
+    let timeframe = "5m";
+    let chart = null;
+    let candles = null;
+    let emaLine = null;
+    let vwapLine = null;
+
+    const money = value => Number(value).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function makeBars(base, count, minutes) {
+      const bars = [];
+      let price = base - 100;
+      const now = Math.floor(Date.now() / 1000);
+      const interval = minutes * 60;
+      const end = Math.floor(now / interval) * interval;
+
+      for (let i = 0; i < count; i++) {
+        const open = price;
+        const wave = Math.sin(i * 1.31) * 22 +
+                     Math.cos(i * 0.37) * 12 + 1.8;
+        const close = open + wave;
+        const high = Math.max(open, close) + 5 + Math.abs(Math.sin(i)) * 12;
+        const low = Math.min(open, close) - 5 - Math.abs(Math.cos(i)) * 10;
+
+        bars.push({
+          time: end - (count - 1 - i) * interval,
+          open, high, low, close,
+          volume: 500 + Math.abs(Math.sin(i * 1.7)) * 1500
+        });
+        price = close;
+      }
+      return bars;
+    }
+
+    function calculateLines(bars) {
+      let cumulativePV = 0;
+      let cumulativeVolume = 0;
+      const ema = [];
+      const vwap = [];
+      const alpha = 2 / (9 + 1);
+      let previousEMA = null;
+
+      bars.forEach((bar, index) => {
+        previousEMA = previousEMA === null
+          ? bar.close
+          : bar.close * alpha + previousEMA * (1 - alpha);
+
+        ema.push({ time: bar.time, value: previousEMA });
+
+        const typical = (bar.high + bar.low + bar.close) / 3;
+        cumulativePV += typical * bar.volume;
+        cumulativeVolume += bar.volume;
+        vwap.push({
+          time: bar.time,
+          value: cumulativePV / cumulativeVolume
+        });
+      });
+      return { ema, vwap };
+    }
+
+    function renderChart() {
+      const status = document.getElementById("chart-status");
+      const container = document.getElementById("chart");
+
+      if (!window.LightweightCharts) {
+        status.textContent =
+          "Chart library did not load. Check internet connection and refresh.";
+        return;
+      }
+
+      if (!chart) {
+        chart = LightweightCharts.createChart(container, {
+          width: container.clientWidth,
+          height: container.clientHeight,
+          layout: {
+            background: { color: "#090f18" },
+            textColor: "#9ba8bb"
+          },
+          grid: {
+            vertLines: { color: "#17202b" },
+            horzLines: { color: "#17202b" }
+          },
+          rightPriceScale: { borderColor: "#263347" },
+          timeScale: {
+            borderColor: "#263347",
+            timeVisible: true,
+            secondsVisible: false
+          },
+          crosshair: { mode: 0 }
+        });
+
+        candles = chart.addCandlestickSeries({
+          upColor: "#20d68a",
+          downColor: "#ff5c70",
+          borderUpColor: "#20d68a",
+          borderDownColor: "#ff5c70",
+          wickUpColor: "#20d68a",
+          wickDownColor: "#ff5c70"
+        });
+
+        emaLine = chart.addLineSeries({
+          color: "#a78bfa",
+          lineWidth: 2,
+          title: "EMA 9"
+        });
+
+        vwapLine = chart.addLineSeries({
+          color: "#e4b65d",
+          lineWidth: 2,
+          title: "VWAP"
+        });
+
+        if ("ResizeObserver" in window) {
+          new ResizeObserver(() => {
+            if (chart && container.clientWidth > 0) {
+              chart.applyOptions({
+                width: container.clientWidth,
+                height: container.clientHeight
+              });
+            }
+          }).observe(container);
+        } else {
+          window.addEventListener("resize", () => {
+            if (chart) chart.applyOptions({
+              width: container.clientWidth,
+              height: container.clientHeight
+            });
+          });
+        }
+      }
+
+      const minutes = timeframe === "1m" ? 1 :
+                      timeframe === "15m" ? 15 :
+                      timeframe === "1H" ? 60 : 5;
+
+      const bars = makeBars(instruments[symbol].base, 100, minutes);
+      const lines = calculateLines(bars);
+
+      candles.setData(bars);
+      emaLine.setData(lines.ema);
+      vwapLine.setData(lines.vwap);
+      chart.timeScale().fitContent();
+
+      document.getElementById("chartTitle").textContent =
+        symbol + " · " + timeframe;
+
+      document.getElementById("chart-status").textContent =
+        "Simulated candles · " + timeframe +
+        " timeframe · Not real exchange data";
+
+      document.querySelectorAll(".market-card").forEach(card => {
+        card.style.borderColor =
+          card.dataset.symbol === symbol ? "#5d8cff" : "#1c2735";
+      });
+    }
+
+    function selectSymbol(nextSymbol) {
+      if (!instruments[nextSymbol]) return;
+      symbol = nextSymbol;
+      renderChart();
+    }
+
+    document.querySelectorAll(".market-card").forEach(card => {
+      card.addEventListener("click", () => selectSymbol(card.dataset.symbol));
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectSymbol(card.dataset.symbol);
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-tf]").forEach(button => {
+      button.addEventListener("click", () => {
+        timeframe = button.dataset.tf;
+        document.querySelectorAll("[data-tf]").forEach(item => {
+          item.classList.toggle("selected", item === button);
+        });
+        renderChart();
+      });
+    });
+
+    function calculateRisk() {
+      const capital = Number(document.getElementById("capital").value);
+      const riskPercent = Number(document.getElementById("risk-percent").value);
+      const entry = Number(document.getElementById("entry").value);
+      const stop = Number(document.getElementById("stop").value);
+      const message = document.getElementById("risk-message");
+
+      if (![capital, riskPercent, entry, stop].every(Number.isFinite) ||
+          capital <= 0 || riskPercent <= 0 || riskPercent > 100 ||
+          entry <= 0 || stop <= 0 || entry === stop) {
+        message.textContent =
+          "Please enter valid positive values. Entry and stop-loss must differ.";
+        return;
+      }
+
+      const riskAmount = capital * riskPercent / 100;
+      const lossPerUnit = Math.abs(entry - stop);
+      const quantity = Math.floor(riskAmount / lossPerUnit);
+
+      document.getElementById("capital-display").textContent =
+        "₹" + money(capital);
+      document.getElementById("risk-display").textContent =
+        "₹" + money(riskAmount);
+      document.getElementById("loss-display").textContent =
+        "₹" + money(lossPerUnit);
+      document.getElementById("quantity-display").textContent =
+        quantity.toLocaleString("en-IN");
+
+      message.textContent = quantity > 0
+        ? "Estimated quantity: " + quantity +
+          ". This is a basic calculation, excluding fees, slippage, lot sizes and margin."
+        : "Risk budget is smaller than the loss per unit. Reduce risk per unit or review your inputs.";
+    }
+
+    ["capital", "risk-percent", "entry", "stop"].forEach(id => {
+      document.getElementById(id).addEventListener("input", calculateRisk);
+    });
+
+    document.getElementById("newTrade").addEventListener("click", () => {
+      document.getElementById("risk").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("capital").focus({ preventScroll: true });
+    });
+
+    Object.entries(instruments).forEach(([name, item]) => {
+      document.getElementById(item.id).textContent =
+        "₹" + money(item.base);
+    });
+
+    calculateRisk();
+    renderChart();
+  })();
+  </script>
 </body>
 </html>
