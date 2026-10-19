@@ -6,8 +6,159 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#070b12">
   <title>TradePilot AI — Trading Dashboard</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
   <script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070b12;
+      --panel: #0d1420;
+      --border: #263347;
+      --text: #edf2fa;
+      --muted: #9ba8bb;
+      --blue: #5d8cff;
+      --green: #20d68a;
+      --red: #ff5c70;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    a { color: inherit; }
+    .topbar {
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--border);
+      background: #090f18;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .logo-mark {
+      display: grid; place-items: center;
+      width: 34px; height: 34px;
+      border-radius: 9px; background: var(--blue);
+      color: white; font-size: 20px;
+    }
+    .market-status { color: #f0c66e; font-size: 11px; font-weight: 700; }
+    .profile-btn, button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #111925;
+      color: var(--text);
+      padding: 10px 13px;
+    }
+    button:hover, .sidebar a:hover { border-color: var(--blue); }
+    .layout { display: flex; min-height: calc(100vh - 66px); }
+    .sidebar {
+      width: 205px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      padding: 18px 12px;
+      border-right: 1px solid var(--border);
+      background: #090f18;
+    }
+    .sidebar nav { display: grid; gap: 7px; }
+    .sidebar nav a {
+      display: block; padding: 12px;
+      border: 1px solid transparent; border-radius: 7px;
+      color: var(--muted); text-decoration: none; font-size: 13px;
+    }
+    .sidebar nav a.active { background: #15223a; color: white; border-color: #263c60; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 10px 0; font-size: 12px; }
+    .sidebar-bottom small { display: block; margin-top: 6px; color: var(--muted); }
+    .main { flex: 1; min-width: 0; padding: 24px; }
+    .welcome { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    h1 { margin: 5px 0 8px; font-size: clamp(24px, 3vw, 32px); }
+    h2 { margin: 8px 0; font-size: 18px; }
+    h3 { font-size: 16px; }
+    p { line-height: 1.55; }
+    .eyebrow, .panel-label { color: var(--blue); font-size: 10px; font-weight: 700; letter-spacing: 1.3px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .primary-btn { background: var(--blue); border-color: var(--blue); color: white; font-weight: 700; }
+    .demo-warning {
+      padding: 13px; margin-bottom: 18px;
+      border: 1px solid #725c29; border-radius: 8px;
+      color: #f0c66e; background: #211b10; font-size: 12px;
+    }
+    .market-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .market-card, .chart-panel, .signal-panel, .stat-card, .strategy-panel, .journal-panel {
+      background: var(--panel); border: 1px solid #1c2735; border-radius: 10px;
+    }
+    .market-card { padding: 17px; cursor: pointer; }
+    .market-card h2 { font-size: 25px; margin: 18px 0 6px; }
+    .card-top { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+    .positive { color: var(--green); }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 16px; }
+    .chart-panel, .signal-panel, .strategy-panel, .journal-panel { padding: 18px; min-width: 0; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .panel-header h2 { margin-bottom: 0; }
+    .timeframes { display: flex; flex-wrap: wrap; gap: 5px; }
+    .timeframes button { padding: 7px 9px; font-size: 11px; }
+    .timeframes button.selected { background: #20365d; border-color: var(--blue); }
+    .chart { width: 100%; height: 360px; min-height: 280px; }
+    .signal-box { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #0a111b; }
+    .signal-neutral { color: #f0c66e; font-size: 11px; font-weight: 700; }
+    .signal-box p { color: var(--muted); font-size: 12px; }
+    .levels { display: grid; gap: 0; margin-top: 12px; }
+    .levels div { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .levels span { color: var(--muted); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .stat-card { padding: 16px; }
+    .stat-card span, .stat-card small { display: block; color: var(--muted); font-size: 10px; }
+    .stat-card strong { display: block; margin: 12px 0 8px; font-size: 21px; overflow-wrap: anywhere; }
+    .stat-card small { font-size: 11px; }
+    .risk-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .risk-fields label { color: var(--muted); font-size: 12px; }
+    .risk-fields input {
+      width: 100%; margin-top: 7px; padding: 12px;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: #111925; color: white; font-size: 14px;
+    }
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+    .strategy { display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .strategy strong, .strategy span { display: block; font-size: 12px; }
+    .strategy div span { margin-top: 6px; color: var(--muted); }
+    .tag { color: #f0c66e; }
+    .empty-state { padding: 22px 8px; text-align: center; }
+    .empty-icon { margin: auto; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; font-size: 23px; }
+    .empty-state p { color: var(--muted); font-size: 12px; }
+    .journal-link { display: inline-block; margin-top: 10px; padding: 10px 13px; border-radius: 7px; background: var(--blue); color: white; text-decoration: none; font-size: 12px; }
+    footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 25px; padding: 16px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+    @media (max-width: 900px) {
+      .layout { display: block; }
+      .sidebar { width: 100%; padding: 8px; border-right: 0; border-bottom: 1px solid var(--border); }
+      .sidebar nav { display: flex; flex-wrap: wrap; gap: 4px; }
+      .sidebar nav a { padding: 9px; font-size: 11px; }
+      .sidebar-bottom { display: none; }
+      .main { padding: 16px; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .risk-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .topbar { padding: 10px; }
+      .market-status { max-width: 105px; line-height: 1.5; }
+      .main { padding: 12px; }
+      .market-grid { grid-template-columns: 1fr; gap: 9px; }
+      .market-card { padding: 13px; }
+      .market-card h2 { margin: 10px 0 5px; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .welcome { align-items: flex-start; }
+      .welcome .primary-btn { padding: 9px; font-size: 11px; }
+      .chart-panel, .signal-panel, .strategy-panel, .journal-panel { padding: 12px; }
+      .chart { height: 300px; min-height: 260px; }
+      .timeframes button { padding: 7px; }
+      .stat-card { padding: 12px; }
+      .stat-card strong { font-size: 18px; }
+      .risk-fields { gap: 10px; }
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -15,21 +166,18 @@
       <span class="logo-mark">T</span>
       <span>TradePilot AI</span>
     </div>
-    <div class="market-status">
-      <span class="status-dot" style="background:#f0b84b"></span>
-      DEMO MODE — NOT LIVE
-    </div>
+    <div class="market-status">● DEMO MODE — NOT LIVE</div>
     <button class="profile-btn" type="button">Trader</button>
   </header>
 
   <div class="layout">
     <aside class="sidebar">
-      <nav>
+      <nav aria-label="Main navigation">
         <a class="active" href="#dashboard">Dashboard</a>
         <a href="#markets">Markets</a>
         <a href="#chart-section">Chart</a>
         <a href="#risk">Risk Calculator</a>
-        <a href="#journal">Trade Journal</a>
+        <a href="journal.html">Trade Journal ↗</a>
       </nav>
       <div class="sidebar-bottom">
         <span>TradePilot AI</span>
@@ -42,16 +190,16 @@
         <div>
           <p class="eyebrow">TRADING TERMINAL</p>
           <h1>Trading Dashboard</h1>
-          <p class="muted">Analyse charts and calculate trade risk.</p>
+          <p class="muted">Explore demo charts and calculate trade risk.</p>
         </div>
         <button class="primary-btn" id="newTrade" type="button">Risk Calculator</button>
       </section>
 
-      <p style="padding:12px;margin-bottom:18px;border:1px solid #725c29;border-radius:8px;color:#f0c66e;background:#211b10;font-size:12px;line-height:1.6">
-        DEMO DATA ONLY. Prices and candles are simulated for testing.
-        This dashboard is not connected to a live exchange. Do not use
-        demo values to make real trading decisions.
-      </p>
+      <div class="demo-warning">
+        <strong>DEMO DATA ONLY.</strong> Prices and candles are simulated.
+        This dashboard is not connected to a live exchange. Do not use demo
+        values to make real trading decisions.
+      </div>
 
       <section class="market-grid" id="markets">
         <article class="market-card" data-symbol="NIFTY 50" role="button" tabindex="0">
@@ -78,18 +226,15 @@
               <span class="panel-label">SIMULATED MARKET CHART</span>
               <h2 id="chartTitle">NIFTY 50 · 5m</h2>
             </div>
-            <div class="timeframes">
+            <div class="timeframes" aria-label="Chart timeframe">
               <button type="button" data-tf="1m">1m</button>
               <button type="button" class="selected" data-tf="5m">5m</button>
               <button type="button" data-tf="15m">15m</button>
               <button type="button" data-tf="1H">1H</button>
             </div>
           </div>
-
-          <div id="chart" class="chart" style="height:360px;min-height:280px"></div>
-          <p id="chart-status" class="muted" style="margin-top:10px;font-size:12px">
-            Preparing demo chart…
-          </p>
+          <div id="chart" class="chart"></div>
+          <p id="chart-status" class="muted">Preparing demo chart…</p>
           <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px">
             <span style="color:#a78bfa">━ EMA 9</span>
             <span style="color:#e4b65d">━ VWAP (demo calculation)</span>
@@ -106,34 +251,32 @@
           <div class="signal-box">
             <span class="signal-neutral">NOT CONNECTED</span>
             <h3>No live signal available</h3>
-            <p>Connect a verified market-data source before calculating real-market signals.</p>
+            <p>Live analysis requires a verified market-data source and a working backend.</p>
           </div>
           <div class="levels">
             <div><span>Entry</span><strong>—</strong></div>
             <div><span>Stop Loss</span><strong>—</strong></div>
             <div><span>Target</span><strong>—</strong></div>
           </div>
-          <p class="muted" style="margin-top:14px;font-size:12px">
-            No buy or sell recommendation is generated in demo mode.
-          </p>
+          <p class="muted">No buy or sell recommendation is generated in demo mode.</p>
         </div>
       </section>
 
       <section class="stats-grid" id="risk">
         <article class="stat-card">
           <span>TRADING CAPITAL (₹)</span>
-          <strong id="capital-display">₹10,000</strong>
+          <strong id="capital-display">₹10,000.00</strong>
           <small>Editable below</small>
         </article>
         <article class="stat-card">
           <span>RISK PER TRADE</span>
-          <strong id="risk-display">₹100</strong>
-          <small>Based on your selected risk %</small>
+          <strong id="risk-display">₹100.00</strong>
+          <small>Based on selected risk %</small>
         </article>
         <article class="stat-card">
           <span>MAX LOSS PER UNIT</span>
-          <strong id="loss-display">₹10</strong>
-          <small>Entry minus stop loss</small>
+          <strong id="loss-display">₹10.00</strong>
+          <small>Absolute entry-stop difference</small>
         </article>
         <article class="stat-card">
           <span>ESTIMATED QUANTITY</span>
@@ -149,34 +292,24 @@
             <h2 id="risk-heading">Risk Calculator</h2>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
-          <label style="font-size:12px;color:#9ba8bb">
-            Capital (₹)
-            <input id="capital" type="number" min="1" value="10000"
-              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+        <div class="risk-fields">
+          <label>Capital (₹)
+            <input id="capital" type="number" min="1" value="10000">
           </label>
-          <label style="font-size:12px;color:#9ba8bb">
-            Risk (%)
-            <input id="risk-percent" type="number" min="0.1" max="100" step="0.1" value="1"
-              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          <label>Risk (%)
+            <input id="risk-percent" type="number" min="0.1" max="100" step="0.1" value="1">
           </label>
-          <label style="font-size:12px;color:#9ba8bb">
-            Entry price (₹)
-            <input id="entry" type="number" min="0.01" step="0.05" value="100"
-              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          <label>Entry price (₹)
+            <input id="entry" type="number" min="0.01" step="0.05" value="100">
           </label>
-          <label style="font-size:12px;color:#9ba8bb">
-            Stop-loss price (₹)
-            <input id="stop" type="number" min="0.01" step="0.05" value="90"
-              style="display:block;width:100%;margin-top:7px;padding:12px;border-radius:7px;border:1px solid #263347;background:#111925;color:white">
+          <label>Stop-loss price (₹)
+            <input id="stop" type="number" min="0.01" step="0.05" value="90">
           </label>
         </div>
-        <p id="risk-message" role="status" style="margin-top:14px;color:#9ba8bb;font-size:13px">
-          Enter your trade details to calculate position size.
-        </p>
+        <p id="risk-message" role="status" class="muted">Enter your trade details to calculate position size.</p>
       </section>
 
-      <section class="bottom-grid" style="margin-top:18px">
+      <section class="bottom-grid">
         <div class="strategy-panel">
           <div class="panel-header">
             <div>
@@ -204,13 +337,14 @@
           <div class="panel-header">
             <div>
               <span class="panel-label">TRADE JOURNAL</span>
-              <h2>Recent Trades</h2>
+              <h2>Track Your Trades</h2>
             </div>
           </div>
           <div class="empty-state">
             <div class="empty-icon">+</div>
-            <h3>No trades recorded</h3>
-            <p>This version does not save trades permanently.</p>
+            <h3>Record your trades</h3>
+            <p>Open the separate Trade Journal to save trades and review P&amp;L.</p>
+            <a class="journal-link" href="journal.html">Open Trade Journal ↗</a>
           </div>
         </div>
       </section>
@@ -238,6 +372,7 @@
     let candles = null;
     let emaLine = null;
     let vwapLine = null;
+    let resizeObserver = null;
 
     const money = value => Number(value).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
@@ -254,7 +389,7 @@
       for (let i = 0; i < count; i++) {
         const open = price;
         const wave = Math.sin(i * 1.31) * 22 +
-                     Math.cos(i * 0.37) * 12 + 1.8;
+          Math.cos(i * 0.37) * 12 + 1.8;
         const close = open + wave;
         const high = Math.max(open, close) + 5 + Math.abs(Math.sin(i)) * 12;
         const low = Math.min(open, close) - 5 - Math.abs(Math.cos(i)) * 10;
@@ -274,10 +409,10 @@
       let cumulativeVolume = 0;
       const ema = [];
       const vwap = [];
-      const alpha = 2 / (9 + 1);
+      const alpha = 2 / 10;
       let previousEMA = null;
 
-      bars.forEach((bar, index) => {
+      bars.forEach(bar => {
         previousEMA = previousEMA === null
           ? bar.close
           : bar.close * alpha + previousEMA * (1 - alpha);
@@ -300,8 +435,12 @@
       const container = document.getElementById("chart");
 
       if (!window.LightweightCharts) {
-        status.textContent =
-          "Chart library did not load. Check internet connection and refresh.";
+        status.textContent = "Chart library failed to load. Check your internet connection and refresh.";
+        return;
+      }
+
+      if (!container || container.clientWidth <= 0) {
+        status.textContent = "Chart is waiting for the page layout.";
         return;
       }
 
@@ -348,126 +487,18 @@
         });
 
         if ("ResizeObserver" in window) {
-          new ResizeObserver(() => {
+          resizeObserver = new ResizeObserver(() => {
             if (chart && container.clientWidth > 0) {
               chart.applyOptions({
                 width: container.clientWidth,
                 height: container.clientHeight
               });
             }
-          }).observe(container);
+          });
+          resizeObserver.observe(container);
         } else {
           window.addEventListener("resize", () => {
-            if (chart) chart.applyOptions({
-              width: container.clientWidth,
-              height: container.clientHeight
-            });
-          });
-        }
-      }
-
-      const minutes = timeframe === "1m" ? 1 :
-                      timeframe === "15m" ? 15 :
-                      timeframe === "1H" ? 60 : 5;
-
-      const bars = makeBars(instruments[symbol].base, 100, minutes);
-      const lines = calculateLines(bars);
-
-      candles.setData(bars);
-      emaLine.setData(lines.ema);
-      vwapLine.setData(lines.vwap);
-      chart.timeScale().fitContent();
-
-      document.getElementById("chartTitle").textContent =
-        symbol + " · " + timeframe;
-
-      document.getElementById("chart-status").textContent =
-        "Simulated candles · " + timeframe +
-        " timeframe · Not real exchange data";
-
-      document.querySelectorAll(".market-card").forEach(card => {
-        card.style.borderColor =
-          card.dataset.symbol === symbol ? "#5d8cff" : "#1c2735";
-      });
-    }
-
-    function selectSymbol(nextSymbol) {
-      if (!instruments[nextSymbol]) return;
-      symbol = nextSymbol;
-      renderChart();
-    }
-
-    document.querySelectorAll(".market-card").forEach(card => {
-      card.addEventListener("click", () => selectSymbol(card.dataset.symbol));
-      card.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          selectSymbol(card.dataset.symbol);
-        }
-      });
-    });
-
-    document.querySelectorAll("[data-tf]").forEach(button => {
-      button.addEventListener("click", () => {
-        timeframe = button.dataset.tf;
-        document.querySelectorAll("[data-tf]").forEach(item => {
-          item.classList.toggle("selected", item === button);
-        });
-        renderChart();
-      });
-    });
-
-    function calculateRisk() {
-      const capital = Number(document.getElementById("capital").value);
-      const riskPercent = Number(document.getElementById("risk-percent").value);
-      const entry = Number(document.getElementById("entry").value);
-      const stop = Number(document.getElementById("stop").value);
-      const message = document.getElementById("risk-message");
-
-      if (![capital, riskPercent, entry, stop].every(Number.isFinite) ||
-          capital <= 0 || riskPercent <= 0 || riskPercent > 100 ||
-          entry <= 0 || stop <= 0 || entry === stop) {
-        message.textContent =
-          "Please enter valid positive values. Entry and stop-loss must differ.";
-        return;
-      }
-
-      const riskAmount = capital * riskPercent / 100;
-      const lossPerUnit = Math.abs(entry - stop);
-      const quantity = Math.floor(riskAmount / lossPerUnit);
-
-      document.getElementById("capital-display").textContent =
-        "₹" + money(capital);
-      document.getElementById("risk-display").textContent =
-        "₹" + money(riskAmount);
-      document.getElementById("loss-display").textContent =
-        "₹" + money(lossPerUnit);
-      document.getElementById("quantity-display").textContent =
-        quantity.toLocaleString("en-IN");
-
-      message.textContent = quantity > 0
-        ? "Estimated quantity: " + quantity +
-          ". This is a basic calculation, excluding fees, slippage, lot sizes and margin."
-        : "Risk budget is smaller than the loss per unit. Reduce risk per unit or review your inputs.";
-    }
-
-    ["capital", "risk-percent", "entry", "stop"].forEach(id => {
-      document.getElementById(id).addEventListener("input", calculateRisk);
-    });
-
-    document.getElementById("newTrade").addEventListener("click", () => {
-      document.getElementById("risk").scrollIntoView({ behavior: "smooth" });
-      document.getElementById("capital").focus({ preventScroll: true });
-    });
-
-    Object.entries(instruments).forEach(([name, item]) => {
-      document.getElementById(item.id).textContent =
-        "₹" + money(item.base);
-    });
-
-    calculateRisk();
-    renderChart();
-  })();
-  </script>
-</body>
-</html>
+            if (chart) {
+              chart.applyOptions({
+                width: container.clientWidth,
+                height: cont
