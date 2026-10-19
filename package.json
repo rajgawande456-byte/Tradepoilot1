@@ -1,8 +1,21 @@
-name": "tradepilot-ai",
+
+{
+  "name": "tradepilot-ai",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "TradePilot AI - trading analytics and trader-development platform",
   "main": "server.mjs",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "start": "node server.mjs
+    "start": "node server.mjs",
+    "migrate": "node db/migrate.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "pg": "^8.16.0"
+  }
+}
