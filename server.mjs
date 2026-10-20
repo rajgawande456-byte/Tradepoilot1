@@ -293,4 +293,5 @@ const server = http.createServer(
               'MARKET_DATA_NOT_CONFIGURED',
 
             message:
-              'No
+  'Market data provider is not configured.',
+              
