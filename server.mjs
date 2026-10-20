@@ -1,13 +1,14 @@
+
 import http from 'node:http';
 import crypto from 'node:crypto';
 
 import {
-  createProvider,
-  MarketDataProviderError
+  createProvider
 } from './market/provider.mjs';
 
 import {
-  createMarketStream
+  createMarketStream,
+  isAllowedSymbol
 } from './market/stream.mjs';
 
 import {
@@ -26,9 +27,8 @@ import {
   checkDatabaseConnection
 } from './db/client.mjs';
 
-const PORT = Number(
-  process.env.PORT || 8787
-);
+const PORT = Number(process.env.PORT || 8787);
+const VERSION = '1.3.1';
 
 const ALLOWED_ORIGINS = new Set(
   (process.env.ALLOWED_ORIGINS || '')
@@ -37,83 +37,43 @@ const ALLOWED_ORIGINS = new Set(
     .filter(Boolean)
 );
 
+const WS_AUTH_TOKEN = process.env.WS_AUTH_TOKEN || '';
+
+const RATE_LIMIT = Number(
+  process.env.RATE_LIMIT_PER_MINUTE || 120
+);
+
 const MARKET_DATA_PROVIDER =
   process.env.MARKET_DATA_PROVIDER || '';
-
-const WS_AUTH_TOKEN =
-  process.env.WS_AUTH_TOKEN || '';
-
-const VERSION = '1.3.0';
 
 let marketProvider = null;
 
 try {
-  marketProvider = createProvider(
-    process.env
+  marketProvider = createProvider(process.env);
+} catch (error) {
+  console.error(
+    'Market provider initialization failed:',
+    error.message
   );
-} catch {
-  marketProvider = null;
 }
 
-const marketStream =
-  createMarketStream({
-    provider: marketProvider,
-    maxAgeMs: Number(
-      process.env.MARKET_DATA_MAX_AGE_MS ||
-      15000
-    )
-  });
+const marketStream = createMarketStream({
+  provider: marketProvider,
+  maxAgeMs: Number(
+    process.env.MARKET_DATA_MAX_AGE_MS || 15000
+  )
+});
 
 const rate = new Map();
 
-function json(
-  res,
-  status,
-  body,
-  extra = {}
-) {
-  const data = JSON.stringify(body);
-
-  res.writeHead(status, {
-    'content-type':
-      'application/json; charset=utf-8',
-
-    'content-length':
-      Buffer.byteLength(data),
-
-    'cache-control':
-      'no-store',
-
-    'x-content-type-options':
-      'nosniff',
-
-    'x-frame-options':
-      'DENY',
-
-    'referrer-policy':
-      'no-referrer',
-
-    'content-security-policy':
-      "default-src 'none'; frame-ancestors 'none'",
-
-    'strict-transport-security':
-      process.env.NODE_ENV === 'production'
-        ? 'max-age=31536000; includeSubDomains'
-        : 'max-age=0',
-
-    ...extra
-  });
-
-  res.end(data);
+function requestId() {
+  return crypto.randomUUID();
 }
 
-function originHeaders(req) {
+function getCorsHeaders(req) {
   const origin = req.headers.origin;
 
-  if (
-    !origin ||
-    !ALLOWED_ORIGINS.size
-  ) {
+  if (!origin || !ALLOWED_ORIGINS.size) {
     return {};
   }
 
@@ -122,74 +82,85 @@ function originHeaders(req) {
   }
 
   return {
-    'access-control-allow-origin':
-      origin,
-
-    'access-control-allow-credentials':
-      'true',
-
+    'access-control-allow-origin': origin,
+    'access-control-allow-credentials': 'true',
     vary: 'Origin'
   };
 }
 
-function allowed(req) {
-  const key =
-    `${req.socket.remoteAddress || 'unknown'}:` +
-    `${Math.floor(Date.now() / 60000)}`;
+function sendJson(res, status, body, extra = {}) {
+  if (res.headersSent || res.destroyed) {
+    return;
+  }
 
-  const count =
-    (rate.get(key) || 0) + 1;
+  const data = JSON.stringify(body);
 
+  res.writeHead(status, {
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': Buffer.byteLength(data),
+    'cache-control': 'no-store',
+    'x-content-type-options': 'nosniff',
+    'x-frame-options': 'DENY',
+    'referrer-policy': 'no-referrer',
+    'content-security-policy':
+      "default-src 'none'; frame-ancestors 'none'",
+    ...extra
+  });
+
+  res.end(data);
+}
+
+function isRateLimited(req) {
+  const now = Date.now();
+  const minute = Math.floor(now / 60000);
+  const key = `${req.socket.remoteAddress || 'unknown'}:${minute}`;
+
+  const count = (rate.get(key) || 0) + 1;
   rate.set(key, count);
 
-  return count <= Number(
-    process.env.RATE_LIMIT_PER_MINUTE ||
-    120
-  );
+  // Remove old entries periodically when traffic arrives.
+  if (rate.size > 5000) {
+    for (const entry of rate.keys()) {
+      if (!entry.endsWith(`:${minute}`)) {
+        rate.delete(entry);
+      }
+    }
+  }
+
+  return count > RATE_LIMIT;
 }
 
-function requestId() {
-  return crypto.randomUUID();
-}
+const server = http.createServer(async (req, res) => {
+  const requestID = requestId();
+  const corsHeaders = getCorsHeaders(req);
 
-const server = http.createServer(
-  async (req, res) => {
-    const headers =
-      originHeaders(req);
+  res.setHeader('x-request-id', requestID);
 
-    const id = requestId();
-
-    res.setHeader(
-      'x-request-id',
-      id
-    );
-
+  try {
     if (req.method === 'OPTIONS') {
-      return json(
+      return sendJson(
         res,
         204,
         {},
         {
-          ...headers,
-
+          ...corsHeaders,
           'access-control-allow-methods':
             'GET,POST,PATCH,DELETE,OPTIONS',
-
           'access-control-allow-headers':
-            'content-type, authorization, idempotency-key'
+            'content-type,authorization,idempotency-key'
         }
       );
     }
 
-    if (!allowed(req)) {
-      return json(
+    if (isRateLimited(req)) {
+      return sendJson(
         res,
         429,
         {
           error: 'RATE_LIMITED',
-          requestId: id
+          requestId: requestID
         },
-        headers
+        corsHeaders
       );
     }
 
@@ -198,56 +169,35 @@ const server = http.createServer(
       `http://${req.headers.host || 'localhost'}`
     );
 
-    /*
-     * Authentication
-     *
-     * POST /api/v1/auth/signup
-     * POST /api/v1/auth/login
-     * POST /api/v1/auth/logout
-     * GET  /api/v1/me
-     */
-    const authResponse =
-      await handleAuthRequest(req);
+    // Authentication routes.
+    const authResponse = await handleAuthRequest(req);
 
     if (authResponse) {
-      return json(
+      return sendJson(
         res,
         authResponse.status,
         {
           ...authResponse.body,
-          requestId: id
+          requestId: requestID
         },
         {
-          ...headers,
+          ...corsHeaders,
           ...(authResponse.headers || {})
         }
       );
     }
 
-    /*
-     * API health
-     *
-     * This checks the actual PostgreSQL
-     * connection when DATABASE_URL exists.
-     */
-    if (
-      url.pathname === '/health' &&
-      req.method === 'GET'
-    ) {
-      let database =
-        'not_configured';
+    // API health and database status.
+    if (url.pathname === '/health' && req.method === 'GET') {
+      let database = 'not_configured';
 
-      if (
-        isDatabaseConfigured()
-      ) {
+      if (isDatabaseConfigured()) {
         try {
           await checkDatabaseConnection();
-
-          database =
-            'connected';
-        } catch {
-          database =
-            'unavailable';
+          database = 'connected';
+        } catch (error) {
+          database = 'unavailable';
+          console.error('Database health check failed:', error.message);
         }
       }
 
@@ -255,43 +205,272 @@ const server = http.createServer(
         database === 'connected' ||
         database === 'not_configured';
 
-      return json(
+      return sendJson(
         res,
         healthy ? 200 : 503,
         {
           ok: healthy,
-
-          service:
-            'tradepilot-api',
-
-          version:
-            VERSION,
-
+          service: 'tradepilot-api',
+          version: VERSION,
           database,
-
-          requestId:
-            id
+          marketData: marketProvider ? 'configured' : 'not_configured',
+          provider: MARKET_DATA_PROVIDER || null,
+          requestId: requestID
         },
-        headers
+        corsHeaders
       );
     }
 
-    /*
-     * Market snapshot
-     */
+    // Basic API information.
+    if (url.pathname === '/' && req.method === 'GET') {
+      return sendJson(
+        res,
+        200,
+        {
+          service: 'TradePilot AI API',
+          version: VERSION,
+          status: 'running',
+          health: '/health',
+          marketSnapshot: '/api/v1/market/snapshot',
+          marketStream: '/api/v1/market/stream',
+          requestId: requestID
+        },
+        corsHeaders
+      );
+    }
+
+    // Supported symbols.
     if (
-      url.pathname ===
-        '/api/v1/market/snapshot' &&
+      url.pathname === '/api/v1/market/symbols' &&
       req.method === 'GET'
     ) {
+      return sendJson(
+        res,
+        200,
+        {
+          symbols: ['NIFTY 50', 'BANKNIFTY', 'FINNIFTY'],
+          providerConfigured: Boolean(marketProvider),
+          requestId: requestID
+        },
+        corsHeaders
+      );
+    }
+
+    // Market snapshot.
+    if (
+      url.pathname === '/api/v1/market/snapshot' &&
+      req.method === 'GET'
+    ) {
+      const symbol = String(
+        url.searchParams.get('symbol') || 'NIFTY 50'
+      ).trim();
+
+      if (!isAllowedSymbol(symbol)) {
+        return sendJson(
+          res,
+          400,
+          {
+            error: 'SYMBOL_NOT_ALLOWED',
+            message: 'Use NIFTY 50, BANKNIFTY, or FINNIFTY.',
+            requestId: requestID
+          },
+          corsHeaders
+        );
+      }
+
       if (!marketProvider) {
-        return json(
+        return sendJson(
           res,
           503,
           {
-            error:
-              'MARKET_DATA_NOT_CONFIGURED',
+            error: 'MARKET_DATA_NOT_CONFIGURED',
+            message: 'A working market-data provider has not been configured yet.',
+            symbol,
+            requestId: requestID
+          },
+          corsHeaders
+        );
+      }
 
-            message:
-  'Market data provider is not configured.',
-              
+      // Do not fabricate prices if the provider lacks a snapshot method.
+      const getSnapshot =
+        marketProvider.getSnapshot ||
+        marketProvider.snapshot;
+
+      if (typeof getSnapshot !== 'function') {
+        return sendJson(
+          res,
+          503,
+          {
+            error: 'SNAPSHOT_NOT_SUPPORTED',
+            message: 'The configured provider does not expose a snapshot method yet.',
+            symbol,
+            requestId: requestID
+          },
+          corsHeaders
+        );
+      }
+
+      const snapshot = await getSnapshot.call(
+        marketProvider,
+        symbol
+      );
+
+      return sendJson(
+        res,
+        200,
+        {
+          symbol,
+          data: snapshot,
+          requestId: requestID
+        },
+        corsHeaders
+      );
+    }
+
+    // WebSocket endpoint is upgraded separately below.
+    if (
+      url.pathname === '/api/v1/market/stream' &&
+      req.method === 'GET'
+    ) {
+      return sendJson(
+        res,
+        426,
+        {
+          error: 'WEBSOCKET_REQUIRED',
+          message: 'Connect using a WebSocket client.',
+          requestId: requestID
+        },
+        corsHeaders
+      );
+    }
+
+    return sendJson(
+      res,
+      404,
+      {
+        error: 'NOT_FOUND',
+        message: 'API route not found.',
+        requestId: requestID
+      },
+      corsHeaders
+    );
+  } catch (error) {
+    console.error('Request failed:', error);
+
+    return sendJson(
+      res,
+      Number(error.status) >= 400 && Number(error.status) <= 599
+        ? Number(error.status)
+        : 500,
+      {
+        error: error.code || 'INTERNAL_SERVER_ERROR',
+        message:
+          Number(error.status) >= 400
+            ? error.message
+            : 'An internal server error occurred.',
+        requestId: requestID
+      },
+      corsHeaders
+    );
+  }
+});
+
+// WebSocket market stream.
+server.on('upgrade', (req, socket, head) => {
+  let cleanup = null;
+  let client = null;
+
+  try {
+    const url = new URL(
+      req.url || '/',
+      `http://${req.headers.host || 'localhost'}`
+    );
+
+    if (url.pathname !== '/api/v1/market/stream') {
+      socket.end('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
+      return;
+    }
+
+    if (!isWebSocketUpgrade(req)) {
+      socket.end('HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n');
+      return;
+    }
+
+    if (!marketProvider) {
+      socket.end(
+        'HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n'
+      );
+      return;
+    }
+
+    const symbol = String(
+      url.searchParams.get('symbol') || 'NIFTY 50'
+    ).trim();
+
+    if (!isAllowedSymbol(symbol)) {
+      socket.end(
+        'HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n'
+      );
+      return;
+    }
+
+    verifyWebSocketAccess(req, {
+      expectedToken: WS_AUTH_TOKEN
+    });
+
+    socket.write(upgradeResponseHeaders(req));
+
+    client = createWebSocketClient(socket);
+    cleanup = marketStream.addClient(client, symbol);
+
+    socket.on('data', (data) => {
+      // Close frames from clients trigger cleanup.
+      if (data.length > 0 && data[0] === 0x88) {
+        try {
+          client.close();
+        } catch {}
+        socket.end();
+      }
+    });
+
+    socket.on('close', () => {
+      if (cleanup) cleanup();
+    });
+
+    socket.on('error', () => {
+      if (cleanup) cleanup();
+    });
+
+    if (head && head.length > 0) {
+      socket.unshift(head);
+    }
+  } catch (error) {
+    if (cleanup) cleanup();
+
+    if (!socket.destroyed) {
+      const status = Number(error.status) || 401;
+      const message =
+        status === 503 ? 'Service Unavailable' :
+        status === 403 ? 'Forbidden' :
+        'Unauthorized';
+
+      socket.end(
+        `HTTP/1.1 ${status} ${message}\r\nConnection: close\r\n\r\n`
+      );
+    }
+  }
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`TradePilot API listening on port ${PORT}`);
+  console.log(`Version: ${VERSION}`);
+  console.log(
+    `Market provider: ${marketProvider ? 'configured' : 'not configured'}`
+  );
+});
+
+server.on('error', (error) => {
+  console.error('Server error:', error);
+  process.exitCode = 1;
+});
