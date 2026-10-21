@@ -1,3 +1,4 @@
+
 import pg from 'pg';
 
 const { Pool } = pg;
@@ -16,26 +17,29 @@ function createPool() {
   const isProduction =
     process.env.NODE_ENV === 'production';
 
+  // SSL certificate verification is enabled by default.
+  // Set DB_SSL_REJECT_UNAUTHORIZED=false only when
+  // you have verified that your database requires it
+  // and understand the associated security risk.
+  const rejectUnauthorized =
+    String(
+      process.env.DB_SSL_REJECT_UNAUTHORIZED ?? 'true'
+    ).toLowerCase() !== 'false';
+
+  const ssl = isProduction
+    ? { rejectUnauthorized }
+    : undefined;
+
   return new Pool({
     connectionString,
-
-    max: Number(
-      process.env.DB_POOL_MAX || 10
-    ),
-
+    max: Number(process.env.DB_POOL_MAX || 10),
     idleTimeoutMillis: Number(
       process.env.DB_IDLE_TIMEOUT_MS || 30000
     ),
-
     connectionTimeoutMillis: Number(
       process.env.DB_CONNECTION_TIMEOUT_MS || 5000
     ),
-
-    ssl: isProduction
-      ? {
-          rejectUnauthorized: true
-        }
-      : undefined
+    ...(ssl ? { ssl } : {})
   });
 }
 
@@ -45,18 +49,12 @@ export function isDatabaseConfigured() {
   return Boolean(pool);
 }
 
-export async function query(
-  text,
-  params = []
-) {
+export async function query(text, params = []) {
   if (!pool) {
     const error = new Error(
       'DATABASE_NOT_CONFIGURED'
     );
-
-    error.code =
-      'DATABASE_NOT_CONFIGURED';
-
+    error.code = 'DATABASE_NOT_CONFIGURED';
     throw error;
   }
 
@@ -77,10 +75,7 @@ export async function checkDatabaseConnection() {
     const error = new Error(
       'DATABASE_NOT_CONFIGURED'
     );
-
-    error.code =
-      'DATABASE_NOT_CONFIGURED';
-
+    error.code = 'DATABASE_NOT_CONFIGURED';
     throw error;
   }
 
