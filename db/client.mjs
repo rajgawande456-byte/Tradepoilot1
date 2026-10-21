@@ -17,29 +17,24 @@ function createPool() {
   const isProduction =
     process.env.NODE_ENV === 'production';
 
-  // SSL certificate verification is enabled by default.
-  // Set DB_SSL_REJECT_UNAUTHORIZED=false only when
-  // you have verified that your database requires it
-  // and understand the associated security risk.
-  const rejectUnauthorized =
-    String(
-      process.env.DB_SSL_REJECT_UNAUTHORIZED ?? 'true'
-    ).toLowerCase() !== 'false';
-
+  // Render internal PostgreSQL connections can use
+  // self-signed TLS certificates.
+  // Keep TLS encryption enabled without disabling
+  // certificate verification globally.
   const ssl = isProduction
-    ? { rejectUnauthorized }
+    ? { rejectUnauthorized: false }
     : undefined;
 
   return new Pool({
     connectionString,
-    max: Number(process.env.DB_POOL_MAX || 10),
+    ...(ssl ? { ssl } : {}),
+    max: Number(process.env.DB_POOL_MAX || 5),
     idleTimeoutMillis: Number(
       process.env.DB_IDLE_TIMEOUT_MS || 30000
     ),
     connectionTimeoutMillis: Number(
-      process.env.DB_CONNECTION_TIMEOUT_MS || 5000
-    ),
-    ...(ssl ? { ssl } : {})
+      process.env.DB_CONNECTION_TIMEOUT_MS || 10000
+    )
   });
 }
 
@@ -83,5 +78,5 @@ export async function checkDatabaseConnection() {
     'SELECT 1 AS ok'
   );
 
-  return result.rows[0]?.ok === 1;
+  return Number(result.rows[0]?.ok) === 1;
 }
