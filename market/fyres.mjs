@@ -40,25 +40,54 @@ export function createFyersLoginUrl(env = process.env) {
 }
 
 export async function exchangeFyersAuthCode(authCode, env = process.env) {
-  const { appId, secret, redirectUri } = getFyersConfig(env);
+  const { appId, secret } = getFyersConfig(env);
 
-  if (!authCode || typeof authCode !== 'string') {
-    throw new FyersError('FYERS_AUTH_CODE_MISSING', 'Authorization code is required.', 400);
+  if (typeof authCode !== 'string' || !authCode.trim()) {
+    throw new FyersError(
+      'FYERS_AUTH_CODE_MISSING',
+      'Authorization code is required.',
+      400
+    );
   }
 
-  const response = await fetch(`${FYERS_BASE_URL}/validate-authcode`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      appId,
-      secret_key: secret,
-      code: authCode
-    }),
-    signal: AbortSignal.timeout(15000)
-  });
+  const appIdHash = crypto
+    .createHash('sha256')
+    .update(`${appId}:${secret}`)
+    .digest('hex');
+
+  let response;
+
+  try {
+    response = await fetch(`${FYERS_BASE_URL}/validate-authcode`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        appIdHash,
+        code: authCode.trim()
+      }),
+      signal: AbortSignal.timeout(15000)
+    });
+  } catch {
+    throw new FyersError(
+      'FYERS_CONNECTION_FAILED',
+      'Could not connect to FYERS.',
+      503
+    );
+  }
 
   const result = await response.json().catch(() => ({}));
 
-  if (!response.ok || !result.access_token) {
-    throw new FyersError
+  if (!response.ok || result.s !== 'ok' || !result.access_token) {
+    throw new FyersError(
+      'FYERS_TOKEN_EXCHANGE_FAILED',
+      'FYERS authorization failed. Check app configuration and permissions.',
+      502
+    );
+  }
+
+  return {
+    accessToken: result.access_token,
+    tokenType: 'Bearer'
+  };
+}
