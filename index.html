@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>TradePilot AI</title>
 <script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js"></script>
 
@@ -26,7 +26,7 @@ p{line-height:1.5}
 .card,.panel{background:#0d1420;border:1px solid #1c2735;border-radius:10px;padding:16px;margin-bottom:14px}
 .market{cursor:pointer}
 .market h2{font-size:24px}
-.dashboard{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);gap:14px}
+.dashboard{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(270px,1fr);gap:14px}
 .panel-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 button{padding:8px 12px;background:#111925;color:white;border:1px solid #263347;border-radius:7px;cursor:pointer}
 button.active{background:#20365d;border-color:#5d8cff}
@@ -35,9 +35,9 @@ button.active{background:#20365d;border-color:#5d8cff}
 .red{color:#ff5c70}
 .purple{color:#a78bfa}
 .yellow{color:#e4b65d}
-#trend-card{padding:18px;border-radius:9px;background:#0a111b;border:1px solid #263347}
-#trend-label{font-size:24px;margin:10px 0}
-#trend-strength{font-size:20px}
+#trend-card,#momentum-card{padding:16px;border-radius:9px;background:#0a111b;border:1px solid #263347;margin-bottom:12px}
+#trend-label,#momentum-label{font-size:23px;margin:10px 0}
+#trend-strength,#momentum-strength{font-size:19px}
 .levels div{padding:12px 0;border-bottom:1px solid #263347;display:flex;justify-content:space-between;font-size:13px}
 input{width:100%;padding:12px;margin-top:6px;background:#111925;color:white;border:1px solid #263347;border-radius:7px}
 .fields{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -63,14 +63,12 @@ header{padding:12px}
 </head>
 
 <body>
-
 <header>
  <div class="logo">⚡ TradePilot AI</div>
  <div class="demo">● DEMO MODE — NOT LIVE</div>
 </header>
 
 <div class="layout">
-
 <aside>
  <a href="#dashboard">Dashboard</a>
  <a href="#markets">Markets</a>
@@ -80,36 +78,29 @@ header{padding:12px}
 </aside>
 
 <main id="dashboard">
-
 <h1>Trading Dashboard</h1>
-<p class="muted">Market analysis and risk management terminal</p>
+<p class="muted">Trend, momentum and market analysis terminal</p>
 
 <div class="warning">
-<strong>DEMO DATA ONLY.</strong> Simulated candles and prices. No live market data connected.
+<strong>DEMO DATA ONLY.</strong> Simulated candles and indicators. No live market data connected.
 </div>
 
 <section class="grid" id="markets">
  <div class="card market" data-symbol="NIFTY 50">
   <span class="muted">NIFTY 50</span>
-  <h2 id="nifty-price">—</h2>
-  <span class="green">DEMO</span>
+  <h2 id="nifty-price">—</h2><span class="green">DEMO</span>
  </div>
-
  <div class="card market" data-symbol="BANKNIFTY">
   <span class="muted">BANKNIFTY</span>
-  <h2 id="banknifty-price">—</h2>
-  <span class="green">DEMO</span>
+  <h2 id="banknifty-price">—</h2><span class="green">DEMO</span>
  </div>
-
  <div class="card market" data-symbol="FINNIFTY">
   <span class="muted">FINNIFTY</span>
-  <h2 id="finnifty-price">—</h2>
-  <span class="green">DEMO</span>
+  <h2 id="finnifty-price">—</h2><span class="green">DEMO</span>
  </div>
 </section>
 
 <section class="dashboard" id="chart-section">
-
 <div class="panel">
  <div class="panel-title">
   <h2 id="chartTitle">NIFTY 50 · 5m</h2>
@@ -120,10 +111,8 @@ header{padding:12px}
    <button data-tf="1H">1H</button>
   </div>
  </div>
-
  <div id="chart"></div>
  <p class="muted" id="chart-status">Loading demo chart…</p>
-
  <p>
  <span class="purple">━ EMA 9</span> &nbsp;
  <span class="yellow">━ VWAP</span> &nbsp;
@@ -133,9 +122,7 @@ header{padding:12px}
 </div>
 
 <div class="panel">
-
 <h2>Automatic Trend Engine</h2>
-
 <div id="trend-card">
  <div class="muted">TREND STATUS</div>
  <h2 id="trend-label">ANALYZING</h2>
@@ -143,65 +130,45 @@ header{padding:12px}
  <p id="trend-description" class="muted">Analyzing candles...</p>
 </div>
 
-<h2>Market Levels</h2>
+<h2>RSI + MACD Momentum</h2>
+<div id="momentum-card">
+ <div class="muted">MOMENTUM STATUS</div>
+ <h2 id="momentum-label">ANALYZING</h2>
+ <strong id="momentum-strength">—</strong>
+ <p id="momentum-description" class="muted">Calculating RSI and MACD...</p>
+</div>
 
 <div class="levels">
+ <div><span>RSI (14)</span><strong id="rsi-value">—</strong></div>
+ <div><span>MACD</span><strong id="macd-value">—</strong></div>
+ <div><span>Signal Line</span><strong id="signal-value">—</strong></div>
+ <div><span>Histogram</span><strong id="histogram-value">—</strong></div>
  <div><span>Support</span><strong class="green" id="support-value">—</strong></div>
  <div><span>Resistance</span><strong class="red" id="resistance-value">—</strong></div>
  <div><span>EMA 9</span><strong class="purple" id="ema-value">—</strong></div>
  <div><span>VWAP</span><strong class="yellow" id="vwap-value">—</strong></div>
 </div>
 
-<p class="muted">Analysis uses simulated values. No live signal.</p>
-
+<h2>Combined Analysis</h2>
+<div id="combined-card" class="muted">Waiting for analysis...</div>
 </div>
 </section>
 
 <section class="stats" id="risk">
-
-<div class="card">
- <span class="muted">CAPITAL</span>
- <strong id="capital-display">₹10,000</strong>
-</div>
-
-<div class="card">
- <span class="muted">RISK AMOUNT</span>
- <strong id="risk-display">₹100</strong>
-</div>
-
-<div class="card">
- <span class="muted">LOSS PER UNIT</span>
- <strong id="loss-display">₹10</strong>
-</div>
-
-<div class="card">
- <span class="muted">QUANTITY</span>
- <strong id="quantity-display">10</strong>
-</div>
-
+<div class="card"><span class="muted">CAPITAL</span><strong id="capital-display">₹10,000</strong></div>
+<div class="card"><span class="muted">RISK AMOUNT</span><strong id="risk-display">₹100</strong></div>
+<div class="card"><span class="muted">LOSS PER UNIT</span><strong id="loss-display">₹10</strong></div>
+<div class="card"><span class="muted">QUANTITY</span><strong id="quantity-display">10</strong></div>
 </section>
 
 <div class="panel">
 <h2>Risk Calculator</h2>
-
 <div class="fields">
- <label>Capital (₹)
-  <input id="capital" type="number" value="10000">
- </label>
-
- <label>Risk (%)
-  <input id="risk-percent" type="number" value="1" step="0.1">
- </label>
-
- <label>Entry Price
-  <input id="entry" type="number" value="100">
- </label>
-
- <label>Stop Loss
-  <input id="stop" type="number" value="90">
- </label>
+ <label>Capital (₹)<input id="capital" type="number" value="10000"></label>
+ <label>Risk (%)<input id="risk-percent" type="number" value="1" step="0.1"></label>
+ <label>Entry Price<input id="entry" type="number" value="100"></label>
+ <label>Stop Loss<input id="stop" type="number" value="90"></label>
 </div>
-
 <p id="risk-message" class="muted"></p>
 </div>
 
@@ -211,6 +178,7 @@ header{padding:12px}
 <p>VWAP — Volume-weighted average</p>
 <p>Support & Resistance — Swing levels</p>
 <p>Trend Engine — Bullish / Bearish / Sideways</p>
+<p>RSI + MACD — Momentum analysis</p>
 </div>
 
 <div class="panel">
@@ -220,33 +188,23 @@ header{padding:12px}
 </div>
 
 <footer>TradePilot AI © 2026 · Demo Mode · Not connected to live market data</footer>
-
 </main>
 </div>
 
 <script>
-(() => {
+(()=>{
 "use strict";
 
-const instruments = {
- "NIFTY 50": {base:25000,id:"nifty-price"},
- "BANKNIFTY": {base:56000,id:"banknifty-price"},
- "FINNIFTY": {base:26000,id:"finnifty-price"}
+const instruments={
+ "NIFTY 50":{base:25000,id:"nifty-price"},
+ "BANKNIFTY":{base:56000,id:"banknifty-price"},
+ "FINNIFTY":{base:26000,id:"finnifty-price"}
 };
 
-let symbol="NIFTY 50";
-let timeframe="5m";
-let chart=null;
-let candles=null;
-let emaLine=null;
-let vwapLine=null;
-let supportLine=null;
-let resistanceLine=null;
+let symbol="NIFTY 50",timeframe="5m";
+let chart=null,candles=null,emaLine=null,vwapLine=null,supportLine=null,resistanceLine=null;
 
-const money=v=>Number(v).toLocaleString("en-IN",{
- minimumFractionDigits:2,
- maximumFractionDigits:2
-});
+const money=v=>Number(v).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
 
 function makeBars(base,count,minutes){
  const bars=[];
@@ -260,193 +218,209 @@ function makeBars(base,count,minutes){
   const close=open+wave;
   const high=Math.max(open,close)+5+Math.abs(Math.sin(i))*12;
   const low=Math.min(open,close)-5-Math.abs(Math.cos(i))*10;
-
-  bars.push({
-   time:end-(count-1-i)*interval,
-   open,high,low,close,
-   volume:500+Math.abs(Math.sin(i*1.7))*1500
-  });
+  bars.push({time:end-(count-1-i)*interval,open,high,low,close,volume:500+Math.abs(Math.sin(i*1.7))*1500});
   price=close;
  }
  return bars;
 }
 
+function calculateEMA(values,period){
+ const result=[];
+ const alpha=2/(period+1);
+ let prev=null;
+ values.forEach((v,i)=>{
+  prev=prev===null?v:v*alpha+prev*(1-alpha);
+  result.push(prev);
+ });
+ return result;
+}
+
 function calculateLines(bars){
- let pv=0,vol=0,prev=null;
+ let pv=0,vol=0;
  const ema=[],vwap=[];
- const alpha=2/10;
+ const closes=bars.map(b=>b.close);
+ const emaValues=calculateEMA(closes,9);
 
- bars.forEach(b=>{
-  prev=prev===null?b.close:b.close*alpha+prev*(1-alpha);
-  ema.push({time:b.time,value:prev});
-
+ bars.forEach((b,i)=>{
+  ema.push({time:b.time,value:emaValues[i]});
   const typical=(b.high+b.low+b.close)/3;
   pv+=typical*b.volume;
   vol+=b.volume;
   vwap.push({time:b.time,value:pv/vol});
  });
-
- return{ema,vwap};
+ return{ema,vwap,emaValues};
 }
 
+/* RSI 14 */
+function calculateRSI(closes,period=14){
+ if(closes.length<=period)return 50;
+ let gains=0,losses=0;
+ for(let i=1;i<=period;i++){
+  const diff=closes[i]-closes[i-1];
+  if(diff>=0)gains+=diff;else losses-=diff;
+ }
+ let avgGain=gains/period,avgLoss=losses/period;
+ for(let i=period+1;i<closes.length;i++){
+  const diff=closes[i]-closes[i-1];
+  const gain=Math.max(diff,0),loss=Math.max(-diff,0);
+  avgGain=(avgGain*(period-1)+gain)/period;
+  avgLoss=(avgLoss*(period-1)+loss)/period;
+ }
+ if(avgLoss===0)return 100;
+ const rs=avgGain/avgLoss;
+ return 100-(100/(1+rs));
+}
+
+/* MACD 12 / 26 / 9 */
+function calculateMACD(closes){
+ const ema12=calculateEMA(closes,12);
+ const ema26=calculateEMA(closes,26);
+ const macd=closes.map((_,i)=>ema12[i]-ema26[i]);
+ const signal=calculateEMA(macd,9);
+ const histogram=macd.map((v,i)=>v-signal[i]);
+ return{macd,signal,histogram};
+}
+
+/* AUTOMATIC SUPPORT / RESISTANCE */
 function findSwingLevels(bars){
  const lows=[],highs=[];
-
  for(let i=2;i<bars.length-2;i++){
   const b=bars[i];
-
-  if(b.low<bars[i-1].low&&b.low<bars[i-2].low&&
-     b.low<bars[i+1].low&&b.low<bars[i+2].low) lows.push(b.low);
-
-  if(b.high>bars[i-1].high&&b.high>bars[i-2].high&&
-     b.high>bars[i+1].high&&b.high>bars[i+2].high) highs.push(b.high);
+  if(b.low<bars[i-1].low&&b.low<bars[i-2].low&&b.low<bars[i+1].low&&b.low<bars[i+2].low)lows.push(b.low);
+  if(b.high>bars[i-1].high&&b.high>bars[i-2].high&&b.high>bars[i+1].high&&b.high>bars[i+2].high)highs.push(b.high);
  }
-
- const price=bars[bars.length-1].close;
-
- const support=lows.filter(v=>v<price).sort((a,b)=>b-a)[0]
-  ??Math.min(...bars.slice(-20).map(b=>b.low));
-
- const resistance=highs.filter(v=>v>price).sort((a,b)=>a-b)[0]
-  ??Math.max(...bars.slice(-20).map(b=>b.high));
-
+ const price=bars.at(-1).close;
+ const support=lows.filter(v=>v<price).sort((a,b)=>b-a)[0]??Math.min(...bars.slice(-20).map(b=>b.low));
+ const resistance=highs.filter(v=>v>price).sort((a,b)=>a-b)[0]??Math.max(...bars.slice(-20).map(b=>b.high));
  return{support,resistance};
 }
 
-/* AUTOMATIC TREND DETECTION */
-
+/* TREND ENGINE */
 function detectTrend(bars,emaValues){
  const recent=bars.slice(-12);
- const last=recent[recent.length-1];
- const ema=emaValues[emaValues.length-1].value;
-
- const upStructure=recent.slice(1).filter((b,i)=>
-  b.high>recent[i].high&&b.low>recent[i].low
- ).length;
-
- const downStructure=recent.slice(1).filter((b,i)=>
-  b.high<recent[i].high&&b.low<recent[i].low
- ).length;
-
- const priceAbove=last.close>ema;
- const emaRising=emaValues.at(-1).value>emaValues.at(-6).value;
- const emaFalling=emaValues.at(-1).value<emaValues.at(-6).value;
-
- let bullish=0,bearish=0;
-
- if(priceAbove)bullish++;
- if(emaRising)bullish++;
- if(upStructure>=5)bullish++;
-
- if(last.close<ema)bearish++;
- if(emaFalling)bearish++;
- if(downStructure>=5)bearish++;
-
- let label="SIDEWAYS";
- let strength=50;
- let desc="Mixed price structure; no clear trend.";
-
- if(bullish>=2&&bullish>bearish){
-  label="BULLISH";
-  strength=60+bullish*10;
-  desc="Price and structure lean upward.";
- }
- else if(bearish>=2&&bearish>bullish){
-  label="BEARISH";
-  strength=60+bearish*10;
-  desc="Price and structure lean downward.";
- }
- else{
-  strength=Math.min(65,Math.max(35,50+Math.abs(bullish-bearish)*5));
- }
-
- const title=document.getElementById("trend-label");
- const card=document.getElementById("trend-card");
-
- title.textContent=label;
+ const last=recent.at(-1);
+ const ema=emaValues.at(-1);
+ const up=recent.slice(1).filter((b,i)=>b.high>recent[i].high&&b.low>recent[i].low).length;
+ const down=recent.slice(1).filter((b,i)=>b.high<recent[i].high&&b.low<recent[i].low).length;
+ const rising=emaValues.at(-1)>emaValues.at(-6);
+ const falling=emaValues.at(-1)<emaValues.at(-6);
+ let bull=0,bear=0;
+ if(last.close>ema)bull++;
+ if(rising)bull++;
+ if(up>=5)bull++;
+ if(last.close<ema)bear++;
+ if(falling)bear++;
+ if(down>=5)bear++;
+ let label="SIDEWAYS",strength=50,desc="Mixed structure; no clear trend.";
+ if(bull>=2&&bull>bear){label="BULLISH";strength=60+bull*10;desc="Price and structure lean upward."}
+ else if(bear>=2&&bear>bull){label="BEARISH";strength=60+bear*10;desc="Price and structure lean downward."}
+ const el=document.getElementById("trend-label");
+ el.textContent=label;
  document.getElementById("trend-strength").textContent=strength+"% strength";
  document.getElementById("trend-description").textContent=desc;
+ el.style.color=label==="BULLISH"?"#20d68a":label==="BEARISH"?"#ff5c70":"#f0c66e";
+ document.getElementById("trend-card").style.borderColor=label==="BULLISH"?"#205b45":label==="BEARISH"?"#6a2834":"#725c29";
+ return label;
+}
 
- title.style.color=label==="BULLISH"?"#20d68a":
- label==="BEARISH"?"#ff5c70":"#f0c66e";
+/* RSI + MACD MOMENTUM ENGINE */
+function detectMomentum(bars){
+ const closes=bars.map(b=>b.close);
+ const rsi=calculateRSI(closes,14);
+ const m=calculateMACD(closes);
+ const macd=m.macd.at(-1),signal=m.signal.at(-1),hist=m.histogram.at(-1);
+ let label="NEUTRAL",strength=50,description="Momentum is mixed or neutral.";
 
- card.style.border="1px solid "+(
- label==="BULLISH"?"#205b45":
- label==="BEARISH"?"#6a2834":"#725c29"
- );
+ if(rsi>70){
+  description="RSI is in the upper zone; momentum is strong but stretched.";
+ }else if(rsi<30){
+  description="RSI is in the lower zone; momentum is weak but stretched.";
+ }else if(macd>signal&&hist>0&&rsi>50){
+  label="BULLISH MOMENTUM";strength=75;
+  description="MACD is above signal and RSI is above 50.";
+ }else if(macd<signal&&hist<0&&rsi<50){
+  label="BEARISH MOMENTUM";strength=75;
+  description="MACD is below signal and RSI is below 50.";
+ }else if(macd>signal){
+  label="POSITIVE MOMENTUM";strength=60;
+  description="MACD is above signal line.";
+ }else if(macd<signal){
+  label="NEGATIVE MOMENTUM";strength=60;
+  description="MACD is below signal line.";
+ }
+
+ const el=document.getElementById("momentum-label");
+ el.textContent=label;
+ document.getElementById("momentum-strength").textContent=strength+"% reading";
+ document.getElementById("momentum-description").textContent=description;
+ el.style.color=label.includes("BULLISH")||label.includes("POSITIVE")?"#20d68a":label.includes("BEARISH")||label.includes("NEGATIVE")?"#ff5c70":"#f0c66e";
+
+ document.getElementById("rsi-value").textContent=rsi.toFixed(2);
+ document.getElementById("macd-value").textContent=macd.toFixed(2);
+ document.getElementById("signal-value").textContent=signal.toFixed(2);
+ document.getElementById("histogram-value").textContent=hist.toFixed(2);
+
+ return{label,rsi,macd,signal,hist};
+}
+
+function combinedAnalysis(trend,momentum){
+ const el=document.getElementById("combined-card");
+ const bullishTrend=trend==="BULLISH";
+ const bearishTrend=trend==="BEARISH";
+ const bullishMomentum=momentum.label.includes("BULLISH")||momentum.label.includes("POSITIVE");
+ const bearishMomentum=momentum.label.includes("BEARISH")||momentum.label.includes("NEGATIVE");
+
+ if(bullishTrend&&bullishMomentum){
+  el.innerHTML='<strong style="color:#20d68a">Bullish alignment</strong><p>Trend and momentum point upward. This is demo analysis, not a trade signal.</p>';
+ }else if(bearishTrend&&bearishMomentum){
+  el.innerHTML='<strong style="color:#ff5c70">Bearish alignment</strong><p>Trend and momentum point downward. This is demo analysis, not a trade signal.</p>';
+ }else{
+  el.innerHTML='<strong style="color:#f0c66e">Mixed / No alignment</strong><p>Trend and momentum are not aligned. Demo analysis suggests caution.</p>';
+ }
 }
 
 function renderChart(){
  const status=document.getElementById("chart-status");
  const container=document.getElementById("chart");
-
- if(!window.LightweightCharts){
-  status.textContent="Chart library failed to load. Refresh the page.";
-  return;
- }
-
+ if(!window.LightweightCharts){status.textContent="Chart library failed to load. Refresh.";return}
  if(!container||container.clientWidth<=0)return;
 
  if(!chart){
   chart=LightweightCharts.createChart(container,{
-   width:container.clientWidth,
-   height:container.clientHeight,
+   width:container.clientWidth,height:container.clientHeight,
    layout:{background:{color:"#090f18"},textColor:"#9ba8bb"},
    grid:{vertLines:{color:"#17202b"},horzLines:{color:"#17202b"}},
    rightPriceScale:{borderColor:"#263347"},
    timeScale:{borderColor:"#263347",timeVisible:true,secondsVisible:false},
    crosshair:{mode:0}
   });
-
   candles=chart.addCandlestickSeries({
-   upColor:"#20d68a",
-   downColor:"#ff5c70",
-   borderUpColor:"#20d68a",
-   borderDownColor:"#ff5c70",
-   wickUpColor:"#20d68a",
-   wickDownColor:"#ff5c70"
+   upColor:"#20d68a",downColor:"#ff5c70",
+   borderUpColor:"#20d68a",borderDownColor:"#ff5c70",
+   wickUpColor:"#20d68a",wickDownColor:"#ff5c70"
   });
-
   emaLine=chart.addLineSeries({color:"#a78bfa",lineWidth:2,title:"EMA 9"});
   vwapLine=chart.addLineSeries({color:"#e4b65d",lineWidth:2,title:"VWAP"});
-
-  new ResizeObserver(()=>{
-   if(chart&&container.clientWidth>0)
-    chart.applyOptions({width:container.clientWidth,height:container.clientHeight});
-  }).observe(container);
+  new ResizeObserver(()=>{if(chart&&container.clientWidth>0)chart.applyOptions({width:container.clientWidth,height:container.clientHeight})}).observe(container);
  }
 
  const mins=timeframe==="1m"?1:timeframe==="5m"?5:timeframe==="15m"?15:60;
  const bars=makeBars(instruments[symbol].base,90,mins);
  const lines=calculateLines(bars);
  const levels=findSwingLevels(bars);
+ const trend=detectTrend(bars,lines.emaValues);
+ const momentum=detectMomentum(bars);
+ combinedAnalysis(trend,momentum);
 
  candles.setData(bars);
  emaLine.setData(lines.ema);
  vwapLine.setData(lines.vwap);
 
- detectTrend(bars,lines.ema);
-
  if(supportLine)candles.removePriceLine(supportLine);
  if(resistanceLine)candles.removePriceLine(resistanceLine);
 
- supportLine=candles.createPriceLine({
-  price:levels.support,
-  color:"#20d68a",
-  lineWidth:2,
-  lineStyle:2,
-  axisLabelVisible:true,
-  title:"Support"
- });
-
- resistanceLine=candles.createPriceLine({
-  price:levels.resistance,
-  color:"#ff5c70",
-  lineWidth:2,
-  lineStyle:2,
-  axisLabelVisible:true,
-  title:"Resistance"
- });
+ supportLine=candles.createPriceLine({price:levels.support,color:"#20d68a",lineWidth:2,lineStyle:2,axisLabelVisible:true,title:"Support"});
+ resistanceLine=candles.createPriceLine({price:levels.resistance,color:"#ff5c70",lineWidth:2,lineStyle:2,axisLabelVisible:true,title:"Resistance"});
 
  document.getElementById("support-value").textContent=money(levels.support);
  document.getElementById("resistance-value").textContent=money(levels.resistance);
@@ -454,15 +428,11 @@ function renderChart(){
  document.getElementById("vwap-value").textContent=money(lines.vwap.at(-1).value);
 
  chart.timeScale().fitContent();
-
  document.getElementById("chartTitle").textContent=symbol+" · "+timeframe;
  status.textContent="Demo candles loaded · simulated values only";
 }
 
-function selectSymbol(s){
- symbol=s;
- renderChart();
-}
+function selectSymbol(s){symbol=s;renderChart()}
 
 Object.entries(instruments).forEach(([name,item])=>{
  document.getElementById(item.id).textContent="₹"+money(item.base);
@@ -485,32 +455,22 @@ function updateRisk(){
  const pct=Number(document.getElementById("risk-percent").value);
  const entry=Number(document.getElementById("entry").value);
  const stop=Number(document.getElementById("stop").value);
-
  const riskAmount=capital*pct/100;
  const loss=Math.abs(entry-stop);
  const qty=loss>0?Math.floor(riskAmount/loss):0;
-
  document.getElementById("capital-display").textContent="₹"+money(capital||0);
  document.getElementById("risk-display").textContent="₹"+money(riskAmount||0);
  document.getElementById("loss-display").textContent="₹"+money(loss||0);
  document.getElementById("quantity-display").textContent=qty;
-
- document.getElementById("risk-message").textContent=
-  loss===0?"Entry and stop-loss cannot be the same.":
-  "Estimated quantity: "+qty+" units (before fees and slippage).";
+ document.getElementById("risk-message").textContent=loss===0?"Entry and stop-loss cannot be the same.":"Estimated quantity: "+qty+" units (before fees/slippage).";
 }
-
-["capital","risk-percent","entry","stop"].forEach(id=>{
- document.getElementById(id).addEventListener("input",updateRisk);
-});
+["capital","risk-percent","entry","stop"].forEach(id=>document.getElementById(id).addEventListener("input",updateRisk));
 
 updateRisk();
 renderChart();
 window.addEventListener("load",renderChart);
 setTimeout(renderChart,300);
-
 })();
 </script>
-
 </body>
 </html>
