@@ -1,121 +1,193 @@
-<!-- TRADEPILOT PREMIUM VERIFICATION MODULE -->
+<!-- TRADEPILOT PREMIUM VERIFICATION V2 -->
 <style>
 .pv-box{
- background:#0d1420;border:1px solid #263347;border-radius:12px;
- padding:18px;margin:20px 0;color:#edf2fa
+  background:#0d1420;
+  border:1px solid #263347;
+  border-radius:12px;
+  padding:18px;
+  margin:20px 0;
+  color:#edf2fa;
 }
-.pv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.pv-box label{font-size:12px;color:#9ba8bb}
+.pv-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.pv-box label{
+  display:block;
+  font-size:12px;
+  color:#9ba8bb;
+}
 .pv-box input,.pv-box select{
- width:100%;padding:12px;margin-top:6px;margin-bottom:12px;
- background:#111925;color:#fff;border:1px solid #263347;border-radius:7px
+  box-sizing:border-box;
+  width:100%;
+  padding:12px;
+  margin-top:6px;
+  margin-bottom:12px;
+  background:#111925;
+  color:#fff;
+  border:1px solid #263347;
+  border-radius:7px;
 }
 .pv-btn{
- width:100%;padding:13px;background:#234b87;border:0;
- border-radius:8px;color:white;font-weight:bold;cursor:pointer
+  width:100%;
+  padding:13px;
+  background:#234b87;
+  border:0;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
-.pv-result{padding:15px;border-radius:9px;margin-top:15px;background:#111925}
-@media(max-width:600px){.pv-grid{grid-template-columns:1fr}}
+.pv-result{
+  padding:15px;
+  border-radius:9px;
+  margin-top:15px;
+  background:#111925;
+  line-height:1.6;
+}
+.pv-status{
+  font-size:18px;
+  font-weight:bold;
+}
+@media(max-width:600px){
+  .pv-grid{grid-template-columns:1fr}
+}
 </style>
 
 <div class="pv-box" id="premium-verify">
-<h2>CE / PE Premium Verification</h2>
-<p style="color:#9ba8bb;font-size:13px">
-Manual verification · Same candle timeframe and timestamp required
-</p>
+  <h2>CE / PE Premium Verification V2</h2>
 
-<div class="pv-grid">
+  <p style="color:#9ba8bb;font-size:13px">
+    Manual data · Same timeframe · Same candle timestamp
+  </p>
 
-<label>Index Candle Direction
-<select id="pv-direction">
-<option value="bullish">Bullish candle</option>
-<option value="bearish">Bearish candle</option>
-</select>
-</label>
+  <div class="pv-grid">
 
-<label>Index Candle Value
-<input id="pv-index" type="number" step="0.01" placeholder="e.g. 161.95">
-</label>
+    <label>Index Candle Direction
+      <select id="pv-direction">
+        <option value="bullish">Bullish</option>
+        <option value="bearish">Bearish</option>
+      </select>
+    </label>
 
-<label>CE Premium
-<input id="pv-ce" type="number" step="0.01" placeholder="e.g. 70.95">
-</label>
+    <label>Index Candle Value
+      <input id="pv-index" type="number" step="0.01"
+      placeholder="Enter index candle value">
+    </label>
 
-<label>PE Premium
-<input id="pv-pe" type="number" step="0.01" placeholder="Enter PE premium">
-</label>
+    <label>CE Premium
+      <input id="pv-ce" type="number" step="0.01"
+      placeholder="Enter CE premium">
+    </label>
 
-<label>Index Candle Time
-<input id="pv-index-time" type="datetime-local">
-</label>
+    <label>PE Premium
+      <input id="pv-pe" type="number" step="0.01"
+      placeholder="Enter PE premium">
+    </label>
 
-<label>Option Premium Candle Time
-<input id="pv-option-time" type="datetime-local">
-</label>
+    <label>Index Candle Time
+      <input id="pv-index-time" type="datetime-local">
+    </label>
 
-</div>
+    <label>Option Candle Time
+      <input id="pv-option-time" type="datetime-local">
+    </label>
 
-<button class="pv-btn" onclick="runPremiumVerification()">
-VERIFY PREMIUM
-</button>
+  </div>
 
-<div id="pv-result" class="pv-result">
-<strong>WAITING FOR INPUT</strong>
-<p style="color:#9ba8bb">Enter candle and premium data to run verification.</p>
-</div>
+  <button class="pv-btn" onclick="runPremiumVerificationV2()">
+    VERIFY PREMIUM
+  </button>
+
+  <div id="pv-result" class="pv-result">
+    <div class="pv-status">WAITING</div>
+    Enter candle data to begin verification.
+  </div>
 </div>
 
 <script>
-function runPremiumVerification(){
+function runPremiumVerificationV2(){
 
- const direction=document.getElementById("pv-direction").value;
- const indexValue=Number(document.getElementById("pv-index").value);
- const ce=Number(document.getElementById("pv-ce").value);
- const pe=Number(document.getElementById("pv-pe").value);
- const indexTime=document.getElementById("pv-index-time").value;
- const optionTime=document.getElementById("pv-option-time").value;
- const result=document.getElementById("pv-result");
+  const direction = document.getElementById("pv-direction").value;
+  const indexInput = document.getElementById("pv-index").value;
+  const ceInput = document.getElementById("pv-ce").value;
+  const peInput = document.getElementById("pv-pe").value;
 
- if(!indexTime||!optionTime||!indexValue||
-    document.getElementById("pv-ce").value===""||
-    document.getElementById("pv-pe").value===""){
-  result.innerHTML="<strong style='color:#f0c66e'>WAIT — INCOMPLETE DATA</strong><p>All values and candle times are required.</p>";
-  return;
- }
+  const indexTime = document.getElementById("pv-index-time").value;
+  const optionTime = document.getElementById("pv-option-time").value;
 
- if(indexTime!==optionTime){
-  result.innerHTML="<strong style='color:#ff5c70'>NOT VERIFIED — TIME MISMATCH</strong><p>Index and option candles must have exactly the same timestamp.</p>";
-  return;
- }
+  const result = document.getElementById("pv-result");
 
- if(indexValue<=0||ce<0||pe<0){
-  result.innerHTML="<strong style='color:#ff5c70'>INVALID INPUT</strong><p>Enter valid positive values.</p>";
-  return;
- }
+  function show(status,color,message){
+    result.innerHTML =
+      "<div class='pv-status' style='color:"+color+"'>"+status+"</div>"+
+      "<p>"+message+"</p>";
+  }
 
- let selectedPremium=direction==="bullish"?ce:pe;
- let doubledPremium=selectedPremium*2;
+  // Required fields
+  if(indexInput==="" || indexTime==="" || optionTime===""){
+    show("WAIT — INCOMPLETE DATA","#f0c66e",
+    "Enter index value and both candle timestamps.");
+    return;
+  }
 
- let verified=doubledPremium>=indexValue;
+  const indexValue = Number(indexInput);
 
- let optionName=direction==="bullish"?"CE":"PE";
+  if(!Number.isFinite(indexValue) || indexValue<=0){
+    show("INVALID INDEX VALUE","#ff5c70",
+    "Index candle value must be greater than zero.");
+    return;
+  }
 
- if(verified){
-  result.innerHTML=
-  "<strong style='color:#20d68a;font-size:20px'>VERIFICATION PASSED</strong>"+
-  "<p>Selected Option: "+optionName+"</p>"+
-  "<p>Index Candle Value: "+indexValue.toFixed(2)+"</p>"+
-  "<p>"+optionName+" Premium × 2: "+doubledPremium.toFixed(2)+"</p>"+
-  "<p>Same candle timestamp confirmed.</p>"+
-  "<p>Premium comparison passed. This is verification only, not an entry signal.</p>";
- }else{
-  result.innerHTML=
-  "<strong style='color:#ff5c70;font-size:20px'>NOT VERIFIED — WAIT</strong>"+
-  "<p>Selected Option: "+optionName+"</p>"+
-  "<p>Index Candle Value: "+indexValue.toFixed(2)+"</p>"+
-  "<p>"+optionName+" Premium × 2: "+doubledPremium.toFixed(2)+"</p>"+
-  "<p>Premium comparison failed. Do not treat this as a verified setup.</p>";
- }
+  // Timestamp verification
+  if(indexTime!==optionTime){
+    show("WAIT — TIME MISMATCH","#ff5c70",
+    "Index and option candles must have exactly the same timestamp.");
+    return;
+  }
+
+  // Select CE or PE according to candle direction
+  const optionName = direction==="bullish" ? "CE" : "PE";
+  const premiumInput = direction==="bullish" ? ceInput : peInput;
+
+  if(premiumInput===""){
+    show("WAIT — PREMIUM MISSING","#f0c66e",
+    "Enter the "+optionName+" premium for the matching candle.");
+    return;
+  }
+
+  const premium = Number(premiumInput);
+
+  if(!Number.isFinite(premium) || premium<0){
+    show("INVALID PREMIUM","#ff5c70",
+    "Selected premium must be a valid non-negative number.");
+    return;
+  }
+
+  // Existing TradePilot premium rule
+  const doubledPremium = premium * 2;
+  const verified = doubledPremium >= indexValue;
+
+  if(verified){
+    result.innerHTML =
+      "<div class='pv-status' style='color:#20d68a'>VERIFIED</div>"+
+      "<p>Selected Option: <b>"+optionName+"</b></p>"+
+      "<p>Index Value: "+indexValue.toFixed(2)+"</p>"+
+      "<p>"+optionName+" Premium: "+premium.toFixed(2)+"</p>"+
+      "<p>Premium × 2: "+doubledPremium.toFixed(2)+"</p>"+
+      "<p>Timestamp: Matched</p>"+
+      "<p>Comparison passed. Verification only — not a trade entry signal.</p>";
+  }else{
+    result.innerHTML =
+      "<div class='pv-status' style='color:#ff5c70'>NOT VERIFIED — WAIT</div>"+
+      "<p>Selected Option: <b>"+optionName+"</b></p>"+
+      "<p>Index Value: "+indexValue.toFixed(2)+"</p>"+
+      "<p>"+optionName+" Premium: "+premium.toFixed(2)+"</p>"+
+      "<p>Premium × 2: "+doubledPremium.toFixed(2)+"</p>"+
+      "<p>Timestamp: Matched</p>"+
+      "<p>Comparison failed. Setup is not verified.</p>";
+  }
 }
 </script>
-<!-- END PREMIUM VERIFICATION MODULE -->
+<!-- END TRADEPILOT PREMIUM VERIFICATION V2 -->
