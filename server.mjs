@@ -1,27 +1,22 @@
 
 import http from 'node:http';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import {
-  createProvider
-} from './market/provider.mjs';
-
+import { createProvider } from './market/provider.mjs';
 import {
   createMarketStream,
   isAllowedSymbol
 } from './market/stream.mjs';
-
 import {
   isWebSocketUpgrade,
   upgradeResponseHeaders,
   createWebSocketClient,
   verifyWebSocketAccess
 } from './market/ws-transport.mjs';
-
-import {
-  handleAuthRequest
-} from './auth/routes.mjs';
-
+import { handleAuthRequest } from './auth/routes.mjs';
 import {
   isDatabaseConfigured,
   checkDatabaseConnection
@@ -30,10 +25,77 @@ import {
 const PORT = Number(process.env.PORT || 8787);
 const VERSION = '1.3.1';
 
+const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.mjs': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
+};
+
+function serveStaticFile(req, res, pathname) {
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch {
+    return false;
+  }
+
+  const relativePath =
+    decodedPath === '/' ? 'index.html' : decodedPath.replace(/^\/+/, '');
+
+  const filePath = path.resolve(ROOT_DIR, relativePath);
+
+  if (
+    !filePath.startsWith(ROOT_DIR + path.sep) &&
+    filePath !== path.join(ROOT_DIR, 'index.html')
+  ) {
+    return false;
+  }
+
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch {
+    return false;
+  }
+
+  if (!stat.isFile()) return false;
+
+  res.writeHead(200, {
+    'content-type':
+      MIME_TYPES[path.extname(filePath).toLowerCase()] ||
+      'application/octet-stream',
+    'content-length': stat.size,
+    'cache-control': filePath.endsWith('index.html')
+      ? 'no-cache'
+      : 'public, max-age=3600',
+    'x-content-type-options': 'nosniff'
+  });
+
+  if (req.method === 'HEAD') {
+    res.end();
+    return true;
+  }
+
+  fs.createReadStream(filePath).pipe(res);
+  return true;
+}
+
 const ALLOWED_ORIGINS = new Set(
   (process.env.ALLOWED_ORIGINS || '')
     .split(',')
-    .map((value) => value.trim())
+    .map(value => value.trim())
     .filter(Boolean)
 );
 
@@ -118,7 +180,6 @@ function isRateLimited(req) {
   const count = (rate.get(key) || 0) + 1;
   rate.set(key, count);
 
-  // Remove old entries periodically when traffic arrives.
   if (rate.size > 5000) {
     for (const entry of rate.keys()) {
       if (!entry.endsWith(`:${minute}`)) {
@@ -169,7 +230,6 @@ const server = http.createServer(async (req, res) => {
       `http://${req.headers.host || 'localhost'}`
     );
 
-    // Authentication routes.
     const authResponse = await handleAuthRequest(req);
 
     if (authResponse) {
@@ -187,7 +247,29 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
-    // API health and database status.
+    // Homepage
+    if (
+      url.pathname === '/' &&
+      (req.method === 'GET' || req.method === 'HEAD')
+    ) {
+      if (serveStaticFile(req, res, '/')) return;
+
+      return sendJson(res, 404, {
+        error: 'DASHBOARD_NOT_FOUND',
+        message: 'index.html not found in repository root.',
+        requestId: requestID
+      }, corsHeaders);
+    }
+
+    // Frontend assets
+    if (
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      !url.pathname.startsWith('/api/')
+    ) {
+      if (serveStaticFile(req, res, url.pathname)) return;
+    }
+
+    // Health and database status
     if (url.pathname === '/health' && req.method === 'GET') {
       let database = 'not_configured';
 
@@ -221,25 +303,7 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
-    // Basic API information.
-    if (url.pathname === '/' && req.method === 'GET') {
-      return sendJson(
-        res,
-        200,
-        {
-          service: 'TradePilot AI API',
-          version: VERSION,
-          status: 'running',
-          health: '/health',
-          marketSnapshot: '/api/v1/market/snapshot',
-          marketStream: '/api/v1/market/stream',
-          requestId: requestID
-        },
-        corsHeaders
-      );
-    }
-
-    // Supported symbols.
+    // Symbols
     if (
       url.pathname === '/api/v1/market/symbols' &&
       req.method === 'GET'
@@ -256,7 +320,7 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
-    // Market snapshot.
+    // Market snapshot
     if (
       url.pathname === '/api/v1/market/snapshot' &&
       req.method === 'GET'
@@ -292,7 +356,6 @@ const server = http.createServer(async (req, res) => {
         );
       }
 
-      // Do not fabricate prices if the provider lacks a snapshot method.
       const getSnapshot =
         marketProvider.getSnapshot ||
         marketProvider.snapshot;
@@ -328,7 +391,7 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
-    // WebSocket endpoint is upgraded separately below.
+    // WebSocket endpoint
     if (
       url.pathname === '/api/v1/market/stream' &&
       req.method === 'GET'
@@ -376,7 +439,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// WebSocket market stream.
+// WebSocket market stream
 server.on('upgrade', (req, socket, head) => {
   let cleanup = null;
   let client = null;
@@ -425,7 +488,6 @@ server.on('upgrade', (req, socket, head) => {
     cleanup = marketStream.addClient(client, symbol);
 
     socket.on('data', (data) => {
-      // Close frames from clients trigger cleanup.
       if (data.length > 0 && data[0] === 0x88) {
         try {
           client.close();
