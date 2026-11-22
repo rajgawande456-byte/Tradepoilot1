@@ -673,5 +673,44 @@ window.addEventListener("DOMContentLoaded",()=>{
   updateChart();
 });
 </script>
+
+<script>
+// TRADEPILOT_LIVE_API_PATCH: live quote cards, synthetic chart remains demo.
+(function(){
+  const API='https://tradepoilot1.onrender.com/api/v1/market/snapshot';
+  const names=['NIFTY 50','BANKNIFTY','FINNIFTY'];
+  const keys=['NIFTY','BANKNIFTY','FINNIFTY'];
+  function unwrap(x){return x?.data??x?.result?.data??x?.result??x;}
+  function findQuote(root,key){
+    const d=unwrap(root);
+    if(Array.isArray(d)) return d.find(x=>String(x.symbol||x.name||x.instrument||'').toUpperCase().includes(key));
+    if(d&&typeof d==='object'){
+      if(d[key]) return d[key];
+      for(const k of Object.keys(d)) if(k.toUpperCase().includes(key)) return d[k];
+      if(String(d.symbol||d.name||d.instrument||'').toUpperCase().includes(key)) return d;
+    }
+    return null;
+  }
+  function priceOf(q){if(!q)return null; const p=q.lastPrice??q.last_price??q.ltp??q.price??q.close??q.currentPrice; const n=Number(p); return Number.isFinite(n)&&n>0?n:null;}
+  window.updateMarketCards=function(){};
+  async function refresh(){
+    try{
+      const r=await fetch(API,{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+      const payload=await r.json();
+      keys.forEach((key,i)=>{
+        const q=findQuote(payload,key),p=priceOf(q);
+        const price=document.getElementById('price'+i), card=document.getElementById('market'+i);
+        if(p!==null){price.textContent=p.toLocaleString('en-IN',{maximumFractionDigits:2}); card.querySelector('.market-change').textContent='LIVE · API'; card.querySelector('.market-change').style.color='var(--green)';}
+        else {price.textContent='—'; card.querySelector('.market-change').textContent='API quote unavailable'; card.querySelector('.market-change').style.color='var(--yellow)';}
+      });
+      const tag=document.querySelector('.demo-tag'); if(tag)tag.textContent='● LIVE QUOTES · DEMO CHARTS';
+    }catch(e){
+      keys.forEach((key,i)=>{const card=document.getElementById('market'+i); card.querySelector('.market-change').textContent='API offline'; card.querySelector('.market-change').style.color='var(--yellow)';});
+    }
+  }
+  window.addEventListener('DOMContentLoaded',()=>{refresh();setInterval(refresh,5000);});
+})();
+</script>
+
 </body>
 </html>
