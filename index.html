@@ -1,429 +1,361 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TradePilot AI</title>
+
 <style>
-:root{--bg:#0b1020;--panel:#121a2b;--line:#26334a;--text:#e8edf7;--muted:#91a0b8;--green:#22c784;--red:#ff6577;--blue:#5b9cff;--yellow:#ffc857}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-h1{margin:0;font-size:22px}
-h1 span{color:var(--blue)}
-.sub{color:var(--muted);font-size:12px}
-.wrap{max-width:1200px;margin:auto;padding:16px}
-.toolbar,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-select,button,input{background:#0c1424;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit}
+body{
+ margin:0;
+ background:#0b1120;
+ color:#e6edf7;
+ font-family:Arial,sans-serif
+}
+header{
+ padding:20px;
+ background:#111a2b;
+ border-bottom:1px solid #27354d;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ flex-wrap:wrap
+}
+.logo{font-size:24px;font-weight:bold}
+.logo span{color:#42a5ff}
+.small{font-size:12px;color:#95a4ba}
+.container{max-width:1250px;margin:auto;padding:16px}
+.panel{
+ background:#121c2d;
+ border:1px solid #26364e;
+ border-radius:12px;
+ padding:16px;
+ margin-bottom:15px
+}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+select,input,button{
+ padding:10px;
+ border-radius:8px;
+ border:1px solid #30425c;
+ background:#0b1423;
+ color:white;
+ font-size:14px
+}
 button{cursor:pointer}
-button:hover{border-color:var(--blue)}
-button.active{background:#24436e;border-color:var(--blue)}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.metric{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
-.metric small{color:var(--muted)}
-.metric strong{display:block;font-size:20px;margin-top:4px}
-.panel h2{font-size:15px;margin:0 0 12px}
-.chartbox{height:340px}
-canvas{width:100%;height:100%;display:block}
-.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
-.chip{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:5px 8px;border-radius:20px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.row>*{flex:1;min-width:110px}
+button:hover{border-color:#42a5ff}
+h2{font-size:17px;margin-top:0}
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:15px
+}
+.stats{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:10px;
+ margin-bottom:15px
+}
+.stat{
+ background:#121c2d;
+ border:1px solid #26364e;
+ border-radius:10px;
+ padding:14px
+}
+.stat small{color:#96a5bb}
+.stat strong{display:block;font-size:19px;margin-top:8px}
+.chart{
+ width:100%;
+ height:550px;
+ border:0;
+ border-radius:10px;
+ background:#0b1423
+}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row input,.row select{flex:1;min-width:120px}
+.result{
+ background:#0b1423;
+ border:1px solid #26364e;
+ border-radius:8px;
+ padding:12px;
+ margin-top:12px;
+ line-height:1.8
+}
+.green{color:#24d18a}
+.red{color:#ff6478}
+.yellow{color:#ffcc58}
+label{font-size:12px;color:#96a5bb}
 .stack{display:grid;gap:10px}
-.result{padding:10px;border-radius:8px;background:#0c1424;border:1px solid var(--line);margin-top:10px}
-.status{font-weight:700}
-.good{color:var(--green)}
-.bad{color:var(--red)}
-.wait{color:var(--yellow)}
-.small{font-size:12px;color:var(--muted)}
-.disclaimer{color:var(--muted);font-size:11px;margin-top:12px}
-.table{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.table div{padding:8px;background:#0c1424;border:1px solid var(--line);border-radius:8px}
-.table b{display:block;color:var(--muted);font-size:11px}
-.table span{font-weight:600}
-.wide{grid-column:1/-1}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.chartbox{height:280px}}
-@media(max-width:480px){header{padding:12px}.wrap{padding:10px}.panel,.toolbar{padding:11px}.metric strong{font-size:18px}}
+footer{padding:20px;color:#8493a9;font-size:12px;text-align:center}
+@media(max-width:800px){
+ .grid{grid-template-columns:1fr}
+ .stats{grid-template-columns:1fr 1fr}
+ .chart{height:430px}
+}
+@media(max-width:480px){
+ header{padding:14px}
+ .container{padding:10px}
+ .chart{height:400px}
+}
 </style>
 </head>
+
 <body>
 
 <header>
-<div>
-<h1>Trade<span>Pilot</span> AI</h1>
-<div class="sub">Market Analysis & Premium Verification Dashboard</div>
-</div>
-<div class="sub">DEMO MODE · Simulated Candles</div>
+ <div>
+  <div class="logo">Trade<span>Pilot</span> AI</div>
+  <div class="small">Market Analysis Dashboard</div>
+ </div>
+ <div class="small">TradingView Chart</div>
 </header>
 
-<div class="wrap">
+<div class="container">
 
-<div class="toolbar">
-<label>Market
-<select id="market">
-<option>NIFTY 50</option>
-<option>BANKNIFTY</option>
-<option>FINNIFTY</option>
-</select>
-</label>
-<div class="row" style="flex:0">
-<button class="tf active" data-tf="1m">1m</button>
-<button class="tf" data-tf="5m">5m</button>
-<button class="tf" data-tf="15m">15m</button>
-<button class="tf" data-tf="1H">1H</button>
-</div>
-<button id="refresh">Refresh Demo</button>
-</div>
+<!-- MARKET SELECTOR -->
+<div class="panel">
+ <div class="controls">
+  <select id="market" onchange="updateChart()">
+   <option value="NSE:NIFTY">NIFTY 50</option>
+   <option value="NSE:BANKNIFTY">BANK NIFTY</option>
+   <option value="NSE:FINNIFTY">FINNIFTY</option>
+  </select>
 
-<div class="metrics">
-<div class="metric"><small>Last Price</small><strong id="price">--</strong></div>
-<div class="metric"><small>Trend</small><strong id="trend">--</strong></div>
-<div class="metric"><small>RSI (14)</small><strong id="rsi">--</strong></div>
-<div class="metric"><small>VWAP</small><strong id="vwap">--</strong></div>
+  <select id="timeframe" onchange="updateChart()">
+   <option value="1">1 Minute</option>
+   <option value="5" selected>5 Minutes</option>
+   <option value="15">15 Minutes</option>
+   <option value="60">1 Hour</option>
+   <option value="D">Daily</option>
+  </select>
+
+  <button onclick="updateChart()">Refresh Chart</button>
+ </div>
 </div>
 
+<!-- CHART -->
+<div class="panel">
+ <h2>Live Market Chart</h2>
+ <iframe
+  id="tvchart"
+  class="chart"
+  title="TradingView Market Chart"
+  allowfullscreen>
+ </iframe>
+ <div class="small">
+  Chart powered by TradingView. Market data availability and delay depend on exchange and provider.
+ </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="stats">
+ <div class="stat">
+  <small>Selected Market</small>
+  <strong id="marketName">NIFTY 50</strong>
+ </div>
+
+ <div class="stat">
+  <small>Chart Timeframe</small>
+  <strong id="tfName">5 Minutes</strong>
+ </div>
+
+ <div class="stat">
+  <small>Chart Source</small>
+  <strong>TradingView</strong>
+ </div>
+
+ <div class="stat">
+  <small>TradePilot Mode</small>
+  <strong class="green">Analysis</strong>
+ </div>
+</div>
+
+<!-- RISK CALCULATOR -->
 <div class="grid">
 
-<section class="panel">
-<h2>Price Chart</h2>
-<div class="chips">
-<span class="chip">EMA 9</span>
-<span class="chip">VWAP</span>
-<span class="chip">Candles · Demo</span>
-</div>
-<div class="chartbox"><canvas id="chart"></canvas></div>
-<div class="small" id="chartnote">Chart data is randomly generated for demonstration.</div>
-</section>
+<div class="panel">
+ <h2>Risk Calculator</h2>
 
-<section class="panel">
-<h2>Indicators</h2>
-<div class="table">
-<div><b>MACD</b><span id="macd">--</span></div>
-<div><b>Signal</b><span id="signal">--</span></div>
-<div><b>Support</b><span id="support">--</span></div>
-<div><b>Resistance</b><span id="resistance">--</span></div>
-</div>
-<div class="result">
-<b>Trend Engine</b>
-<div class="status" id="trenddetail">--</div>
-<div class="small">Based on demo EMA and price movement.</div>
-</div>
-</section>
+ <div class="stack">
+  <input id="capital" type="number" placeholder="Total Capital ₹">
+  <input id="riskPercent" type="number" placeholder="Risk % (example 1)" value="1">
+  <input id="entry" type="number" placeholder="Entry Price">
+  <input id="stop" type="number" placeholder="Stop Loss Price">
 
-<section class="panel">
-<h2>Risk Calculator</h2>
-<div class="stack">
-<div class="row">
-<input id="capital" type="number" min="0" placeholder="Capital (₹)">
-<input id="riskpct" type="number" min="0" max="100" step="0.1" placeholder="Risk %" value="1">
-</div>
-<div class="row">
-<input id="entry" type="number" min="0" placeholder="Entry Price">
-<input id="stop" type="number" min="0" placeholder="Stop-loss Price">
-</div>
-<button id="calcRisk">Calculate Position Size</button>
-</div>
-<div class="result" id="riskResult">Enter values to calculate risk.</div>
-</section>
+  <button onclick="calculateRisk()">Calculate Risk</button>
+ </div>
 
-<section class="panel">
-<h2>CE / PE Premium Verification</h2>
-<div class="stack">
-<div class="row">
-<select id="side">
-<option value="CE">CE (Call)</option>
-<option value="PE">PE (Put)</option>
-</select>
-<input id="indexMetric" type="number" step="any" placeholder="Index candle metric/value">
+ <div class="result" id="riskResult">
+  Enter your values to calculate position size.
+ </div>
 </div>
-<div class="row">
-<input id="premium" type="number" step="any" placeholder="Option premium">
-<input id="double" type="number" step="any" value="2" placeholder="Multiplier">
-</div>
-<div class="row">
-<label class="small">Index Candle Time
-<input id="indexTime" type="datetime-local">
-</label>
-<label class="small">Option Candle Time
-<input id="optionTime" type="datetime-local">
-</label>
-</div>
-<button id="verify">Verify Premium</button>
-</div>
-<div class="result" id="verifyResult">Fill in values and exact candle times.</div>
-<div class="disclaimer">This is a simple comparison tool. It does not validate a proprietary premium formula or provide trade calls.</div>
-</section>
 
-<section class="panel wide">
-<h2>How to Use</h2>
-<div class="small">
-Demo chart is simulated and not connected to NSE/live market data.
-Indicators and levels are calculated from generated candles.
-Premium verification compares the index value you enter with option premium × multiplier, and requires matching candle timestamps.
+<!-- PREMIUM VERIFICATION -->
+<div class="panel">
+ <h2>CE / PE Premium Verification</h2>
+
+ <div class="stack">
+  <select id="optionType">
+   <option value="CE">CE (Call)</option>
+   <option value="PE">PE (Put)</option>
+  </select>
+
+  <input id="indexValue" type="number" step="any"
+   placeholder="Index candle value / metric">
+
+  <input id="optionPremium" type="number" step="any"
+   placeholder="Option premium">
+
+  <input id="multiplier" type="number" value="2"
+   placeholder="Premium multiplier">
+
+  <label>Index Candle Time</label>
+  <input id="indexTime" type="datetime-local">
+
+  <label>Option Candle Time</label>
+  <input id="optionTime" type="datetime-local">
+
+  <button onclick="verifyPremium()">Verify Premium</button>
+ </div>
+
+ <div class="result" id="verifyResult">
+  Enter the candle values and timestamps.
+ </div>
 </div>
-</section>
 
 </div>
+
+<div class="panel">
+ <h2>Indicator Status</h2>
+ <div class="small">
+  TradingView chart has its own chart indicators and tools.
+  EMA, VWAP, RSI, MACD and automatic trend analysis inside TradePilot
+  will be connected separately to actual market candle data in a future upgrade.
+ </div>
 </div>
+
+<div class="panel">
+ <h2>Important</h2>
+ <div class="small">
+  TradePilot AI is an analysis tool, not financial advice.
+  Market chart data is supplied by TradingView and may be delayed depending
+  on exchange data permissions. Premium verification currently uses the
+  manually entered values only.
+ </div>
+</div>
+
+</div>
+
+<footer>
+ TradePilot AI · Market Analysis Platform
+</footer>
 
 <script>
-'use strict';
 
-const $ = (id)=>document.getElementById(id);
-let timeframe='1m',candles=[];
+// MARKET CHART
 
-function rand(min,max){
-return min+Math.random()*(max-min);
+function updateChart(){
+
+ const symbol=document.getElementById("market").value;
+ const tf=document.getElementById("timeframe").value;
+
+ const url=
+ "https://www.tradingview.com/widgetembed/?"+
+ "symbol="+encodeURIComponent(symbol)+
+ "&interval="+encodeURIComponent(tf)+
+ "&theme=dark"+
+ "&style=1"+
+ "&locale=en"+
+ "&toolbarbg=%23111a2b"+
+ "&hide_top_toolbar=false"+
+ "&hide_legend=false"+
+ "&save_image=false"+
+ "&container_id=tradingview_chart";
+
+ document.getElementById("tvchart").src=url;
+
+ document.getElementById("marketName").innerText=
+ document.getElementById("market").selectedOptions[0].text;
+
+ document.getElementById("tfName").innerText=
+ document.getElementById("timeframe").selectedOptions[0].text;
 }
 
-function generate(){
-let base=({
-'NIFTY 50':22400,
-'BANKNIFTY':48200,
-'FINNIFTY':21200
-})[$('market').value]||22400;
 
-let p=base;
-candles=[];
+// RISK CALCULATOR
 
-for(let i=0;i<70;i++){
-let o=p;
-let c=o+rand(-45,45);
-let h=Math.max(o,c)+rand(2,20);
-let l=Math.min(o,c)-rand(2,20);
-candles.push({o,h,l,c});
-p=c;
-}
-render();
-}
+function calculateRisk(){
 
-function EMA(values,period){
-let k=2/(period+1),out=[];
-values.forEach((v,i)=>{
-out.push(i===0?v:v*k+out[i-1]*(1-k));
-});
-return out;
-}
+ const capital=Number(document.getElementById("capital").value);
+ const riskPercent=Number(document.getElementById("riskPercent").value);
+ const entry=Number(document.getElementById("entry").value);
+ const stop=Number(document.getElementById("stop").value);
 
-function RSI(values,period=14){
-if(values.length<=period)return 50;
-let gains=0,losses=0;
+ const result=document.getElementById("riskResult");
 
-for(let i=1;i<=period;i++){
-let d=values[i]-values[i-1];
-if(d>0)gains+=d;
-else losses-=d;
+ if(capital<=0||riskPercent<=0||entry<=0||stop<=0||entry===stop){
+  result.innerHTML="<span class='yellow'>Enter valid capital, risk, entry and stop-loss values.</span>";
+  return;
+ }
+
+ const riskAmount=capital*riskPercent/100;
+ const perUnitRisk=Math.abs(entry-stop);
+ const quantity=Math.floor(riskAmount/perUnitRisk);
+ const positionValue=quantity*entry;
+
+ result.innerHTML=
+ "Risk Amount: ₹"+riskAmount.toFixed(2)+
+ "<br>Risk per unit: ₹"+perUnitRisk.toFixed(2)+
+ "<br>Suggested quantity by risk: "+quantity+
+ "<br>Approx. position value: ₹"+positionValue.toFixed(2);
 }
 
-let avgG=gains/period,avgL=losses/period;
 
-for(let i=period+1;i<values.length;i++){
-let d=values[i]-values[i-1];
-avgG=(avgG*(period-1)+Math.max(d,0))/period;
-avgL=(avgL*(period-1)+Math.max(-d,0))/period;
+// PREMIUM VERIFICATION
+
+function verifyPremium(){
+
+ const type=document.getElementById("optionType").value;
+ const indexValue=Number(document.getElementById("indexValue").value);
+ const premium=Number(document.getElementById("optionPremium").value);
+ const multiplier=Number(document.getElementById("multiplier").value);
+
+ const indexTime=document.getElementById("indexTime").value;
+ const optionTime=document.getElementById("optionTime").value;
+
+ const result=document.getElementById("verifyResult");
+
+ if(indexValue<=0||premium<=0||multiplier<=0||!indexTime||!optionTime){
+  result.innerHTML="<span class='yellow'>Please enter all values and candle times correctly.</span>";
+  return;
+ }
+
+ if(indexTime!==optionTime){
+  result.innerHTML=
+  "<span class='yellow'>WAIT — Index and option candle timestamps are different. Match the candle times first.</span>";
+  return;
+ }
+
+ const doubledPremium=premium*multiplier;
+ const passed=doubledPremium>=indexValue;
+
+ result.innerHTML=
+ (passed
+  ? "<span class='green'>COMPARISON PASSED</span>"
+  : "<span class='red'>COMPARISON NOT PASSED</span>")+
+ "<br>Option Type: "+type+
+ "<br>Index Value: "+indexValue+
+ "<br>Premium × "+multiplier+": "+doubledPremium.toFixed(2)+
+ "<br>Candle Time: "+indexTime+
+ "<br><span class='small'>This is a numerical comparison only. It is not a buy/sell signal.</span>";
 }
 
-return avgL===0?100:100-100/(1+avgG/avgL);
-}
 
-function MACD(v){
-let a=EMA(v,12);
-let b=EMA(v,26);
-let m=v.map((x,i)=>a[i]-b[i]);
-let s=EMA(m,9);
-return {
-m,
-s,
-h:m.map((x,i)=>x-s[i])
-};
-}
+// INITIAL LOAD
 
-function VWAP(cs){
-let total=0,vol=0;
-cs.forEach(c=>{
-let typical=(c.h+c.l+c.c)/3;
-let w=rand(50,150);
-total+=typical*w;
-vol+=w;
-});
-return total/vol;
-}
+updateChart();
 
-function fmt(n){
-return Number(n).toLocaleString('en-IN',{
-maximumFractionDigits:2,
-minimumFractionDigits:2
-});
-}
-
-function render(){
-if(!candles.length)return;
-
-let vals=candles.map(c=>c.c);
-let ema=EMA(vals,9);
-let vwap=VWAP(candles);
-let rsi=RSI(vals);
-let mac=MACD(vals);
-let last=vals.at(-1);
-
-let trend=
-last>ema.at(-1)&&ema.at(-1)>ema.at(-5)?'Bullish':
-last<ema.at(-1)&&ema.at(-1)<ema.at(-5)?'Bearish':
-'Sideways';
-
-$('price').textContent=fmt(last);
-$('trend').textContent=trend;
-$('trend').className=trend==='Bullish'?'good':trend==='Bearish'?'bad':'wait';
-$('rsi').textContent=fmt(rsi);
-$('vwap').textContent=fmt(vwap);
-$('macd').textContent=fmt(mac.m.at(-1));
-$('signal').textContent=fmt(mac.s.at(-1));
-$('support').textContent=fmt(Math.min(...candles.slice(-20).map(c=>c.l)));
-$('resistance').textContent=fmt(Math.max(...candles.slice(-20).map(c=>c.h)));
-$('trenddetail').textContent=trend;
-
-drawChart(ema,vwap);
-}
-
-function drawChart(ema,vwap){
-let canvas=$('chart');
-let ctx=canvas.getContext('2d');
-let rect=canvas.getBoundingClientRect();
-let dpr=window.devicePixelRatio||1;
-
-canvas.width=Math.max(1,rect.width*dpr);
-canvas.height=Math.max(1,rect.height*dpr);
-ctx.scale(dpr,dpr);
-
-let w=rect.width,h=rect.height;
-let pad={l:45,r:10,t:10,b:20};
-let cw=w-pad.l-pad.r;
-let ch=h-pad.t-pad.b;
-
-let lo=Math.min(...candles.map(c=>c.l));
-let hi=Math.max(...candles.map(c=>c.h));
-let range=hi-lo||1;
-let y=v=>pad.t+(hi-v)/range*ch;
-
-ctx.clearRect(0,0,w,h);
-ctx.font='11px system-ui';
-ctx.fillStyle='#91a0b8';
-
-for(let i=0;i<5;i++){
-let val=lo+range*i/4;
-let yy=y(val);
-ctx.strokeStyle='#26334a';
-ctx.beginPath();
-ctx.moveTo(pad.l,yy);
-ctx.lineTo(w-pad.r,yy);
-ctx.stroke();
-ctx.fillText(val.toFixed(0),2,yy+4);
-}
-
-let step=cw/candles.length;
-let bw=Math.max(2,step*.58);
-
-candles.forEach((c,i)=>{
-let x=pad.l+i*step+step/2;
-let col=c.c>=c.o?'#22c784':'#ff6577';
-ctx.strokeStyle=col;
-ctx.fillStyle=col;
-ctx.beginPath();
-ctx.moveTo(x,y(c.h));
-ctx.lineTo(x,y(c.l));
-ctx.stroke();
-
-let top=y(Math.max(c.o,c.c));
-let bottom=y(Math.min(c.o,c.c));
-ctx.fillRect(x-bw/2,top,bw,Math.max(1,bottom-top));
-});
-
-function line(arr,color,dash=[]){
-ctx.strokeStyle=color;
-ctx.setLineDash(dash);
-ctx.beginPath();
-
-arr.forEach((v,i)=>{
-let x=pad.l+i*step+step/2;
-if(i===0)ctx.moveTo(x,y(v));
-else ctx.lineTo(x,y(v));
-});
-
-ctx.stroke();
-ctx.setLineDash([]);
-}
-
-line(ema,'#5b9cff');
-line(candles.map(()=>vwap),'#ffc857',[5,4]);
-}
-
-$('market').addEventListener('change',generate);
-$('refresh').addEventListener('click',generate);
-
-document.querySelectorAll('.tf').forEach(btn=>{
-btn.addEventListener('click',()=>{
-document.querySelectorAll('.tf').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-timeframe=btn.dataset.tf;
-generate();
-});
-});
-
-window.addEventListener('resize',render);
-
-$('calcRisk').addEventListener('click',()=>{
-let cap=Number($('capital').value);
-let pct=Number($('riskpct').value);
-let entry=Number($('entry').value);
-let stop=Number($('stop').value);
-let dist=Math.abs(entry-stop);
-
-if(!(cap>0&&pct>0&&entry>0&&stop>0&&dist>0)){
-$('riskResult').textContent='Please enter valid positive values. Entry and stop must be different.';
-return;
-}
-
-let risk=cap*pct/100;
-let qty=Math.floor(risk/dist);
-
-$('riskResult').innerHTML=
-'Risk amount: <b>₹'+fmt(risk)+'</b><br>'+
-'Approx. quantity: <b>'+qty+'</b><br>'+
-'Position value: <b>₹'+fmt(qty*entry)+'</b>';
-});
-
-$('verify').addEventListener('click',()=>{
-let idx=Number($('indexMetric').value);
-let prem=Number($('premium').value);
-let mult=Number($('double').value);
-let side=$('side').value;
-let t1=$('indexTime').value;
-let t2=$('optionTime').value;
-let box=$('verifyResult');
-
-if(!Number.isFinite(idx)||!Number.isFinite(prem)||!Number.isFinite(mult)||idx<=0||prem<=0||mult<=0||!t1||!t2){
-box.innerHTML='<span class="wait">Please fill all fields with positive numbers and both candle times.</span>';
-return;
-}
-
-if(t1!==t2){
-box.innerHTML='<span class="wait">WAIT — Candle timestamps do not match. Use the same timeframe and exact candle time.</span>';
-return;
-}
-
-let adjusted=prem*mult;
-let ok=adjusted>=idx;
-
-box.innerHTML=
-(ok?'<span class="good">COMPARISON PASSED</span>':'<span class="bad">COMPARISON NOT PASSED</span>')+
-'<br>Index value: <b>'+fmt(idx)+'</b>'+
-'<br>'+side+' premium × '+mult+': <b>'+fmt(adjusted)+'</b>'+
-'<br><span class="small">This is only the entered-value comparison, not a validated trade signal.</span>';
-});
-
-generate();
 </script>
+
 </body>
 </html>
