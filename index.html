@@ -2,100 +2,256 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TradePilot AI</title>
 
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;
- background:#0b1120;
- color:#e6edf7;
- font-family:Arial,sans-serif
+:root {
+  --bg:#0b1020;
+  --panel:#131c2d;
+  --border:#26354c;
+  --text:#e9eff8;
+  --muted:#91a1ba;
+  --green:#20c78a;
+  --red:#ff6477;
+  --blue:#5b9cff;
+  --yellow:#ffc857;
 }
-header{
- padding:20px;
- background:#111a2b;
- border-bottom:1px solid #27354d;
- display:flex;
- justify-content:space-between;
- align-items:center;
- flex-wrap:wrap
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
 }
-.logo{font-size:24px;font-weight:bold}
-.logo span{color:#42a5ff}
-.small{font-size:12px;color:#95a4ba}
-.container{max-width:1250px;margin:auto;padding:16px}
-.panel{
- background:#121c2d;
- border:1px solid #26364e;
- border-radius:12px;
- padding:16px;
- margin-bottom:15px
+
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
 }
-.controls{display:flex;gap:10px;flex-wrap:wrap}
-select,input,button{
- padding:10px;
- border-radius:8px;
- border:1px solid #30425c;
- background:#0b1423;
- color:white;
- font-size:14px
+
+.logo {
+  font-size:24px;
+  font-weight:bold;
 }
-button{cursor:pointer}
-button:hover{border-color:#42a5ff}
-h2{font-size:17px;margin-top:0}
-.grid{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:15px
+
+.logo span { color:var(--blue); }
+
+.muted { color:var(--muted); font-size:12px; }
+
+.container {
+  max-width:1450px;
+  margin:auto;
+  padding:16px;
 }
-.stats{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:10px;
- margin-bottom:15px
+
+.panel,.metric {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
 }
-.stat{
- background:#121c2d;
- border:1px solid #26364e;
- border-radius:10px;
- padding:14px
+
+.panel {
+  padding:15px;
+  margin-bottom:15px;
 }
-.stat small{color:#96a5bb}
-.stat strong{display:block;font-size:19px;margin-top:8px}
-.chart{
- width:100%;
- height:550px;
- border:0;
- border-radius:10px;
- background:#0b1423
+
+.panel h2 {
+  font-size:16px;
+  margin:0 0 14px;
 }
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row input,.row select{flex:1;min-width:120px}
-.result{
- background:#0b1423;
- border:1px solid #26364e;
- border-radius:8px;
- padding:12px;
- margin-top:12px;
- line-height:1.8
+
+.toolbar {
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
 }
-.green{color:#24d18a}
-.red{color:#ff6478}
-.yellow{color:#ffcc58}
-label{font-size:12px;color:#96a5bb}
-.stack{display:grid;gap:10px}
-footer{padding:20px;color:#8493a9;font-size:12px;text-align:center}
-@media(max-width:800px){
- .grid{grid-template-columns:1fr}
- .stats{grid-template-columns:1fr 1fr}
- .chart{height:430px}
+
+.toolbar label {
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
-@media(max-width:480px){
- header{padding:14px}
- .container{padding:10px}
- .chart{height:400px}
+
+select,input,button {
+  background:#0b1424;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:14px;
+}
+
+button {
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+button:hover { border-color:var(--blue); }
+
+.timeframes {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:6px;
+}
+
+.tf {
+  width:auto !important;
+  min-width:55px;
+  height:40px;
+  padding:8px 12px;
+  flex:0 0 auto !important;
+}
+
+.tf.active {
+  background:#1d416c;
+  border-color:var(--blue);
+}
+
+.metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.metric { padding:14px; }
+
+.metric small {
+  color:var(--muted);
+}
+
+.metric strong {
+  display:block;
+  margin-top:7px;
+  font-size:22px;
+  overflow-wrap:anywhere;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(300px,1fr);
+  gap:15px;
+}
+
+.chartbox {
+  height:440px;
+  width:100%;
+  position:relative;
+}
+
+canvas {
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.chips {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-bottom:12px;
+}
+
+.chip {
+  color:var(--muted);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:5px 9px;
+  font-size:12px;
+}
+
+.indicators {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.indicator {
+  background:#0b1424;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:10px;
+}
+
+.indicator b {
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+.indicator span {
+  font-size:15px;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+
+.result {
+  background:#0b1424;
+  border:1px solid var(--border);
+  padding:12px;
+  border-radius:9px;
+  margin-top:12px;
+  line-height:1.7;
+  overflow-wrap:anywhere;
+}
+
+.row {
+  display:flex;
+  flex-direction:row;
+  flex-wrap:wrap;
+  gap:9px;
+}
+
+.row input,.row select {
+  flex:1 1 130px;
+  min-width:0;
+}
+
+.stack {
+  display:grid;
+  gap:10px;
+}
+
+.good { color:var(--green); }
+.bad { color:var(--red); }
+.wait { color:var(--yellow); }
+
+.footer {
+  color:var(--muted);
+  font-size:11px;
+  text-align:center;
+  padding:20px;
+}
+
+@media(max-width:950px) {
+  .grid { grid-template-columns:1fr; }
+  .chartbox { height:380px; }
+}
+
+@media(max-width:600px) {
+  .container { padding:10px; }
+  header { padding:13px; }
+  .metrics { grid-template-columns:1fr 1fr; gap:8px; }
+  .metric { padding:11px; }
+  .metric strong { font-size:18px; }
+  .panel { padding:12px; }
+  .chartbox { height:320px; }
+  .toolbar { gap:8px; }
+  .timeframes { gap:5px; }
+  .tf { min-width:48px; padding:8px; }
 }
 </style>
 </head>
@@ -103,259 +259,510 @@ footer{padding:20px;color:#8493a9;font-size:12px;text-align:center}
 <body>
 
 <header>
- <div>
-  <div class="logo">Trade<span>Pilot</span> AI</div>
-  <div class="small">Market Analysis Dashboard</div>
- </div>
- <div class="small">TradingView Chart</div>
+  <div>
+    <div class="logo">Trade<span>Pilot</span> AI</div>
+    <div class="muted">Market Analysis & Premium Verification Dashboard</div>
+  </div>
+  <div class="muted">DEMO MODE · Simulated Candles</div>
 </header>
 
 <div class="container">
 
-<!-- MARKET SELECTOR -->
+<!-- CONTROLS -->
 <div class="panel">
- <div class="controls">
-  <select id="market" onchange="updateChart()">
-   <option value="NSE:NIFTY">NIFTY 50</option>
-   <option value="NSE:BANKNIFTY">BANK NIFTY</option>
-   <option value="NSE:FINNIFTY">FINNIFTY</option>
-  </select>
+  <div class="toolbar">
 
-  <select id="timeframe" onchange="updateChart()">
-   <option value="1">1 Minute</option>
-   <option value="5" selected>5 Minutes</option>
-   <option value="15">15 Minutes</option>
-   <option value="60">1 Hour</option>
-   <option value="D">Daily</option>
-  </select>
+    <label>
+      Market
+      <select id="market">
+        <option value="NIFTY 50">NIFTY 50</option>
+        <option value="BANKNIFTY">BANKNIFTY</option>
+        <option value="FINNIFTY">FINNIFTY</option>
+      </select>
+    </label>
 
-  <button onclick="updateChart()">Refresh Chart</button>
- </div>
+    <div class="timeframes">
+      <button class="tf active" data-tf="1m">1m</button>
+      <button class="tf" data-tf="5m">5m</button>
+      <button class="tf" data-tf="15m">15m</button>
+      <button class="tf" data-tf="1H">1H</button>
+    </div>
+
+    <button id="refresh">Refresh Demo</button>
+
+  </div>
 </div>
 
-<!-- CHART -->
-<div class="panel">
- <h2>Live Market Chart</h2>
- <iframe
-  id="tvchart"
-  class="chart"
-  title="TradingView Market Chart"
-  allowfullscreen>
- </iframe>
- <div class="small">
-  Chart powered by TradingView. Market data availability and delay depend on exchange and provider.
- </div>
+<!-- METRICS -->
+<div class="metrics">
+
+  <div class="metric">
+    <small>Last Price</small>
+    <strong id="price">--</strong>
+  </div>
+
+  <div class="metric">
+    <small>Trend</small>
+    <strong id="trend">--</strong>
+  </div>
+
+  <div class="metric">
+    <small>RSI (14)</small>
+    <strong id="rsi">--</strong>
+  </div>
+
+  <div class="metric">
+    <small>VWAP</small>
+    <strong id="vwap">--</strong>
+  </div>
+
 </div>
 
-<!-- DASHBOARD -->
-<div class="stats">
- <div class="stat">
-  <small>Selected Market</small>
-  <strong id="marketName">NIFTY 50</strong>
- </div>
-
- <div class="stat">
-  <small>Chart Timeframe</small>
-  <strong id="tfName">5 Minutes</strong>
- </div>
-
- <div class="stat">
-  <small>Chart Source</small>
-  <strong>TradingView</strong>
- </div>
-
- <div class="stat">
-  <small>TradePilot Mode</small>
-  <strong class="green">Analysis</strong>
- </div>
-</div>
-
-<!-- RISK CALCULATOR -->
 <div class="grid">
 
-<div class="panel">
- <h2>Risk Calculator</h2>
+<!-- CHART -->
+<section class="panel">
+  <h2>Price Chart</h2>
 
- <div class="stack">
-  <input id="capital" type="number" placeholder="Total Capital ₹">
-  <input id="riskPercent" type="number" placeholder="Risk % (example 1)" value="1">
-  <input id="entry" type="number" placeholder="Entry Price">
-  <input id="stop" type="number" placeholder="Stop Loss Price">
+  <div class="chips">
+    <span class="chip">EMA 9</span>
+    <span class="chip">VWAP</span>
+    <span class="chip">Candles · Demo</span>
+  </div>
 
-  <button onclick="calculateRisk()">Calculate Risk</button>
- </div>
+  <div class="chartbox">
+    <canvas id="chart"></canvas>
+  </div>
 
- <div class="result" id="riskResult">
-  Enter your values to calculate position size.
- </div>
-</div>
+  <div class="muted">
+    Chart uses simulated candles. Not connected to live NSE data.
+  </div>
+</section>
+
+<!-- INDICATORS -->
+<section class="panel">
+  <h2>Indicators</h2>
+
+  <div class="indicators">
+    <div class="indicator">
+      <b>MACD</b>
+      <span id="macd">--</span>
+    </div>
+
+    <div class="indicator">
+      <b>Signal</b>
+      <span id="signal">--</span>
+    </div>
+
+    <div class="indicator">
+      <b>Support</b>
+      <span id="support">--</span>
+    </div>
+
+    <div class="indicator">
+      <b>Resistance</b>
+      <span id="resistance">--</span>
+    </div>
+  </div>
+
+  <div class="result">
+    <b>Trend Engine</b>
+    <div id="trenddetail">--</div>
+    <div class="muted">Based on simulated EMA and price movement.</div>
+  </div>
+</section>
+
+<!-- RISK CALCULATOR -->
+<section class="panel">
+  <h2>Risk Calculator</h2>
+
+  <div class="stack">
+    <div class="row">
+      <input id="capital" type="number" placeholder="Capital ₹">
+      <input id="riskpct" type="number" placeholder="Risk %" value="1">
+    </div>
+
+    <div class="row">
+      <input id="entry" type="number" placeholder="Entry Price">
+      <input id="stop" type="number" placeholder="Stop-loss Price">
+    </div>
+
+    <button id="calcRisk">Calculate Position Size</button>
+  </div>
+
+  <div class="result" id="riskResult">
+    Enter values to calculate.
+  </div>
+</section>
 
 <!-- PREMIUM VERIFICATION -->
-<div class="panel">
- <h2>CE / PE Premium Verification</h2>
+<section class="panel">
+  <h2>CE / PE Premium Verification</h2>
 
- <div class="stack">
-  <select id="optionType">
-   <option value="CE">CE (Call)</option>
-   <option value="PE">PE (Put)</option>
-  </select>
+  <div class="stack">
+    <div class="row">
+      <select id="side">
+        <option value="CE">CE (Call)</option>
+        <option value="PE">PE (Put)</option>
+      </select>
 
-  <input id="indexValue" type="number" step="any"
-   placeholder="Index candle value / metric">
+      <input id="indexMetric" type="number" step="any"
+      placeholder="Index candle metric/value">
+    </div>
 
-  <input id="optionPremium" type="number" step="any"
-   placeholder="Option premium">
+    <div class="row">
+      <input id="premium" type="number" step="any"
+      placeholder="Option premium">
 
-  <input id="multiplier" type="number" value="2"
-   placeholder="Premium multiplier">
+      <input id="multiplier" type="number" step="any"
+      value="2" placeholder="Multiplier">
+    </div>
 
-  <label>Index Candle Time</label>
-  <input id="indexTime" type="datetime-local">
+    <label class="muted">Index Candle Time</label>
+    <input id="indexTime" type="datetime-local">
 
-  <label>Option Candle Time</label>
-  <input id="optionTime" type="datetime-local">
+    <label class="muted">Option Candle Time</label>
+    <input id="optionTime" type="datetime-local">
 
-  <button onclick="verifyPremium()">Verify Premium</button>
- </div>
+    <button id="verify">Verify Premium</button>
+  </div>
 
- <div class="result" id="verifyResult">
-  Enter the candle values and timestamps.
- </div>
-</div>
+  <div class="result" id="verifyResult">
+    Enter values and matching candle times.
+  </div>
 
-</div>
+  <div class="muted">
+    Manual premium comparison only. Not a buy/sell signal.
+  </div>
+</section>
 
-<div class="panel">
- <h2>Indicator Status</h2>
- <div class="small">
-  TradingView chart has its own chart indicators and tools.
-  EMA, VWAP, RSI, MACD and automatic trend analysis inside TradePilot
-  will be connected separately to actual market candle data in a future upgrade.
- </div>
-</div>
-
-<div class="panel">
- <h2>Important</h2>
- <div class="small">
-  TradePilot AI is an analysis tool, not financial advice.
-  Market chart data is supplied by TradingView and may be delayed depending
-  on exchange data permissions. Premium verification currently uses the
-  manually entered values only.
- </div>
-</div>
+<!-- DISCLAIMER -->
+<section class="panel">
+  <h2>Important</h2>
+  <div class="muted">
+    TradePilot AI is an analysis dashboard, not financial advice.
+    Candle data shown here is simulated. Live market data is not connected.
+  </div>
+</section>
 
 </div>
 
-<footer>
- TradePilot AI · Market Analysis Platform
+<footer class="footer">
+  TradePilot AI · Market Analysis Platform
 </footer>
 
 <script>
+"use strict";
 
-// MARKET CHART
+const $ = id => document.getElementById(id);
 
-function updateChart(){
+let timeframe = "1m";
+let candles = [];
 
- const symbol=document.getElementById("market").value;
- const tf=document.getElementById("timeframe").value;
-
- const url=
- "https://www.tradingview.com/widgetembed/?"+
- "symbol="+encodeURIComponent(symbol)+
- "&interval="+encodeURIComponent(tf)+
- "&theme=dark"+
- "&style=1"+
- "&locale=en"+
- "&toolbarbg=%23111a2b"+
- "&hide_top_toolbar=false"+
- "&hide_legend=false"+
- "&save_image=false"+
- "&container_id=tradingview_chart";
-
- document.getElementById("tvchart").src=url;
-
- document.getElementById("marketName").innerText=
- document.getElementById("market").selectedOptions[0].text;
-
- document.getElementById("tfName").innerText=
- document.getElementById("timeframe").selectedOptions[0].text;
+function rand(min,max) {
+  return min + Math.random() * (max-min);
 }
 
+function generate() {
+  const bases = {
+    "NIFTY 50":22400,
+    "BANKNIFTY":48200,
+    "FINNIFTY":21200
+  };
+
+  let p = bases[$("market").value] || 22400;
+  candles = [];
+
+  for(let i=0;i<80;i++) {
+    const o=p;
+    const c=o+rand(-45,45);
+    const h=Math.max(o,c)+rand(2,20);
+    const l=Math.min(o,c)-rand(2,20);
+
+    candles.push({o,h,l,c});
+    p=c;
+  }
+
+  render();
+}
+
+function EMA(values,period) {
+  const k=2/(period+1);
+  const out=[];
+
+  values.forEach((v,i)=>{
+    out.push(i===0 ? v : v*k+out[i-1]*(1-k));
+  });
+
+  return out;
+}
+
+function RSI(values,period=14) {
+  if(values.length<=period) return 50;
+
+  let gains=0,losses=0;
+
+  for(let i=1;i<=period;i++) {
+    const d=values[i]-values[i-1];
+    if(d>0) gains+=d;
+    else losses-=d;
+  }
+
+  let avgG=gains/period;
+  let avgL=losses/period;
+
+  for(let i=period+1;i<values.length;i++) {
+    const d=values[i]-values[i-1];
+    avgG=(avgG*(period-1)+Math.max(d,0))/period;
+    avgL=(avgL*(period-1)+Math.max(-d,0))/period;
+  }
+
+  if(avgL===0) return 100;
+
+  return 100-100/(1+avgG/avgL);
+}
+
+function MACD(values) {
+  const a=EMA(values,12);
+  const b=EMA(values,26);
+  const m=values.map((v,i)=>a[i]-b[i]);
+  const s=EMA(m,9);
+
+  return {
+    m,
+    s,
+    h:m.map((v,i)=>v-s[i])
+  };
+}
+
+function VWAP(cs) {
+  let total=0,volume=0;
+
+  cs.forEach(c=>{
+    const typical=(c.h+c.l+c.c)/3;
+    const v=rand(50,150);
+
+    total+=typical*v;
+    volume+=v;
+  });
+
+  return total/volume;
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString("en-IN",{
+    maximumFractionDigits:2,
+    minimumFractionDigits:2
+  });
+}
+
+function render() {
+  if(!candles.length) return;
+
+  const vals=candles.map(c=>c.c);
+  const ema=EMA(vals,9);
+  const vwap=VWAP(candles);
+  const rsi=RSI(vals);
+  const mac=MACD(vals);
+  const last=vals[vals.length-1];
+
+  const trend=
+    last>ema[ema.length-1] && ema[ema.length-1]>ema[ema.length-5]
+    ? "Bullish"
+    : last<ema[ema.length-1] && ema[ema.length-1]<ema[ema.length-5]
+    ? "Bearish"
+    : "Sideways";
+
+  $("price").textContent=fmt(last);
+  $("trend").textContent=trend;
+  $("trend").className=trend==="Bullish"?"good":trend==="Bearish"?"bad":"wait";
+  $("rsi").textContent=fmt(rsi);
+  $("vwap").textContent=fmt(vwap);
+  $("macd").textContent=fmt(mac.m[mac.m.length-1]);
+  $("signal").textContent=fmt(mac.s[mac.s.length-1]);
+
+  const recent=candles.slice(-20);
+
+  $("support").textContent=fmt(Math.min(...recent.map(c=>c.l)));
+  $("resistance").textContent=fmt(Math.max(...recent.map(c=>c.h)));
+  $("trenddetail").textContent=trend;
+
+  drawChart(ema,vwap);
+}
+
+function drawChart(ema,vwap) {
+  const canvas=$("chart");
+  const ctx=canvas.getContext("2d");
+  const rect=canvas.getBoundingClientRect();
+
+  const dpr=window.devicePixelRatio||1;
+
+  canvas.width=Math.max(1,rect.width*dpr);
+  canvas.height=Math.max(1,rect.height*dpr);
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  const w=rect.width;
+  const h=rect.height;
+
+  const pad={l:48,r:12,t:12,b:24};
+  const cw=w-pad.l-pad.r;
+  const ch=h-pad.t-pad.b;
+
+  const lo=Math.min(...candles.map(c=>c.l));
+  const hi=Math.max(...candles.map(c=>c.h));
+  const range=hi-lo||1;
+
+  const y=v=>pad.t+(hi-v)/range*ch;
+
+  ctx.clearRect(0,0,w,h);
+  ctx.font="11px Arial";
+  ctx.fillStyle="#91a1ba";
+
+  for(let i=0;i<5;i++) {
+    const val=lo+range*i/4;
+    const yy=y(val);
+
+    ctx.strokeStyle="#26354c";
+    ctx.beginPath();
+    ctx.moveTo(pad.l,yy);
+    ctx.lineTo(w-pad.r,yy);
+    ctx.stroke();
+
+    ctx.fillText(val.toFixed(0),3,yy+4);
+  }
+
+  const step=cw/candles.length;
+  const bw=Math.max(2,step*.62);
+
+  candles.forEach((c,i)=>{
+    const x=pad.l+i*step+step/2;
+    const col=c.c>=c.o?"#20c78a":"#ff6477";
+
+    ctx.strokeStyle=col;
+    ctx.fillStyle=col;
+
+    ctx.beginPath();
+    ctx.moveTo(x,y(c.h));
+    ctx.lineTo(x,y(c.l));
+    ctx.stroke();
+
+    const top=y(Math.max(c.o,c.c));
+    const bottom=y(Math.min(c.o,c.c));
+
+    ctx.fillRect(x-bw/2,top,bw,Math.max(1,bottom-top));
+  });
+
+  function line(arr,color,dash=[]) {
+    ctx.strokeStyle=color;
+    ctx.lineWidth=1.5;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+
+    arr.forEach((v,i)=>{
+      const x=pad.l+i*step+step/2;
+      if(i===0) ctx.moveTo(x,y(v));
+      else ctx.lineTo(x,y(v));
+    });
+
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  line(ema,"#5b9cff");
+  line(candles.map(()=>vwap),"#ffc857",[5,4]);
+}
+
+// TIMEFRAME BUTTONS
+
+document.querySelectorAll(".tf").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tf").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+
+    timeframe=btn.dataset.tf;
+    generate();
+  });
+});
+
+// MARKET
+
+$("market").addEventListener("change",generate);
+$("refresh").addEventListener("click",generate);
 
 // RISK CALCULATOR
 
-function calculateRisk(){
+$("calcRisk").addEventListener("click",()=>{
+  const cap=Number($("capital").value);
+  const pct=Number($("riskpct").value);
+  const entry=Number($("entry").value);
+  const stop=Number($("stop").value);
 
- const capital=Number(document.getElementById("capital").value);
- const riskPercent=Number(document.getElementById("riskPercent").value);
- const entry=Number(document.getElementById("entry").value);
- const stop=Number(document.getElementById("stop").value);
+  const dist=Math.abs(entry-stop);
 
- const result=document.getElementById("riskResult");
+  if(!(cap>0 && pct>0 && entry>0 && stop>0 && dist>0)) {
+    $("riskResult").textContent=
+      "Please enter valid positive values. Entry and stop must be different.";
+    return;
+  }
 
- if(capital<=0||riskPercent<=0||entry<=0||stop<=0||entry===stop){
-  result.innerHTML="<span class='yellow'>Enter valid capital, risk, entry and stop-loss values.</span>";
-  return;
- }
+  const risk=cap*pct/100;
+  const qty=Math.floor(risk/dist);
+  const position=qty*entry;
 
- const riskAmount=capital*riskPercent/100;
- const perUnitRisk=Math.abs(entry-stop);
- const quantity=Math.floor(riskAmount/perUnitRisk);
- const positionValue=quantity*entry;
+  $("riskResult").innerHTML=
+    "Risk amount: <b>₹"+fmt(risk)+"</b><br>"+
+    "Risk per unit: <b>₹"+fmt(dist)+"</b><br>"+
+    "Approx. quantity: <b>"+qty+"</b><br>"+
+    "Position value: <b>₹"+fmt(position)+"</b>";
+});
 
- result.innerHTML=
- "Risk Amount: ₹"+riskAmount.toFixed(2)+
- "<br>Risk per unit: ₹"+perUnitRisk.toFixed(2)+
- "<br>Suggested quantity by risk: "+quantity+
- "<br>Approx. position value: ₹"+positionValue.toFixed(2);
-}
+// CE / PE VERIFICATION
 
+$("verify").addEventListener("click",()=>{
+  const idx=Number($("indexMetric").value);
+  const premium=Number($("premium").value);
+  const mult=Number($("multiplier").value);
+  const side=$("side").value;
 
-// PREMIUM VERIFICATION
+  const t1=$("indexTime").value;
+  const t2=$("optionTime").value;
+  const box=$("verifyResult");
 
-function verifyPremium(){
+  if(!(idx>0 && premium>0 && mult>0 && t1 && t2)) {
+    box.innerHTML="<span class='wait'>Fill all values and candle times correctly.</span>";
+    return;
+  }
 
- const type=document.getElementById("optionType").value;
- const indexValue=Number(document.getElementById("indexValue").value);
- const premium=Number(document.getElementById("optionPremium").value);
- const multiplier=Number(document.getElementById("multiplier").value);
+  if(t1!==t2) {
+    box.innerHTML="<span class='wait'>WAIT — Candle timestamps do not match. Use the same timeframe and exact candle time.</span>";
+    return;
+  }
 
- const indexTime=document.getElementById("indexTime").value;
- const optionTime=document.getElementById("optionTime").value;
+  const adjusted=premium*mult;
+  const ok=adjusted>=idx;
 
- const result=document.getElementById("verifyResult");
+  box.innerHTML=
+    (ok
+      ? "<span class='good'>COMPARISON PASSED</span>"
+      : "<span class='bad'>COMPARISON NOT PASSED</span>")+
+    "<br>Option Type: <b>"+side+"</b>"+
+    "<br>Index Value: <b>"+fmt(idx)+"</b>"+
+    "<br>Premium × "+mult+": <b>"+fmt(adjusted)+"</b>"+
+    "<br>Candle Time: <b>"+t1+"</b>"+
+    "<br><span class='muted'>Numerical comparison only. Not a validated trading signal.</span>";
+});
 
- if(indexValue<=0||premium<=0||multiplier<=0||!indexTime||!optionTime){
-  result.innerHTML="<span class='yellow'>Please enter all values and candle times correctly.</span>";
-  return;
- }
+// RESIZE
 
- if(indexTime!==optionTime){
-  result.innerHTML=
-  "<span class='yellow'>WAIT — Index and option candle timestamps are different. Match the candle times first.</span>";
-  return;
- }
+window.addEventListener("resize",()=>{
+  if(candles.length) render();
+});
 
- const doubledPremium=premium*multiplier;
- const passed=doubledPremium>=indexValue;
+// START
 
- result.innerHTML=
- (passed
-  ? "<span class='green'>COMPARISON PASSED</span>"
-  : "<span class='red'>COMPARISON NOT PASSED</span>")+
- "<br>Option Type: "+type+
- "<br>Index Value: "+indexValue+
- "<br>Premium × "+multiplier+": "+doubledPremium.toFixed(2)+
- "<br>Candle Time: "+indexTime+
- "<br><span class='small'>This is a numerical comparison only. It is not a buy/sell signal.</span>";
-}
-
-
-// INITIAL LOAD
-
-updateChart();
+generate();
 
 </script>
-
 </body>
 </html>
