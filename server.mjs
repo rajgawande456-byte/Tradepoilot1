@@ -108,7 +108,7 @@ const configuredRateLimit = Number(
   process.env.RATE_LIMIT_PER_MINUTE
 );
 const RATE_LIMIT = Number.isFinite(configuredRateLimit) && configuredRateLimit > 0
-  ? Math.floor(configuredRateLimit)
+  ? Math.max(1, Math.floor(configuredRateLimit))
   : 120;
 
 const MARKET_DATA_PROVIDER =
