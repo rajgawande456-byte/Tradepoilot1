@@ -496,16 +496,21 @@ function initChart(){
   });
 }
 
+let chartRequestId=0;
 async function updateChart(){
   if(!chart)return;
+  const requestId=++chartRequestId;
   const symbols=["NIFTY 50","BANKNIFTY","FINNIFTY"];
   const apiSymbol=symbols[selectedMarket]||"NIFTY 50";
   const apiInterval=selectedTF==="1m"?"1":selectedTF==="5m"?"5":selectedTF==="15m"?"15":"60";
   const title=document.getElementById("chart-title");
   if(title)title.textContent=apiSymbol+" · UPSTOX HISTORICAL API";
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
   try{
-    const response=await fetch("https://tradepoilot1.onrender.com/api/v1/market/history?symbol="+encodeURIComponent(apiSymbol)+"&interval="+apiInterval,{cache:"no-store"});
+    const response=await fetch("https://tradepoilot1.onrender.com/api/v1/market/history?symbol="+encodeURIComponent(apiSymbol)+"&interval="+apiInterval,{cache:"no-store",signal:controller.signal});
     const body=await response.json();
+    if(requestId!==chartRequestId)return;
     const source=body?.data?.candles??body?.data?.data?.candles;
     if(!response.ok||!Array.isArray(source))throw new Error("History unavailable");
     const realBars=source.map(c=>({time:Number(c.time),open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close),volume:Number(c.volume||0)}))
@@ -520,6 +525,7 @@ async function updateChart(){
     chart.timeScale().fitContent();
     updateAnalysis();
   }catch(err){
+    if(requestId!==chartRequestId)return;
     candles=[];
     candleSeries.setData([]);
     emaSeries.setData([]);
@@ -532,9 +538,10 @@ async function updateChart(){
     const macd=document.getElementById("macd-value");if(macd)macd.textContent="—";
     const support=document.getElementById("support-value");if(support)support.textContent="—";
     const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent="—";
+  }finally{
+    clearTimeout(timeout);
   }
 }
-
 function updateMarketCards(){
   // Prices are intentionally withheld until a verified live snapshot is available.
   marketBases.forEach((base,i)=>{
