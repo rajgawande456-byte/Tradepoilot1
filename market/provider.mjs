@@ -87,7 +87,8 @@ function createUpstoxProvider(env) {
       );
     }
 
-    const quote = result.data[instrumentKey] || Object.values(result.data).find(entry => entry && entry.instrument_token === instrumentKey);
+    const normalizedInstrumentKey = instrumentKey.replace('|', ':');
+    const quote = result.data[instrumentKey] || result.data[normalizedInstrumentKey] || Object.entries(result.data).find(([key, entry]) => key === normalizedInstrumentKey || key.replace(':', '|') === instrumentKey || (entry && (entry.instrument_token === instrumentKey || entry.instrument_key === instrumentKey)))?.[1];
 
     if (!quote) {
       const returnedKeys = Object.keys(result.data);
