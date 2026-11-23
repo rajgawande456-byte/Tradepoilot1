@@ -117,7 +117,10 @@ function createUpstoxProvider(env) {
       throw new MarketDataProviderError('INTERVAL_NOT_ALLOWED', 'Unsupported candle interval.', 400);
     }
     const instrumentKey = INSTRUMENT_KEYS[safeSymbol];
-    const url = new URL('https://api.upstox.com/v3/historical-candle/intraday/' + encodeURIComponent(instrumentKey) + '/minutes/' + safeInterval);
+    const isHour = ['60', '120', '240'].includes(safeInterval);
+    const unit = isHour ? 'hours' : 'minutes';
+    const providerInterval = isHour ? String(Number(safeInterval) / 60) : safeInterval;
+    const url = new URL('https://api.upstox.com/v3/historical-candle/intraday/' + encodeURIComponent(instrumentKey) + '/' + unit + '/' + providerInterval);
     const response = await fetch(url, {
       method: 'GET',
       headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
