@@ -134,13 +134,28 @@ function createUpstoxProvider(env) {
     if (!Array.isArray(candles)) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
     }
+    const normalized = candles.map(row => ({
+      time: Math.floor(Date.parse(row[0]) / 1000),
+      open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
+      close: Number(row[4]), volume: Number(row[5] ?? 0),
+      oi: row[6] == null ? null : Number(row[6])
+    })).filter(c =>
+      Number.isFinite(c.time) &&
+      [c.open,c.high,c.low,c.close,c.volume].every(Number.isFinite) &&
+      c.volume >= 0 &&
+      c.high >= Math.max(c.open,c.close) &&
+      c.low <= Math.min(c.open,c.close) &&
+      c.high >= c.low
+    );
+    const uniqueByTime = new Map();
+    for (const candle of normalized) uniqueByTime.set(candle.time, candle);
+    const cleanCandles = [...uniqueByTime.values()].sort((a,b) => a.time-b.time);
+    if (!cleanCandles.length) {
+      throw new MarketDataProviderError('UPSTOX_HISTORY_INVALID', 'Historical candle rows failed validation.', 502);
+    }
     return {
       symbol: safeSymbol, instrumentKey, provider: 'UPSTOX', interval: safeInterval,
-      live: true, candles: candles.map(row => ({
-        time: Math.floor(Date.parse(row[0]) / 1000),
-        open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
-        close: Number(row[4]), volume: Number(row[5] || 0), oi: row[6] == null ? null : Number(row[6])
-      })).filter(c => Number.isFinite(c.time) && [c.open,c.high,c.low,c.close].every(Number.isFinite))
+      live: true, candles: cleanCandles
     };
   }
 
