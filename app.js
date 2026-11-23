@@ -420,18 +420,15 @@ function optionChainData(base){
   return {atm,rows,pcr,resistance:resistance.strike,support:support.strike,ceStrength,peStrength,totalCE,totalPE};
 }
 function renderOptionChain(){
-  const base=data[currentSymbol].base, oc=optionChainData(base);
   const body=document.getElementById('optionChainRows');
-  if(!body)return;
-  body.innerHTML=oc.rows.map(r=>{const atm=r.strike===oc.atm,res=r.strike===oc.resistance,sup=r.strike===oc.support;return `<tr class="${atm?'atm ':''}${res?'res-row ':''}${sup?'sup-row':''}"><td>${(r.ceOI/1000).toFixed(0)}k</td><td>${r.ceChg>=0?'+':''}${(r.ceChg/1000).toFixed(0)}k</td><td>${(r.ceVol/1000).toFixed(0)}k</td><td>${r.iv.toFixed(1)}%</td><td>${r.deltaCE.toFixed(2)}</td><td class="strike">${r.strike.toLocaleString('en-IN')}</td><td>${r.deltaPE.toFixed(2)}</td><td>${r.iv.toFixed(1)}%</td><td>${(r.peVol/1000).toFixed(0)}k</td><td>${r.peChg>=0?'+':''}${(r.peChg/1000).toFixed(0)}k</td><td>${(r.peOI/1000).toFixed(0)}k</td></tr>`}).join('');
-  const atmRow=oc.rows.find(r=>r.strike===oc.atm)||oc.rows[5];
+  if(body) body.innerHTML='';
   const greeks=document.getElementById('optionChainGreeks');
-  if(greeks)greeks.innerHTML=`<div class="oc-greek"><span>ATM CE Premium</span><b class="oc-ce">${atmRow.cePrice.toFixed(2)}</b></div><div class="oc-greek"><span>ATM PE Premium</span><b class="oc-pe">${atmRow.pePrice.toFixed(2)}</b></div><div class="oc-greek"><span>ATM Gamma</span><b>${atmRow.gamma.toFixed(5)}</b></div><div class="oc-greek"><span>ATM Theta</span><b>${atmRow.theta.toFixed(2)}</b></div><div class="oc-greek"><span>ATM Vega</span><b>${atmRow.vega.toFixed(2)}</b></div>`;
-  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
-  set('ocAtm',oc.atm.toLocaleString('en-IN'));set('ocPcr',oc.pcr.toFixed(2));set('ocCeStrength',oc.ceStrength+'/100');set('ocPeStrength',oc.peStrength+'/100');set('ocResistance',oc.resistance.toLocaleString('en-IN'));set('ocSupport',oc.support.toLocaleString('en-IN'));
-  const read=oc.ceStrength>oc.peStrength?'CE-side open-interest pressure is stronger in this illustrative chain.':oc.peStrength>oc.ceStrength?'PE-side open-interest pressure is stronger in this illustrative chain.':'CE and PE open-interest pressure is balanced.';
-  const rd=document.getElementById('ocRead');if(rd)rd.textContent=`PCR ${oc.pcr.toFixed(2)}. ${read} OI concentration suggests ${oc.resistance.toLocaleString('en-IN')} resistance and ${oc.support.toLocaleString('en-IN')} support. Option-chain analytics are not a trading recommendation.`;
-  window.tradePilotOptionChain=oc;
+  if(greeks) greeks.textContent='OPTIONS DATA UNAVAILABLE — provider integration not verified';
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  ['ocAtm','ocPcr','ocCeStrength','ocPeStrength','ocResistance','ocSupport'].forEach(id=>set(id,'—'));
+  const read=document.getElementById('ocRead');
+  if(read) read.textContent='Option-chain OI, PCR, premiums, Greeks, support and resistance are withheld because this panel currently uses simulated values. No live options feed is verified.';
+  window.tradePilotOptionChain={status:'unavailable',reason:'No verified options data provider connected',simulatedDataHidden:true};
 }
 window.runTradePilotOptionChainEngine=renderOptionChain;
 
