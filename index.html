@@ -573,46 +573,39 @@ function updateMarketCards(){
 
 function updateAnalysis(){
   if(!candles.length)return;
-
   const closes=candles.map(c=>c.close);
-  const ema9=calcEMA(closes,9);
   const last=closes[closes.length-1];
-  const prevEMA=ema9[ema9.length-1];
-
-  let bullish=last>prevEMA;
-  let trend=bullish?"BULLISH":"BEARISH";
-
-  document.getElementById("trend-value").textContent=trend;
-  document.getElementById("trend-value").className=
-    "metric-value "+(bullish?"value-green":"value-red");
-
-  const strength=Math.min(95,Math.round(Math.abs(last-prevEMA)/last*10000));
-  document.getElementById("strength-value").textContent=strength+" / 100";
-
+  const ema9=calcEMA(closes,9).at(-1);
+  const ema21=calcEMA(closes,21).at(-1);
+  const bullish=last>ema9&&ema9>ema21;
+  const bearish=last<ema9&&ema9<ema21;
+  const trend=bullish?"BULLISH":bearish?"BEARISH":"NEUTRAL";
+  const trendEl=document.getElementById("trend-value");
+  if(trendEl){trendEl.textContent=trend;trendEl.className="metric-value "+(bullish?"value-green":bearish?"value-red":"value-yellow");}
+  const gap9=Math.abs(last-ema9)/last*100;
+  const gap21=Math.abs(last-ema21)/last*100;
+  const strength=Math.min(100,Math.round((gap9+gap21)*100));
+  const strengthEl=document.getElementById("strength-value");
+  if(strengthEl)strengthEl.textContent=strength+" / 100";
   const trendStatus=document.getElementById("trend-status");
-  trendStatus.textContent=trend;
-  trendStatus.className="statuconst m=calcMACD(closes);
-  document.getElementById("macd-value").textContent=m.macd.toFixed(2);
-  const macdDirection=m.histogram>0?"Bullish momentum":m.histogram<0?"Bearish momentum":"Momentum neutral";
-  const macdCross=m.crossover==="bullish"?" · Bullish crossover":m.crossover==="bearish"?" · Bearish crossover":"";
-  const histogramTrend=m.histogram>m.previousHistogram?" · Histogram rising":m.histogram<m.previousHistogram?" · Histogram falling":" · Histogram unchanged";
-  document.getElementById("macd-text").textContent=macdDirection+macdCross+histogramTrend;k (oversold zone)":"Momentum in neutral zone";
-
+  if(trendStatus){trendStatus.textContent=trend;trendStatus.className="status "+(bullish?"status-green":bearish?"status-red":"status-yellow");}
+  const rsi=calcRSI(closes);
+  const rsiEl=document.getElementById("rsi-value");if(rsiEl)rsiEl.textContent=rsi.toFixed(2);
+  const rsiText=document.getElementById("rsi-text");
+  if(rsiText)rsiText.textContent=rsi>70?"Momentum elevated (overbought zone)":rsi<30?"Momentum weak (oversold zone)":"Momentum in neutral zone";
   const m=calcMACD(closes);
-  document.getElementById("macd-value").textContent=m.macd.toFixed(2);
-  document.getElementById("macd-text").textContent=
-    m.macd>m.signal?"MACD above signal line":
-    m.macd<m.signal?"MACD below signal line":"MACD near signal line";
-
-  const lows=candles.map(c=>c.low);
-  const highs=candles.map(c=>c.high);
-
-  document.getElementById("support-value").textContent=
-    Math.min(...lows).toFixed(2);
-  document.getElementById("resistance-value").textContent=
-    Math.max(...highs).toFixed(2);
+  const macdEl=document.getElementById("macd-value");if(macdEl)macdEl.textContent=m.macd.toFixed(2);
+  const macdText=document.getElementById("macd-text");
+  if(macdText){
+    const direction=m.histogram>0?"Bullish momentum":m.histogram<0?"Bearish momentum":"Momentum neutral";
+    const cross=m.crossover==="bullish"?" · Bullish crossover":m.crossover==="bearish"?" · Bearish crossover":"";
+    const histogramTrend=m.histogram>m.previousHistogram?" · Histogram rising":m.histogram<m.previousHistogram?" · Histogram falling":" · Histogram unchanged";
+    macdText.textContent=direction+cross+histogramTrend;
+  }
+  const lows=candles.map(c=>c.low),highs=candles.map(c=>c.high);
+  const support=document.getElementById("support-value");if(support)support.textContent=Math.min(...lows).toFixed(2);
+  const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent=Math.max(...highs).toFixed(2);
 }
-
 function selectMarket(name,index){
   selectedMarket=index;
   document.querySelectorAll(".market-card").forEach(c=>c.classList.remove("selected"));
