@@ -101,9 +101,12 @@ const ALLOWED_ORIGINS = new Set(
 
 const WS_AUTH_TOKEN = process.env.WS_AUTH_TOKEN || '';
 
-const RATE_LIMIT = Number(
-  process.env.RATE_LIMIT_PER_MINUTE || 120
+const configuredRateLimit = Number(
+  process.env.RATE_LIMIT_PER_MINUTE
 );
+const RATE_LIMIT = Number.isFinite(configuredRateLimit) && configuredRateLimit > 0
+  ? Math.floor(configuredRateLimit)
+  : 120;
 
 const MARKET_DATA_PROVIDER =
   process.env.MARKET_DATA_PROVIDER || '';
@@ -185,6 +188,12 @@ function isRateLimited(req) {
       if (!entry.endsWith(`:${minute}`)) {
         rate.delete(entry);
       }
+    }
+    // Bound memory even if many unique clients arrive within one minute.
+    while (rate.size > 5000) {
+      const oldest = rate.keys().next().value;
+      if (oldest === undefined) break;
+      rate.delete(oldest);
     }
   }
 
