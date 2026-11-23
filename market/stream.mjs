@@ -93,15 +93,17 @@ export function createMarketStream({
         );
       }
 
-      authorizeSymbol(symbol);
+      const safeSymbol = String(symbol || '').trim();
+      authorizeSymbol(safeSymbol);
 
-      clients.set(socket, symbol);
+
+      clients.set(socket, safeSymbol);
 
       socket.send(
         JSON.stringify({
           type: 'stream_status',
           status: 'connected',
-          symbol,
+          symbol: safeSymbol,
           transport: 'websocket'
         })
       );
