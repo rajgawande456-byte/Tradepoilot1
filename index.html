@@ -536,10 +536,13 @@ async function updateChart(){
 }
 
 function updateMarketCards(){
+  // Prices are intentionally withheld until a verified live snapshot is available.
   marketBases.forEach((base,i)=>{
-    const variation=(Math.random()-0.5)*base*0.002;
-    document.getElementById("price"+i).textContent=
-      (base+variation).toLocaleString("en-IN",{maximumFractionDigits:2});
+    const price=document.getElementById("price"+i);
+    if(price)price.textContent="—";
+    const card=document.getElementById("market"+i);
+    const status=card?.querySelector(".market-change");
+    if(status)status.textContent="Live snapshot unavailable";
   });
 }
 
