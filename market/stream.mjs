@@ -25,7 +25,7 @@ export function createMarketStream({
   provider = null,
   maxAgeMs = 15000
 } = {}) {
-  const clients = new Set();
+  const clients = new Map();
   const lastSeq = new Map();
 
   function authorizeSymbol(symbol) {
@@ -63,7 +63,8 @@ export function createMarketStream({
       data: validated
     });
 
-    for (const client of clients) {
+    for (const [client, subscribedSymbol] of clients) {
+      if (subscribedSymbol !== validated.symbol) continue;
       try {
         client.send(message);
       } catch {
@@ -91,7 +92,7 @@ export function createMarketStream({
 
       authorizeSymbol(symbol);
 
-      clients.add(socket);
+      clients.set(socket, symbol);
 
       socket.send(
         JSON.stringify({
