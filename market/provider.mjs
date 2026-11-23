@@ -175,12 +175,14 @@ function createUpstoxProvider(env) {
     if (!Array.isArray(candles)) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
     }
-    const normalized = candles.map(row => ({
-      time: Math.floor(Date.parse(row[0]) / 1000),
-      open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
-      close: Number(row[4]), volume: Number(row[5] ?? 0),
-      oi: row[6] == null ? null : Number(row[6])
-    })).filter(c =>
+    const normalized = candles
+      .filter(row => Array.isArray(row) && row.length >= 6)
+      .map(row => ({
+        time: Math.floor(Date.parse(row[0]) / 1000),
+        open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
+        close: Number(row[4]), volume: Number(row[5] ?? 0),
+        oi: row[6] == null ? null : Number(row[6])
+      })).filter(c =>
       Number.isFinite(c.time) &&
       [c.open,c.high,c.low,c.close,c.volume].every(Number.isFinite) &&
       c.volume >= 0 &&
