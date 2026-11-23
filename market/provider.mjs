@@ -194,10 +194,19 @@ function createUpstoxProvider(env) {
     if (!Array.isArray(candles)) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
     }
+    const parseCandleTime = value => {
+      if (typeof value === 'number' || (typeof value === 'string' && /^\\d+$/.test(value.trim()))) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return NaN;
+        return Math.floor(numeric > 1e12 ? numeric / 1000 : numeric);
+      }
+      const parsed = Date.parse(value);
+      return Number.isFinite(parsed) ? Math.floor(parsed / 1000) : NaN;
+    };
     const normalized = candles
       .filter(row => Array.isArray(row) && row.length >= 6)
       .map(row => ({
-        time: Math.floor(Date.parse(row[0]) / 1000),
+        time: parseCandleTime(row[0]),
         open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
         close: Number(row[4]), volume: Number(row[5] ?? 0),
         oi: row[6] == null || !Number.isFinite(Number(row[6])) || Number(row[6]) < 0 ? null : Number(row[6])
