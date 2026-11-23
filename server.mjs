@@ -391,6 +391,33 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
+    // Historical intraday candles
+    if (
+      url.pathname === '/api/v1/market/history' &&
+      req.method === 'GET'
+    ) {
+      const symbol = String(url.searchParams.get('symbol') || 'NIFTY 50').trim();
+      const interval = String(url.searchParams.get('interval') || '5').trim();
+      if (!isAllowedSymbol(symbol)) {
+        return sendJson(res, 400, {
+          error: 'SYMBOL_NOT_ALLOWED',
+          message: 'Use NIFTY 50, BANKNIFTY, or FINNIFTY.',
+          requestId: requestID
+        }, corsHeaders);
+      }
+      if (!marketProvider || typeof marketProvider.getHistory !== 'function') {
+        return sendJson(res, 503, {
+          error: 'HISTORY_NOT_CONFIGURED',
+          message: 'Historical candles are not available from the configured provider.',
+          symbol, interval, requestId: requestID
+        }, corsHeaders);
+      }
+      const history = await marketProvider.getHistory(symbol, interval);
+      return sendJson(res, 200, {
+        symbol, interval, data: history, requestId: requestID
+      }, corsHeaders);
+    }
+
     // WebSocket endpoint
     if (
       url.pathname === '/api/v1/market/stream' &&
