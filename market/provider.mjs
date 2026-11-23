@@ -181,7 +181,7 @@ function createUpstoxProvider(env) {
         time: Math.floor(Date.parse(row[0]) / 1000),
         open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
         close: Number(row[4]), volume: Number(row[5] ?? 0),
-        oi: row[6] == null ? null : Number(row[6])
+        oi: row[6] == null || !Number.isFinite(Number(row[6])) || Number(row[6]) < 0 ? null : Number(row[6])
       })).filter(c =>
       Number.isFinite(c.time) &&
       [c.open,c.high,c.low,c.close,c.volume].every(Number.isFinite) &&
