@@ -54,9 +54,15 @@ export function getSessionToken(req) {
     })
   );
 
-  return cookies.tradepilot_session
-    ? decodeURIComponent(cookies.tradepilot_session)
-    : null;
+  const encodedToken = cookies.tradepilot_session;
+  if (!encodedToken) return null;
+
+  try {
+    return decodeURIComponent(encodedToken);
+  } catch {
+    // Treat malformed cookie encoding as an unauthenticated request.
+    return null;
+  }
 }
 
 export function createSessionCookie(token, maxAgeSeconds) {
