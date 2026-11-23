@@ -414,18 +414,28 @@ function calcEMA(values,period){
 }
 
 function calcRSI(values,period=14){
-  if(values.length<=period)return 50;
-  let gains=0,losses=0;
-  for(let i=values.length-period;i<values.length;i++){
-    const diff=values[i]-values[i-1];
-    if(diff>0)gains+=diff;
-    else losses-=diff;
+  if(!Array.isArray(values)||values.length<=period)return 50;
+  let avgGain=0,avgLoss=0;
+  for(let i=1;i<=period;i++){
+    const change=values[i]-values[i-1];
+    if(change>0)avgGain+=change;
+    else avgLoss-=change;
   }
-  if(losses===0)return 100;
-  const rs=(gains/period)/(losses/period);
+  avgGain/=period;
+  avgLoss/=period;
+  for(let i=period+1;i<values.length;i++){
+    const change=values[i]-values[i-1];
+    const gain=change>0?change:0;
+    const loss=change<0?-change:0;
+    avgGain=((avgGain*(period-1))+gain)/period;
+    avgLoss=((avgLoss*(period-1))+loss)/period;
+  }
+  if(avgGain===0&&avgLoss===0)return 50;
+  if(avgLoss===0)return 100;
+  if(avgGain===0)return 0;
+  const rs=avgGain/avgLoss;
   return 100-(100/(1+rs));
 }
-
 function calcMACD(values){
   const ema12=calcEMA(values,12);
   const ema26=calcEMA(values,26);
