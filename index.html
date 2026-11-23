@@ -496,25 +496,43 @@ function initChart(){
   });
 }
 
-function updateChart(){
+async function updateChart(){
   if(!chart)return;
-
-  const base=marketBases[selectedMarket];
-  candles=makeBars(120,base);
-
-  candleSeries.setData(candles);
-
-  const closes=candles.map(c=>c.close);
-  const ema=calcEMA(closes,9);
-  const vwap=calcVWAP(candles);
-
-  emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
-  vwapSeries.setData(candles.map((c,i)=>({time:c.time,value:vwap[i]})));
-
-  chart.timeScale().fitContent();
-
-  updateAnalysis();
-  updateMarketCards();
+  const symbols=["NIFTY 50","BANKNIFTY","FINNIFTY"];
+  const apiSymbol=symbols[selectedMarket]||"NIFTY 50";
+  const apiInterval=selectedTF==="1m"?"1":selectedTF==="5m"?"5":selectedTF==="15m"?"15":"60";
+  const title=document.getElementById("chart-title");
+  if(title)title.textContent=apiSymbol+" · UPSTOX HISTORICAL API";
+  try{
+    const response=await fetch("https://tradepoilot1.onrender.com/api/v1/market/history?symbol="+encodeURIComponent(apiSymbol)+"&interval="+apiInterval,{cache:"no-store"});
+    const body=await response.json();
+    const source=body?.data?.candles??body?.data?.data?.candles;
+    if(!response.ok||!Array.isArray(source))throw new Error("History unavailable");
+    const realBars=source.map(c=>({time:Number(c.time),open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close),volume:Number(c.volume||0)}))
+      .filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close))
+      .sort((a,b)=>a.time-b.time);
+    if(realBars.length<30)throw new Error("Insufficient candles");
+    candles=realBars;
+    candleSeries.setData(candles);
+    const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),vwap=calcVWAP(candles);
+    emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
+    vwapSeries.setData(candles.map((c,i)=>({time:c.time,value:vwap[i]})));
+    chart.timeScale().fitContent();
+    updateAnalysis();
+  }catch(err){
+    candles=[];
+    candleSeries.setData([]);
+    emaSeries.setData([]);
+    vwapSeries.setData([]);
+    if(title)title.textContent=apiSymbol+" · HISTORICAL DATA UNAVAILABLE";
+    const trend=document.getElementById("trend-value");if(trend)trend.textContent="DATA UNAVAILABLE";
+    const strength=document.getElementById("strength-value");if(strength)strength.textContent="—";
+    const status=document.getElementById("trend-status");if(status)status.textContent="DATA UNAVAILABLE";
+    const rsi=document.getElementById("rsi-value");if(rsi)rsi.textContent="—";
+    const macd=document.getElementById("macd-value");if(macd)macd.textContent="—";
+    const support=document.getElementById("support-value");if(support)support.textContent="—";
+    const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent="—";
+  }
 }
 
 function updateMarketCards(){
