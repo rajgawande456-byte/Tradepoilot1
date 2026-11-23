@@ -360,20 +360,30 @@ function mtfAnalyze(bars){
   const bias=bull>=4?'BULLISH':bull<=1?'BEARISH':'SIDEWAYS';
   return {bias,score,alignment:score,trend:bias,ema:e,rsi:r,macd:m.line,supertrend:st.bull};
 }
-function renderMTF(){
-  const sets=makeMTFBars(data[currentSymbol].base), frames=['5m','15m','30m','1h'];
-  const results=frames.map(tf=>({tf,...mtfAnalyze(sets[tf])}));
-  const bullish=results.filter(x=>x.bias==='BULLISH').length,bearish=results.filter(x=>x.bias==='BEARISH').length;
-  const direction=bullish>=3?'BULLISH':bearish>=3?'BEARISH':'MIXED';
-  const avg=Math.round(results.reduce((a,x)=>a+x.score,0)/results.length);
-  const higher=results.slice(1), higherBull=higher.filter(x=>x.bias==='BULLISH').length,higherBear=higher.filter(x=>x.bias==='BEARISH').length;
-  const confirmation=higherBull>=2||higherBear>=2?'CONFIRMED':'MIXED';
+async function renderMTF(){
+  const frames=[{tf:'5m',interval:'5'},{tf:'15m',interval:'15'},{tf:'30m',interval:'30'},{tf:'1h',interval:'60'}];
+  const api='https://tradepoilot1.onrender.com/api/v1/market/history';
+  const results=await Promise.all(frames.map(async f=>{
+    try{
+      const res=await fetch(api+'?symbol='+encodeURIComponent(currentSymbol)+'&interval='+f.interval,{cache:'no-store'});
+      const body=await res.json(),payload=body?.data?.candles??body?.data?.data?.candles;
+      if(!res.ok||!Array.isArray(payload))throw new Error('History unavailable');
+      const bars=payload.map(c=>({time:Number(c.time),open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close),volume:Number(c.volume||0)}))
+        .filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close)).sort((a,b)=>a.time-b.time);
+      return {tf:f.tf,...mtfAnalyze(bars),count:bars.length};
+    }catch{return {tf:f.tf,bias:'UNAVAILABLE',score:null,rsi:null,macd:null,count:0};}
+  }));
+  const available=results.filter(x=>x.score!==null),bullish=available.filter(x=>x.bias==='BULLISH').length,bearish=available.filter(x=>x.bias==='BEARISH').length;
+  const direction=available.length<3?'DATA UNAVAILABLE':bullish>=3?'BULLISH':bearish>=3?'BEARISH':'MIXED';
+  const avg=available.length?Math.round(available.reduce((a,x)=>a+x.score,0)/available.length):null;
+  const higher=available.filter(x=>x.tf!=='5m'),higherBull=higher.filter(x=>x.bias==='BULLISH').length,higherBear=higher.filter(x=>x.bias==='BEARISH').length;
+  const confirmation=higher.length<2?'DATA UNAVAILABLE':higherBull>=2||higherBear>=2?'CONFIRMED':'MIXED';
   const box=document.getElementById('mtfRows');
-  if(box)box.innerHTML=results.map(x=>`<div class="mtf-row"><b>${x.tf}</b><span class="mtf-bias ${x.bias.toLowerCase()}">${x.bias}</span><span>${x.score}/100</span><small>RSI ${x.rsi.toFixed(1)} · ${x.macd>=0?'MACD +':'MACD −'}</small></div>`).join('');
+  if(box)box.innerHTML=results.map(x=>`<div class="mtf-row"><b>${x.tf}</b><span class="mtf-bias ${x.bias.toLowerCase()}">${x.bias}</span><span>${x.score===null?'—':x.score+'/100'}</span><small>${x.rsi===null?'History unavailable':`RSI ${x.rsi.toFixed(1)} · ${x.macd>=0?'MACD +':'MACD −'}`}</small></div>`).join('');
   const d=document.getElementById('mtfDirection');if(d)d.textContent=direction;
-  const sc=document.getElementById('mtfScore');if(sc)sc.textContent=avg+'/100';
+  const sc=document.getElementById('mtfScore');if(sc)sc.textContent=avg===null?'—':avg+'/100';
   const hc=document.getElementById('mtfConfirmation');if(hc)hc.textContent=confirmation;
-  const rd=document.getElementById('mtfRead');if(rd)rd.textContent=`Higher-timeframe confirmation: ${confirmation}. ${bullish}/4 timeframes are bullish and ${bearish}/4 are bearish. This is analytical context only.`;
+  const rd=document.getElementById('mtfRead');if(rd)rd.textContent=available.length<3?'MTF analysis unavailable: insufficient real historical data.':`Higher-timeframe confirmation: ${confirmation}. ${bullish}/${available.length} available timeframes are bullish and ${bearish}/${available.length} are bearish. Analytical context only.`;
   window.tradePilotMTF={results,direction,avg,confirmation};
 }
 window.runTradePilotMTFEngine=renderMTF;
