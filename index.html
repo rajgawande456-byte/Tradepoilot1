@@ -742,7 +742,7 @@ window.addEventListener("DOMContentLoaded",()=>{
          const q=response.ok?extractQuote(body):null;
          if(q && q.live){
            priceEl.textContent=q.price.toLocaleString('en-IN',{maximumFractionDigits:2});
-           status.textContent='LIVE · '+q.provider+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--green)';
+           status.textContent=q.provider+' · snapshot fetched '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--green)';
          }else{
            priceEl.textContent='—';status.textContent=(body?.message||'Quote unavailable')+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';
          }
