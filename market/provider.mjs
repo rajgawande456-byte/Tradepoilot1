@@ -195,7 +195,7 @@ function createUpstoxProvider(env) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
     }
     const parseCandleTime = value => {
-      if (typeof value === 'number' || (typeof value === 'string' && /^\\d+$/.test(value.trim()))) {
+      if (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value.trim()))) {
         const numeric = Number(value);
         if (!Number.isFinite(numeric)) return NaN;
         return Math.floor(numeric > 1e12 ? numeric / 1000 : numeric);
