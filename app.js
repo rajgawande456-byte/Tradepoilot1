@@ -391,34 +391,10 @@ window.runTradePilotMTFEngine=renderMTF;
 /* =========================
    STEP 11 — OPTION CHAIN ENGINE
    ========================= */
-function optionChainData(base){
-  const step=currentSymbol==='BANKNIFTY'?100:50, atm=Math.round(base/step)*step;
-  const rows=[];
-  for(let k=-5;k<=5;k++){
-    const strike=atm+k*step, dist=Math.abs(k);
-    const ceOI=Math.round((820000-dist*78000+Math.abs(Math.sin(k+2))*24000));
-    const peOI=Math.round((680000-dist*56000+Math.abs(Math.cos(k+1))*28000));
-    const ceChg=Math.round(ceOI*(0.12*Math.sin(k+1)-0.035));
-    const peChg=Math.round(peOI*(0.10*Math.cos(k)-0.025));
-    const ceVol=Math.round(190000+Math.abs(Math.sin(k*1.4))*150000-dist*9000);
-    const peVol=Math.round(175000+Math.abs(Math.cos(k*1.2))*155000-dist*8000);
-    const iv=13.2+dist*0.55+Math.abs(Math.sin(k))*0.7;
-    const time=Math.max(0.08,21/365);
-    const intrinsicCE=Math.max(0,base-strike), intrinsicPE=Math.max(0,strike-base);
-    const cePrice=Math.max(0.5,intrinsicCE+Math.max(4,base*.006)*Math.exp(-dist*.23));
-    const pePrice=Math.max(0.5,intrinsicPE+Math.max(4,base*.006)*Math.exp(-dist*.23));
-    const deltaCE=base>strike?Math.max(.08,.58-dist*.09):Math.min(.92,.42+Math.max(0,5-dist)*.09);
-    const deltaPE=deltaCE-1;
-    rows.push({strike,ceOI,peOI,ceChg,peChg,ceVol,peVol,iv,cePrice,pePrice,deltaCE,deltaPE,gamma:0.00004+Math.max(0,.000025*(5-dist)),theta:-(cePrice+pePrice)*.018,vega:(cePrice+pePrice)*.07});
-  }
-  const totalCE=rows.reduce((a,r)=>a+r.ceOI,0),totalPE=rows.reduce((a,r)=>a+r.peOI,0),pcr=totalPE/Math.max(totalCE,1);
-  const resistance=rows.filter(r=>r.strike>base).sort((a,b)=>b.ceOI-a.ceOI)[0]||rows[rows.length-1];
-  const support=rows.filter(r=>r.strike<base).sort((a,b)=>b.peOI-a.peOI)[0]||rows[0];
-  const cePressure=rows.reduce((a,r)=>a+r.ceOI+r.ceChg*.4,0),pePressure=rows.reduce((a,r)=>a+r.peOI+r.peChg*.4,0);
-  const ceStrength=Math.round(Math.min(95,Math.max(20,50+(cePressure-pePressure)/Math.max(cePressure+pePressure,1)*100)));
-  const peStrength=Math.round(Math.min(95,Math.max(20,50+(pePressure-cePressure)/Math.max(cePressure+pePressure,1)*100)));
-  return {atm,rows,pcr,resistance:resistance.strike,support:support.strike,ceStrength,peStrength,totalCE,totalPE};
-}
+/* STEP 11 — OPTION CHAIN DATA SAFETY
+   Synthetic option-chain calculations intentionally removed.
+   Only verified provider data may populate this panel.
+*/
 function renderOptionChain(){
   const body=document.getElementById('optionChainRows');
   if(body) body.innerHTML='';
