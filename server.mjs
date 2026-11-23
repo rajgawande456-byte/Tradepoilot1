@@ -80,7 +80,10 @@ function serveStaticFile(req, res, pathname) {
     'cache-control': filePath.endsWith('index.html')
       ? 'no-cache'
       : 'public, max-age=3600',
-    'x-content-type-options': 'nosniff'
+    'x-content-type-options': 'nosniff',
+    'x-frame-options': 'DENY',
+    'referrer-policy': 'strict-origin-when-cross-origin',
+    'permissions-policy': 'camera=(), microphone=(), geolocation=()'
   });
 
   if (req.method === 'HEAD') {
