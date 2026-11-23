@@ -203,14 +203,14 @@ function createUpstoxProvider(env) {
       const parsed = Date.parse(value);
       return Number.isFinite(parsed) ? Math.floor(parsed / 1000) : NaN;
     };
-    const normalized = candles
-      .filter(row => Array.isArray(row) && row.length >= 6)
-      .map(row => ({
-        time: parseCandleTime(row[0]),
-        open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
-        close: Number(row[4]), volume: Number(row[5] ?? 0),
-        oi: row[6] == null || !Number.isFinite(Number(row[6])) || Number(row[6]) < 0 ? null : Number(row[6])
-      })).filter(c =>
+    const rowsWithShape = candles.filter(row => Array.isArray(row) && row.length >= 6);
+    const normalized = rowsWithShape.map(row => ({
+      time: parseCandleTime(row[0]),
+      open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
+      close: Number(row[4]), volume: Number(row[5] ?? 0),
+      oi: row[6] == null || !Number.isFinite(Number(row[6])) || Number(row[6]) < 0 ? null : Number(row[6])
+    }));
+    const validCandles = normalized.filter(c =>
       Number.isFinite(c.time) &&
       [c.open,c.high,c.low,c.close,c.volume].every(Number.isFinite) &&
       c.volume >= 0 &&
@@ -219,10 +219,10 @@ function createUpstoxProvider(env) {
       c.high >= c.low
     );
     const uniqueByTime = new Map();
-    for (const candle of normalized) uniqueByTime.set(candle.time, candle);
+    for (const candle of validCandles) uniqueByTime.set(candle.time, candle);
     const cleanCandles = [...uniqueByTime.values()].sort((a,b) => a.time-b.time);
     if (!cleanCandles.length) {
-      throw new MarketDataProviderError('UPSTOX_HISTORY_INVALID', 'Historical candle rows failed validation.', 502);
+      throw new MarketDataProviderError('UPSTOX_HISTORY_INVALID', `Historical candle validation failed: received ${candles.length} rows, ${rowsWithShape.length} rows with expected shape, ${validCandles.length} valid rows.`, 502);
     }
     return {
       symbol: safeSymbol, instrumentKey, provider: 'UPSTOX', interval: safeInterval,
