@@ -64,9 +64,21 @@ function serveStaticFile(req, res, pathname) {
   }
 
   let stat;
+  let realFilePath;
+  let realRootPath;
   try {
     stat = fs.statSync(filePath);
+    realFilePath = fs.realpathSync(filePath);
+    realRootPath = fs.realpathSync(ROOT_DIR);
   } catch {
+    return false;
+  }
+
+  // Prevent symlinks inside the static directory from exposing files outside it.
+  if (
+    realFilePath !== realRootPath &&
+    !realFilePath.startsWith(realRootPath + path.sep)
+  ) {
     return false;
   }
 
