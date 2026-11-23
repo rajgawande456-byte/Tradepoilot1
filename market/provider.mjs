@@ -80,7 +80,7 @@ function createUpstoxProvider(env) {
       );
     }
 
-    const quote = Object.values(result.data)[0];
+    const quote = result.data[instrumentKey] || Object.values(result.data)[0];
 
     if (!quote) {
       throw new MarketDataProviderError(
