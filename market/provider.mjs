@@ -105,6 +105,18 @@ function createUpstoxProvider(env) {
         502
       );
     }
+    const volume = quote.volume == null ? null : Number(quote.volume);
+    const averagePrice = quote.average_price == null ? null : Number(quote.average_price);
+    const netChange = quote.net_change == null ? null : Number(quote.net_change);
+    if ((volume !== null && (!Number.isFinite(volume) || volume < 0)) ||
+      (averagePrice !== null && (!Number.isFinite(averagePrice) || averagePrice <= 0)) ||
+      (netChange !== null && !Number.isFinite(netChange))) {
+      throw new MarketDataProviderError(
+        'QUOTE_METADATA_INVALID',
+        'Quote volume or metadata failed validation.',
+        502
+      );
+    }
     const presentOHLC = Object.values(parsedOHLC).filter(value => value !== null);
     if (presentOHLC.some(value => !Number.isFinite(value) || value <= 0) ||
       (parsedOHLC.high !== null && parsedOHLC.low !== null && parsedOHLC.high < parsedOHLC.low) ||
@@ -129,9 +141,9 @@ function createUpstoxProvider(env) {
       high: parsedOHLC.high,
       low: parsedOHLC.low,
       close: parsedOHLC.close,
-      volume: quote.volume ?? null,
-      averagePrice: quote.average_price ?? null,
-      netChange: quote.net_change ?? null,
+      volume,
+      averagePrice,
+      netChange,
       timestamp: quote.last_trade_time ?? quote.timestamp ?? null,
       receivedAt: new Date().toISOString(),
       raw: quote
