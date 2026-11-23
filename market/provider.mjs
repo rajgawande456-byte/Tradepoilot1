@@ -90,16 +90,45 @@ function createUpstoxProvider(env) {
       );
     }
 
+    const lastPrice = Number(quote.last_price);
+    const ohlc = quote.ohlc || {};
+    const parsedOHLC = {
+      open: ohlc.open == null ? null : Number(ohlc.open),
+      high: ohlc.high == null ? null : Number(ohlc.high),
+      low: ohlc.low == null ? null : Number(ohlc.low),
+      close: ohlc.close == null ? null : Number(ohlc.close)
+    };
+    if (!Number.isFinite(lastPrice) || lastPrice <= 0) {
+      throw new MarketDataProviderError(
+        'QUOTE_PRICE_INVALID',
+        'Quote last price is missing or invalid.',
+        502
+      );
+    }
+    const presentOHLC = Object.values(parsedOHLC).filter(value => value !== null);
+    if (presentOHLC.some(value => !Number.isFinite(value) || value <= 0) ||
+      (parsedOHLC.high !== null && parsedOHLC.low !== null && parsedOHLC.high < parsedOHLC.low) ||
+      (parsedOHLC.high !== null && parsedOHLC.open !== null && parsedOHLC.high < parsedOHLC.open) ||
+      (parsedOHLC.high !== null && parsedOHLC.close !== null && parsedOHLC.high < parsedOHLC.close) ||
+      (parsedOHLC.low !== null && parsedOHLC.open !== null && parsedOHLC.low > parsedOHLC.open) ||
+      (parsedOHLC.low !== null && parsedOHLC.close !== null && parsedOHLC.low > parsedOHLC.close)) {
+      throw new MarketDataProviderError(
+        'QUOTE_OHLC_INVALID',
+        'Quote OHLC values failed validation.',
+        502
+      );
+    }
+
     return {
       symbol: safeSymbol,
       instrumentKey,
       provider: 'UPSTOX',
       live: true,
-      lastPrice: quote.last_price ?? null,
-      open: quote.ohlc?.open ?? null,
-      high: quote.ohlc?.high ?? null,
-      low: quote.ohlc?.low ?? null,
-      close: quote.ohlc?.close ?? null,
+      lastPrice,
+      open: parsedOHLC.open,
+      high: parsedOHLC.high,
+      low: parsedOHLC.low,
+      close: parsedOHLC.close,
       volume: quote.volume ?? null,
       averagePrice: quote.average_price ?? null,
       netChange: quote.net_change ?? null,
