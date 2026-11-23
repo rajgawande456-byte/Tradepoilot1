@@ -707,13 +707,20 @@ window.addEventListener("DOMContentLoaded",()=>{
      const p=Number(q.lastPrice ?? q.last_price ?? q.ltp ?? q.price);
      return Number.isFinite(p)&&p>0 ? {price:p,live:q.live===true,provider:q.provider||'API'} : null;
    }
+   let refreshInFlight=false;
    async function refresh(){
+     if(refreshInFlight)return;
+     refreshInFlight=true;
      const tag=document.querySelector('.demo-tag');
      if(tag) tag.textContent='● QUOTES: API STATUS · CHART: DEMO';
      await Promise.all(symbols.map(async(sym,i)=>{
        const card=document.getElementById('market'+i), priceEl=document.getElementById('price'+i), status=card?.querySelector('.market-change');
        try{
-         const response=await fetch(API+'?symbol='+encodeURIComponent(sym),{cache:'no-store'});
+         const controller=new AbortController();
+         const timeout=setTimeout(()=>controller.abort(),8000);
+         let response;
+         try{response=await fetch(API+'?symbol='+encodeURIComponent(sym),{cache:'no-store',signal:controller.signal});}
+         finally{clearTimeout(timeout);}
          const body=await response.json().catch(()=>null);
          const q=response.ok?extractQuote(body):null;
          if(q && q.live){
@@ -724,6 +731,7 @@ window.addEventListener("DOMContentLoaded",()=>{
          }
        }catch(err){priceEl.textContent='—';status.textContent='API offline · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';}
      }));
+     refreshInFlight=false;
    }
    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{refresh();setInterval(refresh,5000);});
    else {refresh();setInterval(refresh,5000);}
