@@ -109,9 +109,42 @@ function createUpstoxProvider(env) {
     };
   }
 
+  async function getHistory(symbol, interval = '5') {
+    const safeSymbol = validateSymbol(symbol);
+    const allowedIntervals = new Set(['1', '2', '3', '5', '10', '15', '30', '60', '120', '240']);
+    const safeInterval = String(interval);
+    if (!allowedIntervals.has(safeInterval)) {
+      throw new MarketDataProviderError('INTERVAL_NOT_ALLOWED', 'Unsupported candle interval.', 400);
+    }
+    const instrumentKey = INSTRUMENT_KEYS[safeSymbol];
+    const url = new URL('https://api.upstox.com/v3/historical-candle/intraday/' + encodeURIComponent(instrumentKey) + '/minutes/' + safeInterval);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) {
+      throw new MarketDataProviderError('UPSTOX_HISTORY_ERROR', `Upstox historical candles returned HTTP ${response.status}.`, 502);
+    }
+    const result = await response.json();
+    const candles = result?.data?.candles;
+    if (!Array.isArray(candles)) {
+      throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
+    }
+    return {
+      symbol: safeSymbol, instrumentKey, provider: 'UPSTOX', interval: safeInterval,
+      live: true, candles: candles.map(row => ({
+        time: Math.floor(Date.parse(row[0]) / 1000),
+        open: Number(row[1]), high: Number(row[2]), low: Number(row[3]),
+        close: Number(row[4]), volume: Number(row[5] || 0), oi: row[6] == null ? null : Number(row[6])
+      })).filter(c => Number.isFinite(c.time) && [c.open,c.high,c.low,c.close].every(Number.isFinite))
+    };
+  }
+
   return {
     getSnapshot,
-    snapshot: getSnapshot
+    snapshot: getSnapshot,
+    getHistory
   };
 }
 
