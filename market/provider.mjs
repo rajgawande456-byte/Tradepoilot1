@@ -90,6 +90,17 @@ function createUpstoxProvider(env) {
     const quote = result.data[instrumentKey] || Object.values(result.data).find(entry => entry && entry.instrument_token === instrumentKey);
 
     if (!quote) {
+      const returnedKeys = Object.keys(result.data);
+      console.error('Upstox snapshot quote lookup miss', {
+        symbol: safeSymbol,
+        requestedInstrumentKey: instrumentKey,
+        returnedKeys: returnedKeys.slice(0, 20),
+        returnedInstrumentTokens: Object.values(result.data)
+          .filter(entry => entry && typeof entry === 'object')
+          .map(entry => entry.instrument_token)
+          .filter(value => value != null)
+          .slice(0, 20)
+      });
       throw new MarketDataProviderError(
         'QUOTE_NOT_FOUND',
         'Quote was not found for the requested instrument.',
