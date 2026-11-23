@@ -17,6 +17,7 @@ import {
   verifyWebSocketAccess
 } from './market/ws-transport.mjs';
 import { handleAuthRequest } from './auth/routes.mjs';
+import { startUpstoxStream } from './market/upstox-stream.mjs';
 import {
   isDatabaseConfigured,
   checkDatabaseConnection
@@ -489,6 +490,15 @@ const server = http.createServer(async (req, res) => {
     );
   }
 });
+
+const stopUpstoxStream = MARKET_DATA_PROVIDER === 'UPSTOX'
+  ? startUpstoxStream({
+      token: process.env.UPSTOX_ACCESS_TOKEN,
+      marketStream,
+      onStatus: status => console.log('Upstox V3 stream:', status)
+    })
+  : () => {};
+server.on('close', stopUpstoxStream);
 
 // WebSocket market stream
 server.on('upgrade', (req, socket, head) => {
