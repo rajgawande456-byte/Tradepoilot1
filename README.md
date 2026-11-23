@@ -9,6 +9,7 @@ This is a dependency-free Node.js reference boundary for the production backend.
 - `GET /health` — service health only.
 - `GET /api/v1/me` — intentionally returns `401` until real server authentication is connected.
 - `GET /api/v1/market/snapshot` — intentionally returns `503` when no verified market-data provider is configured; it never invents a live quote.
+- `GET /api/v1/market/history?symbol=NIFTY%2050&interval=5` — verified Upstox intraday candles; supported intervals: 1,2,3,5,10,15,30 minutes and 1,2,4 hours.
 
 ## Production rules
 - Put credentials only in server secret storage/environment.
