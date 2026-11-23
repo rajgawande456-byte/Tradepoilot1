@@ -72,6 +72,11 @@ export function createMarketStream({
         client.send(message);
       } catch {
         clients.delete(client);
+        try {
+          client.close?.(1011);
+        } catch {
+          // Failed clients are removed even if close also fails.
+        }
       }
     }
 
