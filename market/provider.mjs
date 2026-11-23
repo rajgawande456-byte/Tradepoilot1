@@ -63,6 +63,13 @@ function createUpstoxProvider(env) {
     });
 
     if (!response.ok) {
+      const upstreamBody = await response.text().catch(() => '');
+      // Log only the upstream error body; never log request headers or access tokens.
+      console.error('Upstox snapshot upstream error', {
+        status: response.status,
+        symbol: safeSymbol,
+        body: upstreamBody.slice(0, 500)
+      });
       throw new MarketDataProviderError(
         'UPSTOX_API_ERROR',
         `Upstox returned HTTP ${response.status}.`,
