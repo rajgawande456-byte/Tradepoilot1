@@ -439,11 +439,19 @@ function calcRSI(values,period=14){
 function calcMACD(values){
   const ema12=calcEMA(values,12);
   const ema26=calcEMA(values,26);
-  const macd=values.map((v,i)=>ema12[i]-ema26[i]);
-  const signal=calcEMA(macd,9);
-  return {macd:macd[macd.length-1],signal:signal[signal.length-1]};
+  const macdLine=values.map((v,i)=>ema12[i]-ema26[i]);
+  const signalLine=calcEMA(macdLine,9);
+  const last=macdLine.length-1;
+  const histogram=macdLine[last]-signalLine[last];
+  const previousHistogram=last>0?macdLine[last-1]-signalLine[last-1]:0;
+  return {
+    macd:macdLine[last],
+    signal:signalLine[last],
+    histogram,
+    previousHistogram,
+    crossover:previousHistogram<=0&&histogram>0?"bullish":previousHistogram>=0&&histogram<0?"bearish":"none"
+  };
 }
-
 function calcVWAP(bars){
   let totalPV=0,totalV=0;
   return bars.map(b=>{
@@ -583,13 +591,12 @@ function updateAnalysis(){
 
   const trendStatus=document.getElementById("trend-status");
   trendStatus.textContent=trend;
-  trendStatus.className="status "+(bullish?"status-green":"status-red");
-
-  const rsi=calcRSI(closes);
-  document.getElementById("rsi-value").textContent=rsi.toFixed(2);
-  document.getElementById("rsi-text").textContent=
-    rsi>70?"Momentum elevated (overbought zone)":
-    rsi<30?"Momentum weak (oversold zone)":"Momentum in neutral zone";
+  trendStatus.className="statuconst m=calcMACD(closes);
+  document.getElementById("macd-value").textContent=m.macd.toFixed(2);
+  const macdDirection=m.histogram>0?"Bullish momentum":m.histogram<0?"Bearish momentum":"Momentum neutral";
+  const macdCross=m.crossover==="bullish"?" · Bullish crossover":m.crossover==="bearish"?" · Bearish crossover":"";
+  const histogramTrend=m.histogram>m.previousHistogram?" · Histogram rising":m.histogram<m.previousHistogram?" · Histogram falling":" · Histogram unchanged";
+  document.getElementById("macd-text").textContent=macdDirection+macdCross+histogramTrend;k (oversold zone)":"Momentum in neutral zone";
 
   const m=calcMACD(closes);
   document.getElementById("macd-value").textContent=m.macd.toFixed(2);
