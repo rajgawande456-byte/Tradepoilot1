@@ -25,6 +25,9 @@ export function createMarketStream({
   provider = null,
   maxAgeMs = 15000
 } = {}) {
+  const safeMaxAgeMs = Number.isFinite(Number(maxAgeMs)) && Number(maxAgeMs) > 0
+    ? Number(maxAgeMs)
+    : 15000;
   const clients = new Map();
   const lastSeq = new Map();
 
@@ -53,7 +56,7 @@ export function createMarketStream({
     const validated = validateSequenceAndFreshness(
       tick,
       lastSeq.get(tick.symbol),
-      maxAgeMs
+      safeMaxAgeMs
     );
 
     lastSeq.set(tick.symbol, validated.sequence);
