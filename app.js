@@ -186,14 +186,14 @@ function srTouches(bars, price, tolerance){
 
 function srPivot(bars){
   if(!bars.length) return null;
-  // Use the last completed 1/3 of available synthetic session as "previous day" proxy.
+  // These are rolling-window pivots from the loaded candles, NOT previous-day pivots.
   const n=bars.length;
   const chunk=Math.max(5,Math.floor(n/3));
-  const prev=bars.slice(Math.max(0,n-2*chunk), Math.max(0,n-chunk));
-  if(!prev.length) return null;
-  const H=Math.max(...prev.map(b=>b.high));
-  const L=Math.min(...prev.map(b=>b.low));
-  const C=prev[prev.length-1].close;
+  const windowBars=bars.slice(Math.max(0,n-2*chunk), Math.max(0,n-chunk));
+  if(!windowBars.length) return null;
+  const H=Math.max(...windowBars.map(b=>b.high));
+  const L=Math.min(...windowBars.map(b=>b.low));
+  const C=windowBars[windowBars.length-1].close;
   const P=(H+L+C)/3;
   return {P,R1:2*P-L,S1:2*P-H,R2:P+(H-L),S2:P-(H-L),H,L,C};
 }
@@ -215,14 +215,14 @@ function srBuildLevels(bars){
 
   const special=[];
   if(pivot){
-    special.push({price:pivot.R1,name:'R1',source:'Pivot'});
-    special.push({price:pivot.R2,name:'R2',source:'Pivot'});
-    special.push({price:pivot.S1,name:'S1',source:'Pivot'});
-    special.push({price:pivot.S2,name:'S2',source:'Pivot'});
+    special.push({price:pivot.R1,name:'R1',source:'Window Pivot R1'});
+    special.push({price:pivot.R2,name:'R2',source:'Window Pivot R2'});
+    special.push({price:pivot.S1,name:'S1',source:'Window Pivot S1'});
+    special.push({price:pivot.S2,name:'S2',source:'Window Pivot S2'});
   }
-  special.push({price:prevHigh,name:'Prev High',source:'Previous High'});
-  special.push({price:prevLow,name:'Prev Low',source:'Previous Low'});
-  special.push({price:dayOpen,name:'Day Open',source:'Day Open'});
+  special.push({price:prevHigh,name:'Prev High',source:'Loaded-Window High'});
+  special.push({price:prevLow,name:'Prev Low',source:'Loaded-Window Low'});
+  special.push({price:dayOpen,name:'Day Open',source:'First Loaded Candle Open'});
   special.push({price:vwap,name:'VWAP',source:'VWAP'});
 
   function makeLevel(c, side){
