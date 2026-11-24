@@ -752,7 +752,7 @@ window.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 <script>
- // TRADEPILOT_LIVE_API_PATCH v3: quote cards use verified snapshots; charts use historical candles plus verified live ticks.
+ // TRADEPILOT_LIVE_API_PATCH v4: verified quotes display exchange trade time; WebSocket owns chart status.
  (function(){
    const API='https://tradepoilot-api.onrender.com/api/v1/market/snapshot';
    const symbols=['NIFTY 50','BANKNIFTY','FINNIFTY'];
@@ -761,33 +761,48 @@ window.addEventListener("DOMContentLoaded",()=>{
      const q=body?.data ?? body?.result?.data ?? body?.result ?? body;
      if(!q || typeof q!=='object') return null;
      const p=Number(q.lastPrice ?? q.last_price ?? q.ltp ?? q.price);
-     return Number.isFinite(p)&&p>0 ? {price:p,live:q.live===true,provider:q.provider||'API'} : null;
+     return Number.isFinite(p)&&p>0 ? {
+       price:p,live:q.live===true,provider:q.provider||'API',
+       timestamp:q.timestamp??q.last_trade_time??null
+     } : null;
+   }
+   function formatTradeTime(value){
+     if(value==null||value==='')return '';
+     let date;
+     if(typeof value==='number'||/^\\d+$/.test(String(value))){
+       let n=Number(value);
+       if(n>0&&n<1e11)n*=1000;
+       date=new Date(n);
+     }else date=new Date(value);
+     if(!Number.isFinite(date.getTime()))return '';
+     return date.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
    }
    let refreshInFlight=false;
    async function refresh(){
      if(refreshInFlight)return;
      refreshInFlight=true;
-     const tag=document.querySelector('.demo-tag');
-     if(tag) tag.textContent='● QUOTES: API STATUS · CHART: HISTORICAL API';
-     await Promise.all(symbols.map(async(sym,i)=>{
-       const card=document.getElementById('market'+i), priceEl=document.getElementById('price'+i), status=card?.querySelector('.market-change');
-       try{
-         const controller=new AbortController();
-         const timeout=setTimeout(()=>controller.abort(),8000);
-         let response;
-         try{response=await fetch(API+'?symbol='+encodeURIComponent(sym),{cache:'no-store',signal:controller.signal});}
-         finally{clearTimeout(timeout);}
-         const body=await response.json().catch(()=>null);
-         const q=response.ok?extractQuote(body):null;
-         if(q && q.live){
-           priceEl.textContent=q.price.toLocaleString('en-IN',{maximumFractionDigits:2});
-           status.textContent=q.provider+' · snapshot fetched '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--green)';
-         }else{
-           priceEl.textContent='—';status.textContent=(body?.message||'Quote unavailable')+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';
-         }
-       }catch(err){priceEl.textContent='—';status.textContent='API offline · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';}
-     }));
-     refreshInFlight=false;
+     try{
+       await Promise.all(symbols.map(async(sym,i)=>{
+         const card=document.getElementById('market'+i), priceEl=document.getElementById('price'+i), status=card?.querySelector('.market-change');
+         try{
+           const controller=new AbortController();
+           const timeout=setTimeout(()=>controller.abort(),8000);
+           let response;
+           try{response=await fetch(API+'?symbol='+encodeURIComponent(sym),{cache:'no-store',signal:controller.signal});}
+           finally{clearTimeout(timeout);}
+           const body=await response.json().catch(()=>null);
+           const q=response.ok?extractQuote(body):null;
+           if(q && q.live){
+             priceEl.textContent=q.price.toLocaleString('en-IN',{maximumFractionDigits:2});
+             const tradedAt=formatTradeTime(q.timestamp);
+             status.textContent=q.provider+' · '+(tradedAt?'last traded '+tradedAt+' IST':'latest available quote · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+             status.style.color=tradedAt?'var(--muted)':'var(--green)';
+           }else{
+             priceEl.textContent='—';status.textContent=(body?.message||'Quote unavailable')+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';
+           }
+         }catch(err){priceEl.textContent='—';status.textContent='API offline · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';}
+       }));
+     }finally{refreshInFlight=false;}
    }
    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{refresh();setInterval(refresh,15000);});
    else {refresh();setInterval(refresh,15000);}
