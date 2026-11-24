@@ -368,6 +368,7 @@ let selectedTF = "1m";
 let chart;
 let candleSeries;
 let emaSeries;
+let ema21Series;
 let vwapSeries;
 let candles = [];
 
@@ -501,6 +502,12 @@ function initChart(){
     title:"EMA 9"
   });
 
+  ema21Series=chart.addLineSeries({
+    color:"#4cc9f0",
+    lineWidth:2,
+    title:"EMA 21"
+  });
+
   vwapSeries=chart.addLineSeries({
     color:"#f3c969",
     lineWidth:2,
@@ -537,8 +544,9 @@ async function updateChart(){
     if(realBars.length<2)throw new Error("Historical API returned fewer than 2 valid candles");
     candles=realBars;
     candleSeries.setData(candles);
-    const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),vwap=calcVWAP(candles);
+    const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),ema21=calcEMA(closes,21),vwap=calcVWAP(candles);
     emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
+    ema21Series.setData(candles.map((c,i)=>({time:c.time,value:ema21[i]})));
     vwapSeries.setData(candles.map((c,i)=>({time:c.time,value:vwap[i]})));
     chart.timeScale().fitContent();
     updateAnalysis();
@@ -548,6 +556,7 @@ async function updateChart(){
     if(!candles.length){
       candleSeries.setData([]);
       emaSeries.setData([]);
+      ema21Series.setData([]);
       vwapSeries.setData([]);
     }
     if(title)title.textContent=apiSymbol+" · "+(candles.length?"SHOWING LAST LOADED DATA · REFRESH FAILED":"HISTORICAL DATA UNAVAILABLE");
