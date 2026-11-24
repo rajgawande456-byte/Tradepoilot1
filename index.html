@@ -755,5 +755,164 @@ window.addEventListener("DOMContentLoaded",()=>{
  })();
 </script>
 
+
+<script>
+/* TRADEPILOT_LIVE_CANDLE_WS_V1
+   Adds verified Upstox WebSocket ticks to the existing historical chart.
+   Read-only market display; never places orders. */
+(function () {
+  const symbols = ["NIFTY 50", "BANKNIFTY", "FINNIFTY"];
+  let socket = null;
+  let reconnectTimer = null;
+  let stopped = false;
+  let activeSymbol = "";
+  let liveCandle = null;
+
+  function setStatus(message, color) {
+    const tag = document.querySelector(".demo-tag");
+    if (tag) {
+      tag.textContent = message;
+      if (color) tag.style.color = color;
+    }
+  }
+
+  function closeSocket() {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    if (socket) {
+      socket.onclose = null;
+      try { socket.close(); } catch {}
+      socket = null;
+    }
+  }
+
+  function intervalSeconds() {
+    return selectedTF === "1m" ? 60 :
+      selectedTF === "5m" ? 300 :
+      selectedTF === "15m" ? 900 : 3600;
+  }
+
+  function applyTick(tick) {
+    if (!tick || tick.symbol !== activeSymbol || !candleSeries) return;
+    const price = Number(tick.price);
+    if (!Number.isFinite(price) || price <= 0) return;
+
+    const parsed = tick.asOf ? Date.parse(tick.asOf) : Date.now();
+    if (!Number.isFinite(parsed)) return;
+    const seconds = Math.floor(parsed / 1000);
+    const bucket = Math.floor(seconds / intervalSeconds()) * intervalSeconds();
+
+    const lastHistorical = candles.length ? candles[candles.length - 1] : null;
+    if (!liveCandle || liveCandle.time !== bucket) {
+      const sameBucket = lastHistorical && lastHistorical.time === bucket;
+      liveCandle = {
+        time: bucket,
+        open: sameBucket ? lastHistorical.open : price,
+        high: Math.max(sameBucket ? lastHistorical.high : price, price),
+        low: Math.min(sameBucket ? lastHistorical.low : price, price),
+        close: price,
+        volume: sameBucket ? Number(lastHistorical.volume || 0) : 0
+      };
+    } else {
+      liveCandle.high = Math.max(liveCandle.high, price);
+      liveCandle.low = Math.min(liveCandle.low, price);
+      liveCandle.close = price;
+    }
+
+    try {
+      candleSeries.update({
+        time: liveCandle.time,
+        open: liveCandle.open,
+        high: liveCandle.high,
+        low: liveCandle.low,
+        close: liveCandle.close
+      });
+      setStatus("● UPSTOX · LIVE WEBSOCKET TICKS", "var(--green)");
+      const title = document.getElementById("chart-title");
+      if (title) title.textContent = activeSymbol + " · " + selectedTF + " · LIVE TICK";
+    } catch (error) {
+      setStatus("● LIVE TICK · CHART UPDATE WAITING", "var(--yellow)");
+    }
+  }
+
+  function connect() {
+    if (stopped || !activeSymbol) return;
+    closeSocket();
+    const target = activeSymbol;
+    const url = "wss://tradepoilot-api.onrender.com/api/v1/market/live?symbol=" +
+      encodeURIComponent(target);
+    try {
+      socket = new WebSocket(url);
+      socket.onopen = () => {
+        if (target === activeSymbol) setStatus("● LIVE WEBSOCKET CONNECTED · WAITING FOR TICK", "var(--yellow)");
+      };
+      socket.onmessage = event => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === "market_tick") applyTick(message.data);
+          else if (message.type === "stream_status" && target === activeSymbol) {
+            setStatus("● LIVE STREAM CONNECTED · WAITING FOR TICK", "var(--yellow)");
+          }
+        } catch {}
+      };
+      socket.onerror = () => {
+        setStatus("● LIVE STREAM RECONNECTING", "var(--yellow)");
+      };
+      socket.onclose = () => {
+        socket = null;
+        if (!stopped && target === activeSymbol && !reconnectTimer) {
+          reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            connect();
+          }, 3000);
+        }
+      };
+    } catch {
+      if (!reconnectTimer) reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connect();
+      }, 3000);
+    }
+  }
+
+  function syncSelection() {
+    const next = symbols[selectedMarket] || "NIFTY 50";
+    if (next === activeSymbol) return;
+    activeSymbol = next;
+    liveCandle = null;
+    closeSocket();
+    connect();
+  }
+
+  const originalSelectMarket = window.selectMarket;
+  if (typeof originalSelectMarket === "function") {
+    window.selectMarket = function () {
+      const result = originalSelectMarket.apply(this, arguments);
+      syncSelection();
+      return result;
+    };
+  }
+
+  const originalChangeTF = window.changeTF;
+  if (typeof originalChangeTF === "function") {
+    window.changeTF = function () {
+      const result = originalChangeTF.apply(this, arguments);
+      liveCandle = null;
+      return result;
+    };
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    syncSelection();
+    window.addEventListener("beforeunload", () => {
+      stopped = true;
+      closeSocket();
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
