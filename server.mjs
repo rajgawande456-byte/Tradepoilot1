@@ -491,7 +491,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-const stopUpstoxStream = MARKET_DATA_PROVIDER === 'UPSTOX'
+const stopUpstoxStream = MARKET_DATA_PROVIDER === 'UPSTOX' && process.env.ENABLE_UPSTOX_STREAM !== 'false'
   ? startUpstoxStream({
       token: process.env.UPSTOX_ACCESS_TOKEN,
       marketStream,
