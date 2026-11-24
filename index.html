@@ -172,17 +172,17 @@ label{display:block;color:var(--muted);font-size:12px}
       <div class="card market-card selected" onclick="selectMarket('NIFTY 50',0)" id="market0">
         <div class="market-name">NIFTY 50</div>
         <div class="market-price" id="price0">--</div>
-        <div class="market-change">Demo Market</div>
+        <div class="market-change">Waiting for verified live quote</div>
       </div>
       <div class="card market-card" onclick="selectMarket('BANKNIFTY',1)" id="market1">
         <div class="market-name">BANKNIFTY</div>
         <div class="market-price" id="price1">--</div>
-        <div class="market-change">Demo Market</div>
+        <div class="market-change">Waiting for verified live quote</div>
       </div>
       <div class="card market-card" onclick="selectMarket('FINNIFTY',2)" id="market2">
         <div class="market-name">FINNIFTY</div>
         <div class="market-price" id="price2">--</div>
-        <div class="market-change">Demo Market</div>
+        <div class="market-change">Waiting for verified live quote</div>
       </div>
     </div>
   </section>
@@ -340,7 +340,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="card">
       <h2 style="font-size:15px">Disclaimer</h2>
       <p class="metric-sub">
-        TradePilot AI demo dashboard uses simulated prices and calculations.
+        TradePilot AI displays market quotes and historical candles only when verified data is received. If live data is unavailable, the dashboard shows an unavailable status instead of a simulated price.
         Indicators and comparisons are for educational and analytical purposes only.
         They are not guaranteed trading signals or financial advice.
         Verify actual market data independently before making decisions.
@@ -349,15 +349,15 @@ label{display:block;color:var(--muted);font-size:12px}
   </section>
 
   <div class="footer">
-    TradePilot AI · Demo Analysis Dashboard · Simulated Data
+    TradePilot AI · Live Market Data Dashboard · Verify data timestamps before trading
   </div>
 </main>
 </div>
 
 <script>
 // ==============================
-// TRADEPILOT DEMO ENGINE
-// Simulated market data only
+// TRADEPILOT DASHBOARD ENGINE
+// Historical chart data is fetched from the backend API.
 // ==============================
 
 const marketNames = ["NIFTY 50","BANKNIFTY","FINNIFTY"];
