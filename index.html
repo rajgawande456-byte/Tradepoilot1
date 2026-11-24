@@ -146,6 +146,7 @@ label{display:block;color:var(--muted);font-size:12px}
   <div class="nav-list">
     <div class="nav-item active" onclick="scrollToSection('dashboard')">▦ Dashboard</div>
     <div class="nav-item" onclick="scrollToSection('beginner-section')">◎ Beginner Guide</div>
+    <div class="nav-item" onclick="scrollToSection('coach-section')">✦ Market Coach</div>
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
@@ -257,6 +258,34 @@ label{display:block;color:var(--muted);font-size:12px}
         <div class="card"><div class="metric-label">Price vs averages</div><div class="metric-value" id="beginner-position">—</div><div class="metric-sub">Current loaded candle close</div></div>
       </div>
       <p class="metric-sub">Educational explanation only. It is not a buy/sell recommendation. Confirm data freshness, candle close, stop-loss and position size before considering any trade.</p>
+    </div>
+  </section>
+
+  <!-- TRADEPILOT MARKET COACH -->
+  <section class="section" id="coach-section">
+    <div class="section-title">
+      <h2>TradePilot Market Coach · Explain the market</h2>
+      <span class="status status-blue">RULE-BASED BETA</span>
+    </div>
+    <div class="card">
+      <p class="metric-sub">A transparent learning assistant using the selected chart's loaded candles, EMA 9/21, RSI and MACD. It does not predict returns or place trades.</p>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Selected market</div><div class="metric-value" id="coach-symbol">NIFTY 50</div></div>
+        <div class="card"><div class="metric-label">Chart timeframe</div><div class="metric-value" id="coach-timeframe">1m</div></div>
+        <div class="card"><div class="metric-label">Data points</div><div class="metric-value" id="coach-bars">0</div></div>
+      </div>
+      <div class="result-box" style="margin-top:14px">
+        <div class="metric-label">MARKET READ</div>
+        <div class="metric-value" id="coach-headline">Waiting for chart data</div>
+        <p id="coach-summary" class="metric-sub">Load verified historical candles to receive an explanation.</p>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="result-box"><b>What supports this view?</b><p id="coach-evidence" class="metric-sub">No analysis yet.</p></div>
+        <div class="result-box"><b>What should a learner watch?</b><p id="coach-watch" class="metric-sub">Wait for chart data.</p></div>
+      </div>
+      <div class="result-box"><b>Risk reminder</b><p id="coach-risk" class="metric-sub">Define your invalidation level and position size before any real trade.</p></div>
+      <button class="small-btn" type="button" id="coach-refresh">REFRESH MARKET EXPLANATION</button>
+      <p class="metric-sub">Educational analysis only—not financial advice, a guaranteed forecast, or a buy/sell signal. Results depend on available chart candles and may be delayed or incomplete.</p>
     </div>
   </section>
 
@@ -706,9 +735,33 @@ function updateAnalysis(){
     const histogramTrend=m.histogram>m.previousHistogram?" · Histogram rising":m.histogram<m.previousHistogram?" · Histogram falling":" · Histogram unchanged";
     macdText.textContent=direction+cross+histogramTrend;
   }
+  renderMarketCoach();
   const lows=candles.map(c=>c.low),highs=candles.map(c=>c.high);
   const support=document.getElementById("support-value");if(support)support.textContent=Math.min(...lows).toFixed(2);
   const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent=Math.max(...highs).toFixed(2);
+}
+function renderMarketCoach(){
+  const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+  const symbol=["NIFTY 50","BANKNIFTY","FINNIFTY"][selectedMarket]||"Selected market";
+  put("coach-symbol",symbol);put("coach-timeframe",selectedTF);put("coach-bars",candles.length);
+  if(!candles.length){put("coach-headline","Waiting for chart data");put("coach-summary","No chart candles are loaded yet. Check data availability and try again.");put("coach-evidence","No evidence available.");put("coach-watch","Wait for verified candles; do not infer a trend from an empty chart.");return;}
+  const closes=candles.map(x=>x.close),last=closes[closes.length-1];
+  const e9=calcEMA(closes,9).at(-1),e21=calcEMA(closes,21).at(-1),rsi=calcRSI(closes),m=calcMACD(closes);
+  const up=last>e9&&e9>e21,down=last<e9&&e9<e21;
+  const trend=up?"Bullish alignment":down?"Bearish alignment":"Mixed / sideways conditions";
+  const rsiText=rsi>=70?"RSI is in the elevated zone ("+rsi.toFixed(1)+").":rsi<=30?"RSI is in the weak/oversold zone ("+rsi.toFixed(1)+").":"RSI is in the middle range ("+rsi.toFixed(1)+").";
+  const macdText=m.histogram>0?"MACD histogram is positive.":m.histogram<0?"MACD histogram is negative.":"MACD histogram is near zero.";
+  const headline=up?"Price is above EMA 9 and EMA 21":down?"Price is below EMA 9 and EMA 21":"No clear EMA alignment";
+  put("coach-headline",headline);
+  put("coach-summary",trend+". Latest loaded close: "+last.toFixed(2)+". This describes the selected "+selectedTF+" chart only; it is not a prediction.");
+  put("coach-evidence","EMA 9: "+e9.toFixed(2)+" · EMA 21: "+e21.toFixed(2)+". "+rsiText+" "+macdText);
+  const lows=candles.map(x=>x.low),highs=candles.map(x=>x.high);
+  const support=Math.min(...lows),resistance=Math.max(...highs);
+  let watch="Watch whether a candle closes and holds beyond the nearby range; avoid treating an intrabar move as confirmation.";
+  if(up)watch="Watch whether price can hold above EMA 9; a move back below the averages can weaken this alignment.";
+  if(down)watch="Watch whether price remains below EMA 9; a recovery above both averages would weaken this bearish alignment.";
+  put("coach-watch",watch+" Loaded-window support: "+support.toFixed(2)+" · resistance: "+resistance.toFixed(2)+".");
+  put("coach-risk","Before any trade, define the price level that invalidates your idea, calculate quantity from your allowed rupee risk, and account for slippage and charges. Avoid entries when the chart data is stale or incomplete.");
 }
 function selectMarket(name,index){
   selectedMarket=index;
@@ -813,6 +866,9 @@ function runPremiumVerification(){
 window.addEventListener("DOMContentLoaded",()=>{
   initChart();
   updateChart();
+  const coachRefresh=document.getElementById("coach-refresh");
+  if(coachRefresh)coachRefresh.addEventListener("click",renderMarketCoach);
+  renderMarketCoach();
 });
 </script>
 
