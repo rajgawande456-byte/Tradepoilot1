@@ -150,6 +150,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
     <div class="nav-item" onclick="scrollToSection('safety-shield-section')">🛡 Trader Safety Shield</div>
     <div class="nav-item" onclick="scrollToSection('trading-dna-section')">🧬 Trading DNA</div>
+    <div class="nav-item" onclick="scrollToSection('trader-level-section')">🏆 Trader Level & XP</div>
     <div class="nav-item" onclick="scrollToSection('journal-section')">▤ Trading Journal</div>
     <div class="nav-item" onclick="scrollToSection('academy-section')">🎓 Beginner Academy</div>
     <div class="nav-item" onclick="scrollToSection('profile-section')">◉ My Progress</div>
@@ -540,6 +541,25 @@ label{display:block;color:var(--muted);font-size:12px}
         <p id="academy-feedback" class="metric-sub" role="status">Choose one answer and submit.</p>
       </div>
       <p class="metric-sub">Progress and streak are stored only in this browser/device. Daily challenge allows one attempt per local calendar day. No subscription or payment is needed for this learning beta.</p>
+    </div>
+  </section>
+
+  <section class="section" id="trader-level-section">
+    <div class="section-title"><h2>Trader Level & XP</h2><span class="status status-blue">PRACTICE REWARDS</span></div>
+    <div class="card">
+      <p class="metric-sub">Earn experience by completing Academy lessons, answering daily challenges correctly, and closing virtual practice trades. XP is calculated from your existing browser data; it is not a cash reward or a measure of trading skill.</p>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Your level</div><div class="metric-value" id="level-name">Beginner</div></div>
+        <div class="card"><div class="metric-label">Total XP</div><div class="metric-value" id="level-xp">0 XP</div></div>
+        <div class="card"><div class="metric-label">Next level</div><div class="metric-value" id="level-next">Learner</div></div>
+      </div>
+      <div class="result-box" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>Level progress</b><span id="level-progress-label" class="metric-sub">0 / 100 XP</span></div>
+        <div style="height:10px;background:var(--border);border-radius:8px;overflow:hidden;margin-top:10px"><div id="level-progress-bar" style="height:100%;width:0%;background:var(--blue);transition:width .2s"></div></div>
+        <div id="level-breakdown" class="metric-sub" style="margin-top:12px">Complete a lesson or practice activity to earn XP.</div>
+      </div>
+      <button class="small-btn" type="button" id="level-refresh" style="margin-top:12px">REFRESH XP</button>
+      <p class="metric-sub">XP formula: 50 per completed lesson, 20 per correct daily challenge, 10 per closed virtual trade, plus up to 50 streak bonus XP. Existing history is counted once from source records; nothing is deducted or overwritten.</p>
     </div>
   </section>
 
@@ -1535,5 +1555,35 @@ set('dna-strategies',strat?Object.entries(strategies).map(([k,v])=>k+': '+v+' tr
 $('dna-refresh').addEventListener('click',render);window.addEventListener('focus',render);window.addEventListener('storage',render);render();
 })();
 </script>
+<script>
+/* TRADEPILOT_TRADER_LEVEL_XP_V1 */
+(function(){
+const $=id=>document.getElementById(id);
+function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'null')||fallback;}catch{return fallback;}}
+function render(){
+ const academy=read('tradepilot.academy.v1',{lessons:[],attempts:{},streak:0});
+ const paper=read('tradepilot.paper.v1',{trades:[]});
+ const lessons=Array.isArray(academy.lessons)?new Set(academy.lessons).size:0;
+ const attempts=academy.attempts&&typeof academy.attempts==='object'?Object.values(academy.attempts):[];
+ const correct=attempts.filter(a=>a&&a.correct===true).length;
+ const closed=(Array.isArray(paper.trades)?paper.trades:[]).filter(t=>t&&t.side==='SELL'&&Number.isFinite(Number(t.pnl))).length;
+ const streakBonus=Math.min(50,Math.max(0,Number(academy.streak)||0)*5);
+ const xp=lessons*50+correct*20+closed*10+streakBonus;
+ const levels=[{name:'Beginner',min:0},{name:'Learner',min:100},{name:'Practitioner',min:250},{name:'Disciplined Trader',min:500},{name:'Market Strategist',min:1000},{name:'TradePilot Legend',min:2000}];
+ let idx=0;for(let i=0;i<levels.length;i++)if(xp>=levels[i].min)idx=i;
+ const current=levels[idx],next=levels[idx+1],floor=current.min,ceil=next?next.min:current.min;
+ const progress=next?Math.max(0,Math.min(100,(xp-floor)/(ceil-floor)*100)):100;
+ $('level-name').textContent=current.name;$('level-xp').textContent=xp.toLocaleString('en-IN')+' XP';
+ $('level-next').textContent=next?next.name:'Maximum level reached';
+ $('level-progress-label').textContent=next?(xp-floor)+' / '+(ceil-floor)+' XP':'Level complete';
+ $('level-progress-bar').style.width=progress+'%';
+ $('level-breakdown').textContent='Lessons: '+(lessons*50)+' XP ('+lessons+') · Correct challenges: '+(correct*20)+' XP ('+correct+') · Closed virtual trades: '+(closed*10)+' XP ('+closed+') · Streak bonus: '+streakBonus+' XP';
+}
+$('level-refresh').addEventListener('click',render);
+window.addEventListener('focus',render);window.addEventListener('storage',render);
+render();
+})();
+</script>
+
 </body>
 </html>
