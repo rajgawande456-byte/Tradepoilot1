@@ -184,6 +184,15 @@ label{display:block;color:var(--muted);font-size:12px}
     </div>
     <div id="account-signed-in" hidden>
       <p class="metric-sub">Signed in as <strong id="account-email"></strong></p>
+      <div class="card" style="margin:12px 0;padding:14px">
+        <div class="section-title">
+          <h3 style="margin:0">Broker Connection · FYERS</h3>
+          <span class="status status-yellow" id="fyers-status">NOT CONNECTED</span>
+        </div>
+        <p class="metric-sub" id="fyers-message">Connect your FYERS account securely to enable broker-linked features.</p>
+        <button class="primary-btn" type="button" id="fyers-connect">CONNECT FYERS</button>
+        <button class="small-btn" type="button" id="fyers-disconnect" hidden>DISCONNECT</button>
+      </div>
       <button class="small-btn" type="button" id="auth-logout">LOG OUT</button>
     </div>
   </section>
@@ -1019,6 +1028,7 @@ window.addEventListener("DOMContentLoaded",()=>{
         body: JSON.stringify({ email, password })
       });
       showSignedIn(result.data.user);
+      refreshFyersStatus();
       byId('auth-password').value = '';
     } catch (error) {
       const labels = {
@@ -1036,6 +1046,42 @@ window.addEventListener("DOMContentLoaded",()=>{
   }
   byId('auth-login').addEventListener('click', () => submit('login'));
   byId('auth-signup').addEventListener('click', () => submit('signup'));
+  async function refreshFyersStatus() {
+    const badge = byId('fyers-status');
+    const messageEl = byId('fyers-message');
+    try {
+      const result = await request('/fyers/status', { method: 'GET', headers: {} });
+      const connected = Boolean(result.data?.connected);
+      badge.textContent = connected ? 'CONNECTED' : 'NOT CONNECTED';
+      badge.className = connected ? 'status status-green' : 'status status-yellow';
+      messageEl.textContent = connected
+        ? 'FYERS account connected. Token validity is checked by the server.'
+        : 'Connect your FYERS account securely to enable broker-linked features.';
+      byId('fyers-connect').hidden = connected;
+      byId('fyers-disconnect').hidden = !connected;
+    } catch (error) {
+      badge.textContent = 'STATUS UNAVAILABLE';
+      messageEl.textContent = error.message || 'Could not check FYERS connection.';
+    }
+  }
+  byId('fyers-connect').addEventListener('click', () => {
+    window.location.href = API + '/fyers/connect';
+  });
+  byId('fyers-disconnect').addEventListener('click', async () => {
+    try { await request('/fyers/disconnect', { method: 'POST', body: '{}' }); await refreshFyersStatus(); }
+    catch (error) { byId('fyers-message').textContent = 'Disconnect failed: ' + error.message; }
+  });
+  const fyersResult = new URLSearchParams(window.location.search).get('fyers');
+  if (fyersResult) {
+    const messages = {
+      connected: 'FYERS connection completed successfully.',
+      state_expired: 'FYERS authorization expired. Please connect again.',
+      authorization_failed: 'FYERS authorization was not approved.',
+      connection_failed: 'FYERS token exchange failed. Check your FYERS app settings.'
+    };
+    byId('fyers-message').textContent = messages[fyersResult] || 'FYERS connection status updated.';
+    window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+  }
   byId('auth-logout').addEventListener('click', async () => {
     try { await request('/auth/logout', { method: 'POST', body: '{}' }); showSignedOut('You have logged out.'); }
     catch (error) { message.textContent = 'Logout failed: ' + error.message; }
@@ -1044,6 +1090,7 @@ window.addEventListener("DOMContentLoaded",()=>{
     try {
       const result = await request('/me', { method: 'GET', headers: {} });
       showSignedIn(result.data.user);
+      refreshFyersStatus();
     } catch {
       showSignedOut('Create an account or log in. Passwords must be at least 12 characters.');
     }
