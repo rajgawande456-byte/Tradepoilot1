@@ -149,6 +149,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="nav-item" onclick="scrollToSection('coach-section')">✦ Market Coach</div>
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
     <div class="nav-item" onclick="scrollToSection('journal-section')">▤ Trading Journal</div>
+    <div class="nav-item" onclick="scrollToSection('academy-section')">🎓 Beginner Academy</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
     <div class="nav-item" onclick="scrollToSection('trend-section')">↗ Trend Engine</div>
@@ -462,6 +463,33 @@ label{display:block;color:var(--muted);font-size:12px}
       </div>
       <div class="result-box"><b>Recent closed trades</b><div id="journal-recent" class="metric-sub">No closed trades yet.</div></div>
       <p class="metric-sub">Missing stop-losses and losing streaks are review prompts, not proof of a mistake. This journal is educational and does not evaluate real broker trades.</p>
+    </div>
+  </section>
+
+  <!-- BEGINNER ACADEMY & DAILY CHALLENGE -->
+  <section class="section" id="academy-section">
+    <div class="section-title"><h2>Beginner Academy · Learn by doing</h2><span class="status status-blue">LEARNING HUB</span></div>
+    <div class="card">
+      <p class="metric-sub">Short lessons for market basics. Complete lessons and take the daily quiz to build a learning habit. Educational content only.</p>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Lessons completed</div><div class="metric-value" id="academy-progress">0 / 5</div></div>
+        <div class="card"><div class="metric-label">Learning streak</div><div class="metric-value" id="academy-streak">0 days</div></div>
+        <div class="card"><div class="metric-label">Today's challenge</div><div class="metric-value" id="academy-status">Not attempted</div></div>
+      </div>
+      <div class="result-box" style="margin-top:12px"><b>Learning path</b><div id="academy-lessons">
+        <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0"><input class="academy-check" type="checkbox" data-lesson="0" style="width:auto;margin:2px 0"> <span><b>1. Market basics</b><br><span class="metric-sub">Understand an index, price, and why markets move.</span></span></label>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0"><input class="academy-check" type="checkbox" data-lesson="1" style="width:auto;margin:2px 0"> <span><b>2. Candlesticks</b><br><span class="metric-sub">Open, high, low, close and candle body/wicks.</span></span></label>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0"><input class="academy-check" type="checkbox" data-lesson="2" style="width:auto;margin:2px 0"> <span><b>3. EMA 9 and EMA 21</b><br><span class="metric-sub">Fast and slow averages, crossovers and sideways conditions.</span></span></label>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0"><input class="academy-check" type="checkbox" data-lesson="3" style="width:auto;margin:2px 0"> <span><b>4. Risk management</b><br><span class="metric-sub">Stop-loss, position size and planned risk/reward.</span></span></label>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0"><input class="academy-check" type="checkbox" data-lesson="4" style="width:auto;margin:2px 0"> <span><b>5. Trading psychology</b><br><span class="metric-sub">Avoid revenge trading, overtrading and rule-breaking.</span></span></label>
+      </div></div>
+      <div class="result-box" style="margin-top:12px"><b>Daily Challenge · One question a day</b>
+        <p id="academy-question" style="margin-top:10px">Loading today's question…</p>
+        <div id="academy-options" class="field-grid"></div>
+        <button class="primary-btn" type="button" id="academy-submit" style="margin-top:8px">SUBMIT ANSWER</button>
+        <p id="academy-feedback" class="metric-sub" role="status">Choose one answer and submit.</p>
+      </div>
+      <p class="metric-sub">Progress and streak are stored only in this browser/device. Daily challenge allows one attempt per local calendar day. No subscription or payment is needed for this learning beta.</p>
     </div>
   </section>
 
@@ -1305,5 +1333,57 @@ window.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
+<script>
+/* TRADEPILOT_BEGINNER_ACADEMY_V1 */
+(function(){
+  const KEY='tradepilot.academy.v1';
+  const questions=[
+    {q:'What does the candle body show?',a:['The open-to-close range',"Only the day's volume",'The next guaranteed price'],correct:0,why:'The body represents the distance between open and close. Wicks show the high and low beyond the body.'},
+    {q:'What is EMA 9 generally used for?',a:['A faster view of recent price movement','A guaranteed entry price','Measuring account balance'],correct:0,why:'EMA 9 reacts faster to recent prices than a longer EMA. It can still give false signals.'},
+    {q:'Where is a long trade stop-loss usually planned?',a:['At a level that invalidates the trade idea','At a random number after entry','There is never a need for one'],correct:0,why:'A stop should be planned at an invalidation level and paired with sensible position sizing.'},
+    {q:'What does a 1:2 risk/reward plan mean?',a:['Potential reward is twice the planned risk','The trade wins two times out of three','Loss is twice the reward'],correct:0,why:'For each unit of planned risk, the target reward is two units. It does not guarantee the outcome.'},
+    {q:'What is revenge trading?',a:['Taking impulsive trades to recover a loss','Reviewing a journal calmly','Following a written risk plan'],correct:0,why:'Revenge trading is emotionally driven and often breaks a trader’s rules.'},
+    {q:'What does an index represent?',a:['A basket/measure of selected securities','A guaranteed investment return','One company share only'],correct:0,why:'An index tracks the performance of a selected group of securities using its methodology.'},
+    {q:'When EMA 9 and EMA 21 keep crossing in a narrow range, what may it suggest?',a:['Choppy or sideways conditions','A guaranteed breakout','A risk-free trade'],correct:0,why:'Repeated crossovers can occur in choppy markets and may create false signals.'}
+  ];
+  const $=id=>document.getElementById(id);
+  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  let data={lessons:[],lastDay:'',streak:0,attempts:{}};
+  try{data={...data,...JSON.parse(localStorage.getItem(KEY)||'{}')};}catch{}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data));}catch{}};
+  const day=today(),dayIndex=Math.floor(Date.now()/86400000),q=questions[dayIndex%questions.length];
+  function render(){
+    document.querySelectorAll('.academy-check').forEach(el=>el.checked=(data.lessons||[]).includes(Number(el.dataset.lesson)));
+    $('academy-progress').textContent=(data.lessons||[]).length+' / 5';
+    $('academy-streak').textContent=(data.streak||0)+' days';
+    const done=data.attempts&&data.attempts[day];
+    $('academy-status').textContent=done?'Completed':'Not attempted';
+    $('academy-question').textContent=q.q;
+    $('academy-options').innerHTML=q.a.map((v,i)=>'<label style="display:flex;gap:8px;align-items:center"><input type="radio" name="academy-answer" value="'+i+'" style="width:auto"> '+v+'</label>').join('');
+    $('academy-submit').disabled=!!done;
+    $('academy-feedback').textContent=done?(done.correct?'Correct! ':'Attempt used today. ')+q.why:'Choose one answer and submit.';
+    if(done){const chosen=document.querySelector('input[name="academy-answer"][value="'+done.answer+'"]');if(chosen)chosen.checked=true;}
+  }
+  document.querySelectorAll('.academy-check').forEach(el=>el.addEventListener('change',()=>{
+    const n=Number(el.dataset.lesson);data.lessons=data.lessons||[];
+    data.lessons=el.checked?[...new Set([...data.lessons,n])]:data.lessons.filter(x=>x!==n);
+    save();render();
+  }));
+  $('academy-submit').addEventListener('click',()=>{
+    if(data.attempts&&data.attempts[day])return;
+    const selected=document.querySelector('input[name="academy-answer"]:checked');
+    if(!selected){$('academy-feedback').textContent='Please choose an answer first.';return;}
+    const correct=Number(selected.value)===q.correct;
+    data.attempts=data.attempts||{};data.attempts[day]={correct,answer:Number(selected.value)};
+    if(data.lastDay!==day){
+      const prev=new Date();prev.setDate(prev.getDate()-1);
+      const prevKey=prev.getFullYear()+'-'+String(prev.getMonth()+1).padStart(2,'0')+'-'+String(prev.getDate()).padStart(2,'0');
+      data.streak=data.lastDay===prevKey?(data.streak||0)+1:1;data.lastDay=day;
+    }
+    save();render();
+  });
+  render();
+})();
+</script>
 </body>
 </html>
