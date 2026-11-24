@@ -1,4 +1,3 @@
-
 import {
   createUser,
   authenticateUser,
@@ -16,89 +15,82 @@ import {
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
-function errorResponse(code, status = 400) {
-  return {
-    status,
-    body: { error: code }
-  };
-}
-
-function jsonResponse(status, body, headers = {}) {
-  return {
-    status,
-    body,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      ...headers
-    }
-  };
+function errorResponse(code, status = 400, headers = {}) {
+  return { status, body: { error: code }, headers };
 }
 
 export async function handleAuthRequest(req) {
-  const url = new URL(req.url, 'http://localhost');
-  const path = url.pathname;
-  const method = req.method.toUpperCase();
+  const path = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`).pathname;
 
   try {
-    if (method === 'POST' && path === '/api/auth/signup') {
+    if (path === '/api/v1/auth/signup' && req.method === 'POST') {
       const body = await readJsonBody(req);
-      const user = await createUser(body);
-      const session = await createSession(user.id, SESSION_TTL_SECONDS);
-
-      return jsonResponse(
-        201,
-        { user },
-        { 'set-cookie': createSessionCookie(session.token, SESSION_TTL_SECONDS) }
-      );
+      const user = await createUser({ email: body.email, password: body.password });
+      const session = await createSession(user.id);
+      return {
+        status: 201,
+        body: { data: { user } },
+        headers: { 'set-cookie': createSessionCookie(session.token, SESSION_TTL_SECONDS) }
+      };
     }
 
-    if (method === 'POST' && path === '/api/auth/login') {
+    if (path === '/api/v1/auth/login' && req.method === 'POST') {
       const body = await readJsonBody(req);
-      const user = await authenticateUser(body);
-      if (!user) return errorResponse('INVALID_CREDENTIALS', 401);
-
-      const session = await createSession(user.id, SESSION_TTL_SECONDS);
-
-      return jsonResponse(
-        200,
-        { user },
-        { 'set-cookie': createSessionCookie(session.token, SESSION_TTL_SECONDS) }
-      );
+      const user = await authenticateUser({ email: body.email, password: body.password });
+      const session = await createSession(user.id);
+      return {
+        status: 200,
+        body: { data: { user } },
+        headers: { 'set-cookie': createSessionCookie(session.token, SESSION_TTL_SECONDS) }
+      };
     }
 
-    if (method === 'POST' && path === '/api/auth/logout') {
+    if (path === '/api/v1/auth/logout' && req.method === 'POST') {
       const token = getSessionToken(req);
       if (token) await revokeSession(token);
-
-      return jsonResponse(
-        200,
-        { success: true },
-        { 'set-cookie': clearSessionCookie() }
-      );
+      return {
+        status: 200,
+        body: { data: { loggedOut: true } },
+        headers: { 'set-cookie': clearSessionCookie() }
+      };
     }
 
-    if (method === 'GET' && path === '/api/auth/me') {
+    if (path === '/api/v1/me' && req.method === 'GET') {
       const token = getSessionToken(req);
-      if (!token) return errorResponse('UNAUTHENTICATED', 401);
-
+      if (!token) return errorResponse('AUTH_REQUIRED', 401);
       const session = await getSession(token);
       if (!session) {
-        return jsonResponse(
-          401,
-          { error: 'UNAUTHENTICATED' },
-          { 'set-cookie': clearSessionCookie() }
-        );
+        return errorResponse('AUTH_REQUIRED', 401, { 'set-cookie': clearSessionCookie() });
       }
-
-      return jsonResponse(200, { user: session.user });
+      return {
+        status: 200,
+        body: {
+          data: {
+            user: { id: session.user_id, email: session.email },
+            session: { expiresAt: session.expires_at }
+          }
+        }
+      };
     }
-
     return null;
   } catch (error) {
-    if (error?.status && Number.isInteger(error.status)) {
+    const known = {
+      DATABASE_NOT_CONFIGURED: [503, 'DATABASE_NOT_CONFIGURED'],
+      INVALID_EMAIL: [400, 'INVALID_EMAIL'],
+      INVALID_PASSWORD: [400, 'INVALID_PASSWORD'],
+      EMAIL_ALREADY_REGISTERED: [409, 'EMAIL_ALREADY_REGISTERED'],
+      INVALID_CREDENTIALS: [401, 'INVALID_CREDENTIALS'],
+      UNSUPPORTED_CONTENT_TYPE: [415, 'UNSUPPORTED_CONTENT_TYPE'],
+      REQUEST_BODY_TOO_LARGE: [413, 'REQUEST_BODY_TOO_LARGE'],
+      EMPTY_REQUEST_BODY: [400, 'EMPTY_REQUEST_BODY'],
+      INVALID_JSON: [400, 'INVALID_JSON']
+    };
+    const mapped = known[error?.code];
+    if (mapped) return errorResponse(mapped[1], mapped[0]);
+    if (Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599) {
       return errorResponse(error.code || 'REQUEST_FAILED', error.status);
     }
-
-    return errorResponse('REQUEST_FAILED', 400);
+    console.error('Authentication request failed:', error);
+    return errorResponse('AUTH_REQUEST_FAILED', 500);
   }
 }
