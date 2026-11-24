@@ -145,6 +145,7 @@ label{display:block;color:var(--muted);font-size:12px}
   <div class="nav-title">WORKSPACE</div>
   <div class="nav-list">
     <div class="nav-item active" onclick="scrollToSection('dashboard')">▦ Dashboard</div>
+    <div class="nav-item" onclick="scrollToSection('beginner-section')">◎ Beginner Guide</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
     <div class="nav-item" onclick="scrollToSection('trend-section')">↗ Trend Engine</div>
@@ -225,11 +226,36 @@ label{display:block;color:var(--muted);font-size:12px}
       <div id="chart"></div>
 
       <div class="chart-legend">
-        <span><i class="legend-dot" style="background:#a98bff"></i>EMA 9</span>
+        <span><i class="legend-dot" style="background:#a98bff"></i>EMA 9 (fast)</span>
+        <span><i class="legend-dot" style="background:#4cc9f0"></i>EMA 21 (slow)</span>
         <span><i class="legend-dot" style="background:#f3c969"></i>VWAP (approx.)</span>
         <span><i class="legend-dot" style="background:#20d68a"></i>Historical bullish candle</span>
         <span><i class="legend-dot" style="background:#ff6478"></i>Historical bearish candle</span>
       </div>
+    </div>
+  </section>
+
+  <!-- BEGINNER GUIDE -->
+  <section class="section" id="beginner-section">
+    <div class="section-title"><h2>Beginner Guide · Understand the chart</h2></div>
+    <div class="card">
+      <div class="metric-label">What is happening on the selected chart?</div>
+      <div class="metric-value" id="beginner-reading">Waiting for historical candles</div>
+      <p class="metric-sub" id="beginner-explanation">Load verified candles to see a plain-language explanation of the 9 EMA and 21 EMA relationship.</p>
+      <div class="result-box">
+        <b>How to read EMA 9 and EMA 21</b>
+        <p><b>EMA 9:</b> reacts faster to recent price changes. It is the faster trend line.</p>
+        <p><b>EMA 21:</b> reacts more slowly and helps show the broader short-term direction.</p>
+        <p><b>Possible bullish setup:</b> EMA 9 crosses above EMA 21 and price holds above both. Wait for candle close and check risk; a crossover can fail.</p>
+        <p><b>Possible bearish setup:</b> EMA 9 crosses below EMA 21 and price stays below both. Wait for candle close and check risk; a crossover can fail.</p>
+        <p><b>Neutral:</b> lines are close, crossing repeatedly, or price is between them. Choppy conditions can produce false signals.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Current EMA 9</div><div class="metric-value" id="beginner-ema9">—</div><div class="metric-sub">Faster average</div></div>
+        <div class="card"><div class="metric-label">Current EMA 21</div><div class="metric-value" id="beginner-ema21">—</div><div class="metric-sub">Slower average</div></div>
+        <div class="card"><div class="metric-label">Price vs averages</div><div class="metric-value" id="beginner-position">—</div><div class="metric-sub">Current loaded candle close</div></div>
+      </div>
+      <p class="metric-sub">Educational explanation only. It is not a buy/sell recommendation. Confirm data freshness, candle close, stop-loss and position size before considering any trade.</p>
     </div>
   </section>
 
@@ -628,6 +654,16 @@ function updateAnalysis(){
   if(strengthEl)strengthEl.textContent=strength+" / 100";
   const trendStatus=document.getElementById("trend-status");
   if(trendStatus){trendStatus.textContent=trend;trendStatus.className="status "+(bullish?"status-green":bearish?"status-red":"status-yellow");}
+  const beginnerReading=document.getElementById("beginner-reading");
+  const beginnerExplanation=document.getElementById("beginner-explanation");
+  const beginnerEma9=document.getElementById("beginner-ema9");
+  const beginnerEma21=document.getElementById("beginner-ema21");
+  const beginnerPosition=document.getElementById("beginner-position");
+  if(beginnerReading) beginnerReading.textContent=trend==="BULLISH"?"Price is above both averages":trend==="BEARISH"?"Price is below both averages":"Price and averages are mixed";
+  if(beginnerExplanation) beginnerExplanation.textContent=trend==="BULLISH"?"The loaded candles show price > EMA 9 > EMA 21. This is a bullish trend alignment, not a confirmed entry. Wait for a candle close and check nearby support, resistance and risk.":trend==="BEARISH"?"The loaded candles show price < EMA 9 < EMA 21. This is a bearish trend alignment, not a confirmed entry. Wait for a candle close and check nearby support, resistance and risk.":"The loaded candles do not show a clear price > EMA 9 > EMA 21 or price < EMA 9 < EMA 21 alignment. Consider waiting for clearer conditions rather than forcing a trade.";
+  if(beginnerEma9) beginnerEma9.textContent=ema9.toFixed(2);
+  if(beginnerEma21) beginnerEma21.textContent=ema21.toFixed(2);
+  if(beginnerPosition) beginnerPosition.textContent=last>ema9&&last>ema21?"Above both":last<ema9&&last<ema21?"Below both":"Between / mixed";
   const rsi=calcRSI(closes);
   const rsiEl=document.getElementById("rsi-value");if(rsiEl)rsiEl.textContent=rsi.toFixed(2);
   const rsiText=document.getElementById("rsi-text");
