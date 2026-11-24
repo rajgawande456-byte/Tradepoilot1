@@ -534,7 +534,7 @@ async function updateChart(){
     const realBars=source.map(c=>({time:Number(c.time),open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close),volume:Number(c.volume||0)}))
       .filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close))
       .sort((a,b)=>a.time-b.time);
-    if(realBars.length<30)throw new Error("Insufficient candles");
+    if(realBars.length<2)throw new Error("Historical API returned fewer than 2 valid candles");
     candles=realBars;
     candleSeries.setData(candles);
     const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),vwap=calcVWAP(candles);
@@ -544,11 +544,13 @@ async function updateChart(){
     updateAnalysis();
   }catch(err){
     if(requestId!==chartRequestId)return;
-    candles=[];
-    candleSeries.setData([]);
-    emaSeries.setData([]);
-    vwapSeries.setData([]);
-    if(title)title.textContent=apiSymbol+" · HISTORICAL DATA UNAVAILABLE";
+    // Preserve the last valid chart during temporary API/network failures.
+    if(!candles.length){
+      candleSeries.setData([]);
+      emaSeries.setData([]);
+      vwapSeries.setData([]);
+    }
+    if(title)title.textContent=apiSymbol+" · "+(candles.length?"SHOWING LAST LOADED DATA · REFRESH FAILED":"HISTORICAL DATA UNAVAILABLE");
     const trend=document.getElementById("trend-value");if(trend)trend.textContent="DATA UNAVAILABLE";
     const strength=document.getElementById("strength-value");if(strength)strength.textContent="—";
     const status=document.getElementById("trend-status");if(status)status.textContent="DATA UNAVAILABLE";
