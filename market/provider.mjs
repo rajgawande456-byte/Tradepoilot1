@@ -47,6 +47,69 @@ function createUpstoxProvider(env) {
   const historyCache = new Map();
   const inFlight = new Map();
 
+  // Serialize historical-candle requests so simultaneous index/timeframe loads
+  // do not burst the Upstox historical API. Retry HTTP 429 using Retry-After.
+  let historyRequestQueue = Promise.resolve();
+  let lastHistoryRequestAt = 0;
+
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function fetchHistoryWithThrottle(url, safeSymbol, endpointLabel) {
+    const task = historyRequestQueue.then(async () => {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const spacing = 1100 - (Date.now() - lastHistoryRequestAt);
+        if (spacing > 0) await wait(spacing);
+        lastHistoryRequestAt = Date.now();
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          signal: AbortSignal.timeout(10000)
+        });
+
+        if (response.status !== 429) return response;
+
+        const body = await response.text().catch(() => '');
+        if (attempt === 2) {
+          console.error('Upstox historical rate limit persisted', {
+            symbol: safeSymbol,
+            endpoint: endpointLabel,
+            status: response.status,
+            body: body.slice(0, 300)
+          });
+          throw new MarketDataProviderError(
+            'UPSTOX_HISTORY_RATE_LIMITED',
+            'Upstox historical data is temporarily rate limited. Please retry shortly.',
+            503
+          );
+        }
+
+        const retryAfter = response.headers?.get?.('retry-after');
+        let retryMs = Number(retryAfter) * 1000;
+        if (!Number.isFinite(retryMs) || retryMs <= 0) {
+          const retryDate = Date.parse(retryAfter || '');
+          retryMs = Number.isFinite(retryDate)
+            ? retryDate - Date.now()
+            : 1500 * (2 ** attempt);
+        }
+        await wait(Math.max(1000, Math.min(retryMs, 10000)));
+      }
+      throw new MarketDataProviderError(
+        'UPSTOX_HISTORY_RATE_LIMITED',
+        'Upstox historical data is temporarily rate limited. Please retry shortly.',
+        503
+      );
+    });
+
+    historyRequestQueue = task.catch(() => {});
+    return task;
+  }
+
   async function getSnapshotRemote(symbol) {
     const safeSymbol = validateSymbol(symbol);
     const instrumentKey = INSTRUMENT_KEYS[safeSymbol];
@@ -185,12 +248,12 @@ function createUpstoxProvider(env) {
     const unit = isHour ? 'hours' : 'minutes';
     const providerInterval = isHour ? String(Number(safeInterval) / 60) : safeInterval;
     const url = new URL('https://api.upstox.com/v3/historical-candle/intraday/' + encodeURIComponent(instrumentKey) + '/' + unit + '/' + providerInterval);
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(10000)
-    });
+    const response = await fetchHistoryWithThrottle(url, safeSymbol, 'intraday');
     if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      console.error('Upstox historical upstream error', {
+        status: response.status, symbol: safeSymbol, body: body.slice(0, 300)
+      });
       throw new MarketDataProviderError('UPSTOX_HISTORY_ERROR', `Upstox historical candles returned HTTP ${response.status}.`, 502);
     }
     let result = await response.json();
@@ -217,11 +280,7 @@ function createUpstoxProvider(env) {
         encodeURIComponent(instrumentKey) + '/' + unit + '/' + providerInterval +
         '/' + toDate + '/' + fromDate
       );
-      const historyResponse = await fetch(historyUrl, {
-        method: 'GET',
-        headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(10000)
-      });
+      const historyResponse = await fetchHistoryWithThrottle(historyUrl, safeSymbol, 'date-range');
       if (historyResponse.ok) {
         result = await historyResponse.json();
         candles = result?.data?.candles;
