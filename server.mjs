@@ -17,7 +17,6 @@ import {
   verifyWebSocketAccess
 } from './market/ws-transport.mjs';
 import { handleAuthRequest } from './auth/routes.mjs';
-import { handleFyersRequest } from './fyers/routes.mjs';
 import { startUpstoxStream } from './market/upstox-stream.mjs';
 import {
   isDatabaseConfigured,
@@ -270,21 +269,6 @@ const server = http.createServer(async (req, res) => {
           ...corsHeaders,
           ...(authResponse.headers || {})
         }
-      );
-    }
-
-    const fyersResponse = await handleFyersRequest(req);
-
-    if (fyersResponse) {
-      if (fyersResponse.status === 302) {
-        res.writeHead(302, { ...corsHeaders, ...(fyersResponse.headers || {}) });
-        return res.end();
-      }
-      return sendJson(
-        res,
-        fyersResponse.status,
-        { ...(fyersResponse.body || {}), requestId: requestID },
-        { ...corsHeaders, ...(fyersResponse.headers || {}) }
       );
     }
 
