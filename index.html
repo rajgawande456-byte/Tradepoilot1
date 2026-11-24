@@ -166,6 +166,28 @@ label{display:block;color:var(--muted);font-size:12px}
     <span class="demo-tag">● LIVE QUOTES · HISTORICAL CHARTS</span>
   </div>
 
+  <section class="section card" id="account-panel" style="margin-bottom:16px">
+    <div class="section-title">
+      <h2>TradePilot Account</h2>
+      <span class="status status-yellow" id="account-status">Checking session…</span>
+    </div>
+    <div id="account-signed-out">
+      <div class="field-grid">
+        <label>Email address<input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+        <label>Password<input id="auth-password" type="password" autocomplete="current-password" minlength="12" maxlength="128" placeholder="At least 12 characters"></label>
+      </div>
+      <div class="field-grid">
+        <button class="primary-btn" type="button" id="auth-login">LOG IN</button>
+        <button class="small-btn" type="button" id="auth-signup">CREATE ACCOUNT</button>
+      </div>
+      <p class="metric-sub" id="auth-message" role="status">Create an account or log in. Passwords must be at least 12 characters.</p>
+    </div>
+    <div id="account-signed-in" hidden>
+      <p class="metric-sub">Signed in as <strong id="account-email"></strong></p>
+      <button class="small-btn" type="button" id="auth-logout">LOG OUT</button>
+    </div>
+  </section>
+
   <!-- MARKET CARDS -->
   <section id="market">
     <div class="market-row">
@@ -928,6 +950,91 @@ window.addEventListener("DOMContentLoaded",()=>{
       closeSocket();
     });
   });
+})();
+</script>
+
+
+<script>
+/* TRADEPILOT_ACCOUNT_UI_V1 */
+(function () {
+  const API = 'https://tradepoilot-api.onrender.com/api/v1';
+  const byId = id => document.getElementById(id);
+  const status = byId('account-status');
+  const message = byId('auth-message');
+  function showSignedOut(text, bad) {
+    byId('account-signed-out').hidden = false;
+    byId('account-signed-in').hidden = true;
+    status.textContent = 'SIGNED OUT';
+    status.className = 'status status-yellow';
+    if (text) { message.textContent = text; message.style.color = bad ? 'var(--red)' : 'var(--muted)'; }
+  }
+  function showSignedIn(user) {
+    byId('account-signed-out').hidden = true;
+    byId('account-signed-in').hidden = false;
+    byId('account-email').textContent = user.email;
+    status.textContent = 'SIGNED IN';
+    status.className = 'status status-green';
+  }
+  async function request(path, options) {
+    const response = await fetch(API + path, {
+      credentials: 'include',
+      cache: 'no-store',
+      ...options,
+      headers: { 'content-type': 'application/json', ...(options && options.headers || {}) }
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = new Error(body.error || 'REQUEST_FAILED');
+      error.status = response.status;
+      throw error;
+    }
+    return body;
+  }
+  async function submit(mode) {
+    const email = byId('auth-email').value.trim();
+    const password = byId('auth-password').value;
+    if (!email || !password) { message.textContent = 'Enter your email and password.'; return; }
+    if (mode === 'signup' && password.length < 12) { message.textContent = 'Password must be at least 12 characters.'; return; }
+    const buttons = [byId('auth-login'), byId('auth-signup')];
+    buttons.forEach(b => b.disabled = true);
+    message.textContent = mode === 'signup' ? 'Creating account…' : 'Logging in…';
+    try {
+      const result = await request('/auth/' + mode, {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      showSignedIn(result.data.user);
+      byId('auth-password').value = '';
+    } catch (error) {
+      const labels = {
+        INVALID_EMAIL: 'Please enter a valid email address.',
+        INVALID_PASSWORD: 'Password must be 12–128 characters.',
+        EMAIL_ALREADY_REGISTERED: 'This email is already registered. Please log in.',
+        INVALID_CREDENTIALS: 'Email or password is incorrect.',
+        DATABASE_NOT_CONFIGURED: 'Account database is not configured yet.',
+        REQUEST_BODY_TOO_LARGE: 'Request is too large.'
+      };
+      showSignedOut(labels[error.message] || 'Could not complete request: ' + error.message, true);
+    } finally {
+      buttons.forEach(b => b.disabled = false);
+    }
+  }
+  byId('auth-login').addEventListener('click', () => submit('login'));
+  byId('auth-signup').addEventListener('click', () => submit('signup'));
+  byId('auth-logout').addEventListener('click', async () => {
+    try { await request('/auth/logout', { method: 'POST', body: '{}' }); showSignedOut('You have logged out.'); }
+    catch (error) { message.textContent = 'Logout failed: ' + error.message; }
+  });
+  async function checkSession() {
+    try {
+      const result = await request('/me', { method: 'GET', headers: {} });
+      showSignedIn(result.data.user);
+    } catch {
+      showSignedOut('Create an account or log in. Passwords must be at least 12 characters.');
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', checkSession);
+  else checkSession();
 })();
 </script>
 
