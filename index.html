@@ -150,6 +150,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
     <div class="nav-item" onclick="scrollToSection('journal-section')">▤ Trading Journal</div>
     <div class="nav-item" onclick="scrollToSection('academy-section')">🎓 Beginner Academy</div>
+    <div class="nav-item" onclick="scrollToSection('profile-section')">◉ My Progress</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
     <div class="nav-item" onclick="scrollToSection('trend-section')">↗ Trend Engine</div>
@@ -191,6 +192,27 @@ label{display:block;color:var(--muted);font-size:12px}
       <p class="metric-sub">Signed in as <strong id="account-email"></strong></p>
       <button class="small-btn" type="button" id="auth-logout">LOG OUT</button>
     </div>
+  </section>
+  <section class="section" id="profile-section">
+    <div class="section-title"><h2>My Profile · Personal Progress</h2><button class="small-btn" type="button" id="profile-refresh">REFRESH</button></div>
+    <div class="card"><div class="metric-label">ACCOUNT</div><div class="metric-value" id="profile-email">Checking account…</div><p class="metric-sub">Your learning and practice summary on this browser</p></div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="card"><div class="metric-label">Lessons completed</div><div class="metric-value" id="profile-lessons">0 / 5</div></div>
+      <div class="card"><div class="metric-label">Learning streak</div><div class="metric-value" id="profile-streak">0 days</div></div>
+      <div class="card"><div class="metric-label">Daily challenges</div><div class="metric-value" id="profile-challenges">0</div><p class="metric-sub" id="profile-correct">0 correct</p></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="card"><div class="metric-label">Virtual balance</div><div class="metric-value" id="profile-balance">₹100,000.00</div></div>
+      <div class="card"><div class="metric-label">Realized practice P/L</div><div class="metric-value" id="profile-pnl">₹0.00</div></div>
+      <div class="card"><div class="metric-label">Open practice position</div><div class="metric-value" id="profile-position">None</div></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="card"><div class="metric-label">Closed practice trades</div><div class="metric-value" id="profile-trades">0</div></div>
+      <div class="card"><div class="metric-label">Practice win rate</div><div class="metric-value" id="profile-winrate">—</div></div>
+      <div class="card"><div class="metric-label">Winning / losing trades</div><div class="metric-value" id="profile-wl">0 / 0</div></div>
+    </div>
+    <p class="metric-sub" style="margin-top:12px">Academy and Paper Trading progress is stored locally in this browser/device. It is not synced to your account or other devices. Virtual results are practice records, not real broker trades.</p>
+    <div class="result-box" id="profile-summary">Your progress summary will appear here.</div>
   </section>
 
   <!-- MARKET CARDS -->
@@ -1382,6 +1404,42 @@ window.addEventListener("DOMContentLoaded",()=>{
     }
     save();render();
   });
+  render();
+})();
+<script>
+/* TRADEPILOT_PERSONAL_PROGRESS_V1 */
+(function(){
+  const $=id=>document.getElementById(id);
+  const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'null')||fallback;}catch{return fallback;}}
+  function render(){
+    const paper=read('tradepilot.paper.v1',{balance:100000,closedPnl:0,position:null,trades:[]});
+    const academy=read('tradepilot.academy.v1',{lessons:[],lastDay:'',streak:0,attempts:{}});
+    const closed=(Array.isArray(paper.trades)?paper.trades:[]).filter(t=>t&&t.side==='SELL'&&Number.isFinite(Number(t.pnl)));
+    const wins=closed.filter(t=>Number(t.pnl)>0).length,losses=closed.filter(t=>Number(t.pnl)<0).length;
+    const attempts=academy.attempts&&typeof academy.attempts==='object'?Object.values(academy.attempts):[];
+    const correct=attempts.filter(a=>a&&a.correct===true).length;
+    const lessons=Array.isArray(academy.lessons)?new Set(academy.lessons).size:0;
+    const email=$('account-email')&&$('account-email').textContent.trim();
+    const signedIn=$('account-status')&&$('account-status').textContent.trim()==='SIGNED IN';
+    $('profile-email').textContent=signedIn&&email?email:'Not signed in';
+    $('profile-lessons').textContent=Math.min(lessons,5)+' / 5';
+    $('profile-streak').textContent=(Number(academy.streak)||0)+' days';
+    $('profile-challenges').textContent=attempts.length;
+    $('profile-correct').textContent=correct+' correct answers';
+    $('profile-balance').textContent=money(paper.balance);
+    $('profile-pnl').textContent=money(paper.closedPnl);
+    $('profile-pnl').style.color=Number(paper.closedPnl||0)>=0?'var(--green)':'var(--red)';
+    const p=paper.position;
+    $('profile-position').textContent=p?(p.symbol+' × '+p.qty+' @ '+money(p.entry)):'None';
+    $('profile-trades').textContent=closed.length;
+    $('profile-winrate').textContent=closed.length?(wins/closed.length*100).toFixed(1)+'%':'—';
+    $('profile-wl').textContent=wins+' / '+losses;
+    $('profile-summary').textContent=closed.length?'You have completed '+closed.length+' virtual trade(s), with '+wins+' win(s) and '+losses+' loss(es). Keep reviewing your plan and risk on every practice trade.':'Complete an Academy lesson or record a Paper Trading practice trade to start building your progress history.';
+  }
+  $('profile-refresh').addEventListener('click',render);
+  window.addEventListener('storage',render);window.addEventListener('focus',render);
+  ['account-email','account-status'].forEach(id=>{const node=$(id);if(node&&window.MutationObserver)new MutationObserver(render).observe(node,{childList:true,characterData:true,subtree:true});});
   render();
 })();
 </script>
