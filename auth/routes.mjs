@@ -12,6 +12,7 @@ import {
   createSessionCookie,
   clearSessionCookie
 } from './http.mjs';
+import { mapAuthError } from './errors.mjs';
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
@@ -74,23 +75,14 @@ export async function handleAuthRequest(req) {
     }
     return null;
   } catch (error) {
-    const known = {
-      DATABASE_NOT_CONFIGURED: [503, 'DATABASE_NOT_CONFIGURED'],
-      INVALID_EMAIL: [400, 'INVALID_EMAIL'],
-      INVALID_PASSWORD: [400, 'INVALID_PASSWORD'],
-      EMAIL_ALREADY_REGISTERED: [409, 'EMAIL_ALREADY_REGISTERED'],
-      INVALID_CREDENTIALS: [401, 'INVALID_CREDENTIALS'],
-      UNSUPPORTED_CONTENT_TYPE: [415, 'UNSUPPORTED_CONTENT_TYPE'],
-      REQUEST_BODY_TOO_LARGE: [413, 'REQUEST_BODY_TOO_LARGE'],
-      EMPTY_REQUEST_BODY: [400, 'EMPTY_REQUEST_BODY'],
-      INVALID_JSON: [400, 'INVALID_JSON']
-    };
-    const mapped = known[error?.code];
-    if (mapped) return errorResponse(mapped[1], mapped[0]);
-    if (Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599) {
-      return errorResponse(error.code || 'REQUEST_FAILED', error.status);
+    const mapped = mapAuthError(error);
+    if (mapped.status >= 500) {
+      // Log only a short error code/name; never serialize database connection details.
+      const diagnosticCode = String(
+        error?.code || error?.cause?.code || error?.name || 'UNKNOWN'
+      ).slice(0, 80);
+      console.error('Authentication request failed:', diagnosticCode);
     }
-    console.error('Authentication request failed:', error);
-    return errorResponse('AUTH_REQUEST_FAILED', 500);
+    return errorResponse(mapped.code, mapped.status);
   }
 }

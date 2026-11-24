@@ -1351,6 +1351,7 @@ window.addEventListener("DOMContentLoaded",()=>{
     if (!response.ok) {
       const error = new Error(body.error || 'REQUEST_FAILED');
       error.status = response.status;
+      error.requestId = body.requestId || null;
       throw error;
     }
     return body;
@@ -1377,9 +1378,12 @@ window.addEventListener("DOMContentLoaded",()=>{
         EMAIL_ALREADY_REGISTERED: 'This email is already registered. Please log in.',
         INVALID_CREDENTIALS: 'Email or password is incorrect.',
         DATABASE_NOT_CONFIGURED: 'Account database is not configured yet.',
+        DATABASE_UNAVAILABLE: 'Account service cannot reach its database right now. Please try again shortly.',
         REQUEST_BODY_TOO_LARGE: 'Request is too large.'
       };
-      showSignedOut(labels[error.message] || 'Could not complete request: ' + error.message, true);
+      const label = labels[error.message] || 'Could not complete request: ' + error.message;
+      const reference = error.requestId ? ' Reference ID: ' + error.requestId : '';
+      showSignedOut(label + reference, true);
     } finally {
       buttons.forEach(b => b.disabled = false);
     }
