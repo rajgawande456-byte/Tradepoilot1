@@ -146,6 +146,7 @@ label{display:block;color:var(--muted);font-size:12px}
   <div class="nav-list">
     <div class="nav-item active" onclick="scrollToSection('dashboard')">▦ Dashboard</div>
     <div class="nav-item" onclick="scrollToSection('beginner-section')">◎ Beginner Guide</div>
+    <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
     <div class="nav-item" onclick="scrollToSection('trend-section')">↗ Trend Engine</div>
@@ -381,6 +382,30 @@ label{display:block;color:var(--muted);font-size:12px}
         <b>WAITING FOR INPUT</b>
         <p>Enter matching candle data to run verification.</p>
       </div>
+    </div>
+  </section>
+
+
+  <!-- PAPER TRADING SIMULATOR -->
+  <section class="section" id="paper-section">
+    <div class="section-title"><h2>Paper Trading · Practice without real money</h2></div>
+    <div class="card">
+      <p class="metric-sub">Virtual trading only. No broker order is placed and no real money is used. Practice data is saved in this browser on this device.</p>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Virtual balance</div><div class="metric-value" id="paper-balance">₹100,000.00</div></div>
+        <div class="card"><div class="metric-label">Open position</div><div class="metric-value" id="paper-position">None</div></div>
+        <div class="card"><div class="metric-label">Closed P/L</div><div class="metric-value" id="paper-pnl">₹0.00</div></div>
+      </div>
+      <div class="field-grid" style="margin-top:14px">
+        <label>Practice symbol<select id="paper-symbol"><option>NIFTY 50</option><option>BANKNIFTY</option><option>FINNIFTY</option></select></label>
+        <label>Side<select id="paper-side"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Close long)</option></select></label>
+        <label>Entry / Exit price<input id="paper-price" type="number" min="0.01" step="0.05" placeholder="Enter price"></label>
+        <label>Quantity<input id="paper-qty" type="number" min="1" step="1" value="1"></label>
+      </div>
+      <button class="primary-btn" type="button" id="paper-submit">PLACE VIRTUAL TRADE</button>
+      <p class="metric-sub" id="paper-message" role="status">Start with a virtual balance of ₹1,00,000. BUY opens a long position; SELL closes it.</p>
+      <div class="result-box" style="overflow:auto"><b>Practice trade history</b><div id="paper-history" class="metric-sub">No practice trades yet.</div></div>
+      <button class="small-btn" type="button" id="paper-reset">RESET PRACTICE ACCOUNT</button>
     </div>
   </section>
 
@@ -1019,6 +1044,51 @@ window.addEventListener("DOMContentLoaded",()=>{
       closeSocket();
     });
   });
+})();
+/* TRADEPILOT_PAPER_TRADING_V1 */
+(function(){
+  const KEY='tradepilot.paper.v1';
+  const $=id=>document.getElementById(id);
+  const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fresh=()=>({balance:100000,closedPnl:0,position:null,trades:[]});
+  let state;
+  try{state=JSON.parse(localStorage.getItem(KEY))||fresh();}catch{state=fresh();}
+  if(!state||typeof state.balance!=='number'||!Array.isArray(state.trades))state=fresh();
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{}}
+  function render(){
+    $('paper-balance').textContent=money(state.balance);
+    $('paper-position').textContent=state.position?state.position.symbol+' × '+state.position.qty+' @ '+money(state.position.entry):'None';
+    $('paper-pnl').textContent=money(state.closedPnl);
+    $('paper-pnl').style.color=state.closedPnl>=0?'var(--green)':'var(--red)';
+    const rows=state.trades.slice(-10).reverse();
+    $('paper-history').innerHTML=rows.length?rows.map(t=>'<div style="padding:7px 0;border-bottom:1px solid var(--border)">'+t.side+' · '+t.symbol+' · '+t.qty+' × '+money(t.price)+' · '+(t.pnl==null?'OPEN':('P/L '+money(t.pnl)))+' <span style="color:var(--muted)">('+new Date(t.at).toLocaleString()+')</span></div>').join(''):'No practice trades yet.';
+  }
+  function message(s,bad){$('paper-message').textContent=s;$('paper-message').style.color=bad?'var(--red)':'var(--muted)';}
+  $('paper-submit').addEventListener('click',()=>{
+    const side=$('paper-side').value,symbol=$('paper-symbol').value;
+    const price=Number($('paper-price').value),qty=Number($('paper-qty').value);
+    if(!Number.isFinite(price)||price<=0||!Number.isSafeInteger(qty)||qty<1){message('Enter a valid positive price and whole-number quantity.',true);return;}
+    if(side==='BUY'){
+      if(state.position){message('Close the existing virtual position before opening another.',true);return;}
+      const cost=price*qty;
+      if(!Number.isFinite(cost)||cost>state.balance){message('Insufficient virtual balance for this practice BUY.',true);return;}
+      state.balance-=cost;state.position={symbol,entry:price,qty};
+      state.trades.push({side,symbol,price,qty,at:Date.now(),pnl:null});
+      message('Virtual BUY opened. No real order was sent.',false);
+    }else{
+      if(!state.position){message('There is no open virtual long position to close.',true);return;}
+      if(state.position.symbol!==symbol||state.position.qty!==qty){message('Select the same symbol and quantity as the open position.',true);return;}
+      const pnl=(price-state.position.entry)*qty;state.balance+=price*qty;state.closedPnl+=pnl;state.position=null;
+      state.trades.push({side,symbol,price,qty,pnl,at:Date.now()});
+      message('Virtual position closed. Realized practice P/L: '+money(pnl),false);
+    }
+    save();render();
+  });
+  $('paper-reset').addEventListener('click',()=>{
+    if(!window.confirm('Reset virtual balance and erase this browser practice history?'))return;
+    state=fresh();save();render();message('Practice account reset to ₹1,00,000.',false);
+  });
+  render();
 })();
 </script>
 
