@@ -399,10 +399,14 @@ label{display:block;color:var(--muted);font-size:12px}
       <div class="field-grid" style="margin-top:14px">
         <label>Practice symbol<select id="paper-symbol"><option>NIFTY 50</option><option>BANKNIFTY</option><option>FINNIFTY</option></select></label>
         <label>Side<select id="paper-side"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Close long)</option></select></label>
-        <label>Entry / Exit price<input id="paper-price" type="number" min="0.01" step="0.05" placeholder="Enter price"></label>
+        <label>Entry / Exit / Check price<input id="paper-price" type="number" min="0.01" step="0.05" placeholder="Enter price"></label>
         <label>Quantity<input id="paper-qty" type="number" min="1" step="1" value="1"></label>
+        <label>Stop Loss (optional)<input id="paper-stop" type="number" min="0.01" step="0.05" placeholder="Below entry"></label>
+        <label>Target (optional)<input id="paper-target" type="number" min="0.01" step="0.05" placeholder="Above entry"></label>
       </div>
+      <div class="result-box" id="paper-risk-preview">Set an entry price, stop loss and target to preview risk/reward.</div>
       <button class="primary-btn" type="button" id="paper-submit">PLACE VIRTUAL TRADE</button>
+      <button class="small-btn" style="width:100%;margin-top:8px" type="button" id="paper-check-levels">UPDATE PRICE & CHECK STOP / TARGET</button>
       <p class="metric-sub" id="paper-message" role="status">Start with a virtual balance of ₹1,00,000. BUY opens a long position; SELL closes it.</p>
       <div class="result-box" style="overflow:auto"><b>Practice trade history</b><div id="paper-history" class="metric-sub">No practice trades yet.</div></div>
       <button class="small-btn" type="button" id="paper-reset">RESET PRACTICE ACCOUNT</button>
@@ -1057,32 +1061,58 @@ window.addEventListener("DOMContentLoaded",()=>{
   function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{}}
   function render(){
     $('paper-balance').textContent=money(state.balance);
-    $('paper-position').textContent=state.position?state.position.symbol+' × '+state.position.qty+' @ '+money(state.position.entry):'None';
+    $('paper-position').textContent=state.position?state.position.symbol+' × '+state.position.qty+' @ '+money(state.position.entry)+' · SL '+(state.position.stop?money(state.position.stop):'—')+' · TP '+(state.position.target?money(state.position.target):'—'):'None';
     $('paper-pnl').textContent=money(state.closedPnl);
     $('paper-pnl').style.color=state.closedPnl>=0?'var(--green)':'var(--red)';
     const rows=state.trades.slice(-10).reverse();
-    $('paper-history').innerHTML=rows.length?rows.map(t=>'<div style="padding:7px 0;border-bottom:1px solid var(--border)">'+t.side+' · '+t.symbol+' · '+t.qty+' × '+money(t.price)+' · '+(t.pnl==null?'OPEN':('P/L '+money(t.pnl)))+' <span style="color:var(--muted)">('+new Date(t.at).toLocaleString()+')</span></div>').join(''):'No practice trades yet.';
+    $('paper-history').innerHTML=rows.length?rows.map(t=>'<div style="padding:7px 0;border-bottom:1px solid var(--border)">'+t.side+' · '+t.symbol+' · '+t.qty+' × '+money(t.price)+' · '+(t.pnl==null?'OPEN':('P/L '+money(t.pnl)))+(t.reason?' · '+t.reason:'')+' <span style="color:var(--muted)">('+new Date(t.at).toLocaleString()+')</span></div>').join(''):'No practice trades yet.';
   }
   function message(s,bad){$('paper-message').textContent=s;$('paper-message').style.color=bad?'var(--red)':'var(--muted)';}
+  function previewRisk(){
+    const entry=Number($('paper-price').value),stop=Number($('paper-stop').value),target=Number($('paper-target').value),qty=Number($('paper-qty').value);
+    const box=$('paper-risk-preview');
+    if(!Number.isFinite(entry)||entry<=0||!Number.isSafeInteger(qty)||qty<1){box.textContent='Enter a valid entry price and quantity to preview risk/reward.';return;}
+    if(!stop&&!target){box.textContent='Stop Loss and Target are optional. Add both to calculate planned risk/reward.';return;}
+    if((stop&&stop>=entry)||(target&&target<=entry)||(stop&&target&&stop>=target)){box.textContent='For a long practice trade: Stop Loss must be below entry and Target must be above entry.';return;}
+    const risk=stop?(entry-stop)*qty:0, reward=target?(target-entry)*qty:0;
+    box.textContent='Planned risk: '+(stop?money(risk):'Not set')+' · Potential reward: '+(target?money(reward):'Not set')+(stop&&target?' · Risk/Reward: 1 : '+(reward/risk).toFixed(2):'');
+  }
+  ['paper-price','paper-qty','paper-stop','paper-target'].forEach(id=>$(id).addEventListener('input',previewRisk));
+  function closeVirtual(price,reason){
+    const p=state.position;if(!p)return;
+    const pnl=(price-p.entry)*p.qty;
+    state.balance+=price*p.qty;state.closedPnl+=pnl;state.position=null;
+    state.trades.push({side:'SELL',symbol:p.symbol,price,qty:p.qty,pnl,reason,at:Date.now()});
+    save();render();message(reason+' · Virtual position closed. Realized P/L: '+money(pnl),false);
+  }
   $('paper-submit').addEventListener('click',()=>{
     const side=$('paper-side').value,symbol=$('paper-symbol').value;
     const price=Number($('paper-price').value),qty=Number($('paper-qty').value);
     if(!Number.isFinite(price)||price<=0||!Number.isSafeInteger(qty)||qty<1){message('Enter a valid positive price and whole-number quantity.',true);return;}
     if(side==='BUY'){
       if(state.position){message('Close the existing virtual position before opening another.',true);return;}
+      const stop=$('paper-stop').value===''?null:Number($('paper-stop').value);
+      const target=$('paper-target').value===''?null:Number($('paper-target').value);
+      if((stop!==null&&(!Number.isFinite(stop)||stop<=0||stop>=price))||(target!==null&&(!Number.isFinite(target)||target<=price))||(stop!==null&&target!==null&&stop>=target)){message('For a long trade, Stop Loss must be below entry and Target above entry.',true);return;}
       const cost=price*qty;
       if(!Number.isFinite(cost)||cost>state.balance){message('Insufficient virtual balance for this practice BUY.',true);return;}
-      state.balance-=cost;state.position={symbol,entry:price,qty};
-      state.trades.push({side,symbol,price,qty,at:Date.now(),pnl:null});
-      message('Virtual BUY opened. No real order was sent.',false);
+      state.balance-=cost;state.position={symbol,entry:price,qty,stop,target};
+      state.trades.push({side,symbol,price,qty,stop,target,at:Date.now(),pnl:null});
+      message('Virtual BUY opened with '+(stop?'Stop Loss ':'')+(target?'Target':'')+'. No real order was sent.',false);
     }else{
       if(!state.position){message('There is no open virtual long position to close.',true);return;}
       if(state.position.symbol!==symbol||state.position.qty!==qty){message('Select the same symbol and quantity as the open position.',true);return;}
-      const pnl=(price-state.position.entry)*qty;state.balance+=price*qty;state.closedPnl+=pnl;state.position=null;
-      state.trades.push({side,symbol,price,qty,pnl,at:Date.now()});
-      message('Virtual position closed. Realized practice P/L: '+money(pnl),false);
+      closeVirtual(price,'Manual exit');
     }
-    save();render();
+    save();render();previewRisk();
+  });
+  $('paper-check-levels').addEventListener('click',()=>{
+    if(!state.position){message('No open virtual position to check.',true);return;}
+    const price=Number($('paper-price').value),p=state.position;
+    if(!Number.isFinite(price)||price<=0){message('Enter the latest price to check your virtual Stop Loss / Target.',true);return;}
+    if(p.stop&&price<=p.stop){closeVirtual(price,'Stop Loss reached');return;}
+    if(p.target&&price>=p.target){closeVirtual(price,'Target reached');return;}
+    message('No level triggered at '+money(price)+'. Open virtual P/L: '+money((price-p.entry)*p.qty),false);
   });
   $('paper-reset').addEventListener('click',()=>{
     if(!window.confirm('Reset virtual balance and erase this browser practice history?'))return;
