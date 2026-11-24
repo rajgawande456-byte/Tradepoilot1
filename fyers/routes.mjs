@@ -12,9 +12,9 @@ function json(status, body) {
 }
 
 function encryptionKey() {
-  const value = String(process.env.FYERS_TOKEN_ENCRYPTION_KEY || '');
+  const value = String(process.env.FYERS_TOKEN_ENCRYPTION_KEY || process.env.FYERS_SECRET_KEY || '');
   if (value.length < 32) {
-    const error = new Error('FYERS_TOKEN_ENCRYPTION_KEY must be at least 32 characters.');
+    const error = new Error('Set FYERS_TOKEN_ENCRYPTION_KEY or a FYERS_SECRET_KEY of at least 32 characters.');
     error.code = 'FYERS_ENCRYPTION_NOT_CONFIGURED';
     throw error;
   }
