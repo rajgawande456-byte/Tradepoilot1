@@ -43,7 +43,11 @@ function createUpstoxProvider(env) {
     );
   }
 
-  async function getSnapshot(symbol) {
+  const snapshotCache = new Map();
+  const historyCache = new Map();
+  const inFlight = new Map();
+
+  async function getSnapshotRemote(symbol) {
     const safeSymbol = validateSymbol(symbol);
     const instrumentKey = INSTRUMENT_KEYS[safeSymbol];
 
@@ -169,7 +173,7 @@ function createUpstoxProvider(env) {
     };
   }
 
-  async function getHistory(symbol, interval = '5') {
+  async function getHistoryRemote(symbol, interval = '5') {
     const safeSymbol = validateSymbol(symbol);
     const allowedIntervals = new Set(['1', '2', '3', '5', '10', '15', '30', '60', '120', '240']);
     const safeInterval = String(interval);
@@ -266,6 +270,31 @@ function createUpstoxProvider(env) {
       symbol: safeSymbol, instrumentKey, provider: 'UPSTOX', interval: safeInterval,
       live: true, candles: cleanCandles
     };
+  }
+
+  async function cachedRequest(key, cache, ttlMs, loader) {
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.at < ttlMs) return cached.value;
+    if (inFlight.has(key)) return inFlight.get(key);
+    const pending = loader().then(value => {
+      cache.set(key, { at: Date.now(), value });
+      return value;
+    }).finally(() => inFlight.delete(key));
+    inFlight.set(key, pending);
+    return pending;
+  }
+
+  function getSnapshot(symbol) {
+    const safeSymbol = validateSymbol(symbol);
+    return cachedRequest('snapshot:' + safeSymbol, snapshotCache, 2000,
+      () => getSnapshotRemote(safeSymbol));
+  }
+
+  function getHistory(symbol, interval = '5') {
+    const safeSymbol = validateSymbol(symbol);
+    const safeInterval = String(interval);
+    return cachedRequest('history:' + safeSymbol + ':' + safeInterval, historyCache, 30000,
+      () => getHistoryRemote(safeSymbol, safeInterval));
   }
 
   return {
