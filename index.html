@@ -148,6 +148,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="nav-item" onclick="scrollToSection('beginner-section')">◎ Beginner Guide</div>
     <div class="nav-item" onclick="scrollToSection('coach-section')">✦ Market Coach</div>
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
+    <div class="nav-item" onclick="scrollToSection('journal-section')">▤ Trading Journal</div>
     <div class="nav-item" onclick="scrollToSection('market')">◈ Market Overview</div>
     <div class="nav-item" onclick="scrollToSection('chart-section')">▥ Charts & Indicators</div>
     <div class="nav-item" onclick="scrollToSection('trend-section')">↗ Trend Engine</div>
@@ -432,6 +433,7 @@ label{display:block;color:var(--muted);font-size:12px}
         <label>Quantity<input id="paper-qty" type="number" min="1" step="1" value="1"></label>
         <label>Stop Loss (optional)<input id="paper-stop" type="number" min="0.01" step="0.05" placeholder="Below entry"></label>
         <label>Target (optional)<input id="paper-target" type="number" min="0.01" step="0.05" placeholder="Above entry"></label>
+        <label>Strategy<select id="paper-strategy"><option value="EMA 9/21">EMA 9/21</option><option value="Breakout">Breakout</option><option value="Support / Resistance">Support / Resistance</option><option value="Momentum">Momentum</option><option value="Other">Other</option></select></label>
       </div>
       <div class="result-box" id="paper-risk-preview">Set an entry price, stop loss and target to preview risk/reward.</div>
       <button class="primary-btn" type="button" id="paper-submit">PLACE VIRTUAL TRADE</button>
@@ -439,6 +441,27 @@ label{display:block;color:var(--muted);font-size:12px}
       <p class="metric-sub" id="paper-message" role="status">Start with a virtual balance of ₹1,00,000. BUY opens a long position; SELL closes it.</p>
       <div class="result-box" style="overflow:auto"><b>Practice trade history</b><div id="paper-history" class="metric-sub">No practice trades yet.</div></div>
       <button class="small-btn" type="button" id="paper-reset">RESET PRACTICE ACCOUNT</button>
+    </div>
+  </section>
+
+  <section class="section" id="journal-section">
+    <div class="section-title"><h2>Trading Journal · Performance & learning</h2><span class="status status-blue">PAPER DATA</span></div>
+    <div class="card">
+      <p class="metric-sub">Analytics are calculated from closed Paper Trading positions saved in this browser. Older trades without a strategy label appear as Unlabelled.</p>
+      <div class="grid-3">
+        <div class="card"><div class="metric-label">Closed trades</div><div class="metric-value" id="journal-count">0</div></div>
+        <div class="card"><div class="metric-label">Win rate</div><div class="metric-value" id="journal-winrate">—</div></div>
+        <div class="card"><div class="metric-label">Net realized P/L</div><div class="metric-value" id="journal-net">₹0.00</div></div>
+        <div class="card"><div class="metric-label">Winning trades</div><div class="metric-value" id="journal-wins">0</div></div>
+        <div class="card"><div class="metric-label">Losing trades</div><div class="metric-value" id="journal-losses">0</div></div>
+        <div class="card"><div class="metric-label">Profit factor</div><div class="metric-value" id="journal-factor">—</div></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="result-box"><b>Strategy performance</b><div id="journal-strategies" class="metric-sub">No closed trades yet.</div></div>
+        <div class="result-box"><b>Learning & mistake review</b><div id="journal-review" class="metric-sub">Close practice trades to build your review.</div></div>
+      </div>
+      <div class="result-box"><b>Recent closed trades</b><div id="journal-recent" class="metric-sub">No closed trades yet.</div></div>
+      <p class="metric-sub">Missing stop-losses and losing streaks are review prompts, not proof of a mistake. This journal is educational and does not evaluate real broker trades.</p>
     </div>
   </section>
 
@@ -1122,6 +1145,24 @@ window.addEventListener("DOMContentLoaded",()=>{
     $('paper-pnl').style.color=state.closedPnl>=0?'var(--green)':'var(--red)';
     const rows=state.trades.slice(-10).reverse();
     $('paper-history').innerHTML=rows.length?rows.map(t=>'<div style="padding:7px 0;border-bottom:1px solid var(--border)">'+t.side+' · '+t.symbol+' · '+t.qty+' × '+money(t.price)+' · '+(t.pnl==null?'OPEN':('P/L '+money(t.pnl)))+(t.reason?' · '+t.reason:'')+' <span style="color:var(--muted)">('+new Date(t.at).toLocaleString()+')</span></div>').join(''):'No practice trades yet.';
+    renderJournal();
+  }
+  function renderJournal(){
+    const closed=state.trades.filter(t=>t.side==='SELL'&&Number.isFinite(Number(t.pnl)));
+    const wins=closed.filter(t=>Number(t.pnl)>0),losses=closed.filter(t=>Number(t.pnl)<0);
+    const net=closed.reduce((sum,t)=>sum+Number(t.pnl),0),grossWin=wins.reduce((sum,t)=>sum+Number(t.pnl),0),grossLoss=Math.abs(losses.reduce((sum,t)=>sum+Number(t.pnl),0));
+    const set=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+    set('journal-count',closed.length);set('journal-winrate',closed.length?(wins.length/closed.length*100).toFixed(1)+'%':'—');set('journal-net',money(net));
+    set('journal-wins',wins.length);set('journal-losses',losses.length);set('journal-factor',grossLoss?(grossWin/grossLoss).toFixed(2):(grossWin?'∞':'—'));
+    $('journal-net').style.color=net>=0?'var(--green)':'var(--red)';
+    const groups={};closed.forEach(t=>{const name=t.strategy||'Unlabelled';(groups[name]??=[]).push(t);});
+    $('journal-strategies').innerHTML=Object.entries(groups).map(([name,items])=>{const pnl=items.reduce((sum,t)=>sum+Number(t.pnl),0),won=items.filter(t=>Number(t.pnl)>0).length;return '<div style="padding:6px 0;border-bottom:1px solid var(--border)">'+name+' · '+items.length+' trades · '+(won/items.length*100).toFixed(0)+'% wins · <b>'+money(pnl)+'</b></div>';}).join('')||'No closed trades yet.';
+    const missing=closed.filter(t=>t.stop==null).length;let streak=0;for(let i=closed.length-1;i>=0;i--){if(Number(closed[i].pnl)<0)streak++;else break;}
+    const avgWin=wins.length?grossWin/wins.length:0,avgLoss=losses.length?grossLoss/losses.length:0,notes=[];
+    if(missing)notes.push(missing+' closed trade(s) had no recorded stop-loss.');if(streak>=2)notes.push('Current losing streak: '+streak+' closed trades.');if(avgWin&&avgLoss)notes.push('Average win '+money(avgWin)+' vs average loss '+money(avgLoss)+'.');
+    if(!notes.length)notes.push(closed.length?'No obvious journal flags from these basic checks. Keep recording a plan before each practice entry.':'Close practice trades to build your review.');
+    $('journal-review').innerHTML=notes.map(x=>'<div style="padding:5px 0">• '+x+'</div>').join('');
+    $('journal-recent').innerHTML=closed.slice(-8).reverse().map(t=>'<div style="padding:6px 0;border-bottom:1px solid var(--border)">'+t.symbol+' · '+(t.strategy||'Unlabelled')+' · '+money(t.pnl)+' · '+(t.reason||'Closed')+' <span style="color:var(--muted)">('+new Date(t.at).toLocaleString()+')</span></div>').join('')||'No closed trades yet.';
   }
   function message(s,bad){$('paper-message').textContent=s;$('paper-message').style.color=bad?'var(--red)':'var(--muted)';}
   function previewRisk(){
@@ -1138,7 +1179,7 @@ window.addEventListener("DOMContentLoaded",()=>{
     const p=state.position;if(!p)return;
     const pnl=(price-p.entry)*p.qty;
     state.balance+=price*p.qty;state.closedPnl+=pnl;state.position=null;
-    state.trades.push({side:'SELL',symbol:p.symbol,price,qty:p.qty,pnl,reason,at:Date.now()});
+    state.trades.push({side:'SELL',symbol:p.symbol,price,qty,pnl,reason,strategy:p.strategy||'Unlabelled',stop:p.stop??null,target:p.target??null,entry:p.entry,at:Date.now()});
     save();render();message(reason+' · Virtual position closed. Realized P/L: '+money(pnl),false);
   }
   $('paper-submit').addEventListener('click',()=>{
@@ -1152,8 +1193,9 @@ window.addEventListener("DOMContentLoaded",()=>{
       if((stop!==null&&(!Number.isFinite(stop)||stop<=0||stop>=price))||(target!==null&&(!Number.isFinite(target)||target<=price))||(stop!==null&&target!==null&&stop>=target)){message('For a long trade, Stop Loss must be below entry and Target above entry.',true);return;}
       const cost=price*qty;
       if(!Number.isFinite(cost)||cost>state.balance){message('Insufficient virtual balance for this practice BUY.',true);return;}
-      state.balance-=cost;state.position={symbol,entry:price,qty,stop,target};
-      state.trades.push({side,symbol,price,qty,stop,target,at:Date.now(),pnl:null});
+      const strategy=$('paper-strategy').value;
+      state.balance-=cost;state.position={symbol,entry:price,qty,stop,target,strategy};
+      state.trades.push({side,symbol,price,qty,stop,target,strategy,at:Date.now(),pnl:null});
       message('Virtual BUY opened with '+(stop?'Stop Loss ':'')+(target?'Target':'')+'. No real order was sent.',false);
     }else{
       if(!state.position){message('There is no open virtual long position to close.',true);return;}
