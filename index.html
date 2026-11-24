@@ -148,6 +148,7 @@ label{display:block;color:var(--muted);font-size:12px}
     <div class="nav-item" onclick="scrollToSection('beginner-section')">◎ Beginner Guide</div>
     <div class="nav-item" onclick="scrollToSection('coach-section')">✦ Market Coach</div>
     <div class="nav-item" onclick="scrollToSection('paper-section')">▣ Paper Trading</div>
+    <div class="nav-item" onclick="scrollToSection('safety-shield-section')">🛡 Trader Safety Shield</div>
     <div class="nav-item" onclick="scrollToSection('journal-section')">▤ Trading Journal</div>
     <div class="nav-item" onclick="scrollToSection('academy-section')">🎓 Beginner Academy</div>
     <div class="nav-item" onclick="scrollToSection('profile-section')">◉ My Progress</div>
@@ -491,6 +492,7 @@ label{display:block;color:var(--muted);font-size:12px}
     </div>
   </section>
 
+<section class="section" id="safety-shield-section"><div class="section-title"><h2>🛡 Trader Safety Shield · Practice discipline</h2><span class="status status-blue">PAPER TRADING ONLY</span></div><div class="card"><p class="metric-sub">Uses your existing local Paper Trading history. Configure practice limits, review daily realized P/L, loss streaks and trade frequency. Educational warnings only; it does not block trades or monitor real broker accounts.</p><div class="grid-3"><div class="card"><div class="metric-label">Today realized P/L</div><div class="metric-value" id="shield-today-pnl">₹0.00</div><div class="metric-sub" id="shield-day-status">No closed practice trades today</div></div><div class="card"><div class="metric-label">Current losing streak</div><div class="metric-value" id="shield-streak">0</div><div class="metric-sub">Consecutive closed losses</div></div><div class="card"><div class="metric-label">Today closed trades</div><div class="metric-value" id="shield-trades">0</div><div class="metric-sub" id="shield-frequency">Practice trade frequency</div></div></div><div class="field-grid" style="margin-top:14px"><label>Daily loss limit (₹)<input id="shield-loss-limit" type="number" min="1" step="100" value="2000"></label><label>Maximum closed trades per day<input id="shield-trade-limit" type="number" min="1" max="100" step="1" value="5"></label><label>Maximum planned risk per trade (₹)<input id="shield-risk-limit" type="number" min="1" step="100" value="1000"></label></div><button class="primary-btn" type="button" id="shield-save">SAVE MY PRACTICE LIMITS</button><div class="result-box" id="shield-alert" role="status" style="margin-top:12px">Review your limits before your next practice trade.</div><div class="result-box" style="margin-top:12px"><b>Pre-trade discipline checklist</b><label style="display:flex;gap:9px;align-items:center;margin-top:12px;color:var(--text)"><input class="shield-check" type="checkbox" data-check="setup" style="width:auto;margin:0"> I can explain my trade setup and invalidation level.</label><label style="display:flex;gap:9px;align-items:center;margin-top:10px;color:var(--text)"><input class="shield-check" type="checkbox" data-check="stop" style="width:auto;margin:0"> I have planned a stop-loss before entry.</label><label style="display:flex;gap:9px;align-items:center;margin-top:10px;color:var(--text)"><input class="shield-check" type="checkbox" data-check="size" style="width:auto;margin:0"> My quantity fits my planned risk limit.</label><label style="display:flex;gap:9px;align-items:center;margin-top:10px;color:var(--text)"><input class="shield-check" type="checkbox" data-check="emotion" style="width:auto;margin:0"> I am calm and not trying to recover a previous loss.</label><div class="metric-sub" id="shield-check-progress" style="margin-top:10px">0 / 4 checks completed</div></div><p class="metric-sub" style="margin-top:12px">Limits and checklist are saved only in this browser/device. Daily P/L uses closed virtual trades. Open-position unrealized P/L is not included. Alerts are reminders, not financial advice.</p><button class="small-btn" type="button" id="shield-refresh">REFRESH SAFETY REVIEW</button></div></section>
   <section class="section" id="journal-section">
     <div class="section-title"><h2>Trading Journal · Performance & learning</h2><span class="status status-blue">PAPER DATA</span></div>
     <div class="card">
@@ -1465,6 +1467,40 @@ window.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener('storage',render);window.addEventListener('focus',render);
   ['account-email','account-status'].forEach(id=>{const node=$(id);if(node&&window.MutationObserver)new MutationObserver(render).observe(node,{childList:true,characterData:true,subtree:true});});
   render();
+})();
+</script>
+<script>
+/* TRADEPILOT_SAFETY_SHIELD_V1 */
+(function(){
+const PAPER_KEY='tradepilot.paper.v1', SETTINGS_KEY='tradepilot.safety.v1';
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dayKey=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const today=dayKey(Date.now());
+let settings={dailyLoss:2000,maxTrades:5,maxRisk:1000,checks:{},checkDay:today};
+try{settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')};}catch{}
+if(settings.checkDay!==today){settings.checks={};settings.checkDay=today;}
+function paper(){try{const p=JSON.parse(localStorage.getItem(PAPER_KEY)||'{}');return p&&Array.isArray(p.trades)?p:{trades:[]};}catch{return {trades:[]};}}
+function save(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));}catch{}}
+function render(){
+const trades=paper().trades, closed=trades.filter(t=>t&&t.side==='SELL'&&Number.isFinite(Number(t.pnl))), todays=closed.filter(t=>dayKey(t.at)===today);
+const todayPnl=todays.reduce((n,t)=>n+Number(t.pnl),0);let streak=0;for(let i=closed.length-1;i>=0;i--){if(Number(closed[i].pnl)<0)streak++;else break;}
+$('shield-today-pnl').textContent=money(todayPnl);$('shield-today-pnl').style.color=todayPnl<0?'var(--red)':'var(--green)';
+$('shield-day-status').textContent=todayPnl<0?'Realized practice loss today':'Realized practice result today';$('shield-streak').textContent=String(streak);$('shield-streak').style.color=streak>=2?'var(--red)':'var(--text)';
+$('shield-trades').textContent=String(todays.length);$('shield-frequency').textContent=todays.length>=Number(settings.maxTrades)?'Daily practice trade limit reached':'Daily practice trade count';
+$('shield-loss-limit').value=settings.dailyLoss;$('shield-trade-limit').value=settings.maxTrades;$('shield-risk-limit').value=settings.maxRisk;
+document.querySelectorAll('.shield-check').forEach(el=>el.checked=!!settings.checks[el.dataset.check]);
+const checked=Object.values(settings.checks||{}).filter(Boolean).length;$('shield-check-progress').textContent=Math.min(checked,4)+' / 4 checks completed';
+const alerts=[];if(todayPnl<=-Math.abs(Number(settings.dailyLoss)))alerts.push('Daily loss limit reached or exceeded. Stop and review today practice session.');else if(todayPnl<0)alerts.push('You are down '+money(Math.abs(todayPnl))+' today. Protect your remaining practice capital.');
+if(todays.length>=Number(settings.maxTrades))alerts.push('Daily trade-count limit reached. Consider ending the practice session.');if(streak>=2)alerts.push('You have '+streak+' consecutive losses. Take a break and review your journal.');
+if(!alerts.length)alerts.push('No safety threshold triggered from available closed-trade data. Complete the checklist before every practice entry.');
+$('shield-alert').textContent=alerts.join(' ');$('shield-alert').style.color=alerts.some(x=>/limit reached|consecutive losses/.test(x))?'var(--red)':'var(--text)';
+}
+$('shield-save').addEventListener('click',()=>{const dailyLoss=Number($('shield-loss-limit').value),maxTrades=Number($('shield-trade-limit').value),maxRisk=Number($('shield-risk-limit').value);
+if(!Number.isFinite(dailyLoss)||dailyLoss<=0||!Number.isSafeInteger(maxTrades)||maxTrades<1||maxTrades>100||!Number.isFinite(maxRisk)||maxRisk<=0){$('shield-alert').textContent='Enter positive limits. Daily trade count must be a whole number from 1 to 100.';return;}
+settings={...settings,dailyLoss,maxTrades,maxRisk};save();render();$('shield-alert').textContent='Your practice limits have been saved on this device. '+$('shield-alert').textContent;});
+document.querySelectorAll('.shield-check').forEach(el=>el.addEventListener('change',()=>{settings.checks=settings.checks||{};settings.checks[el.dataset.check]=el.checked;settings.checkDay=today;save();render();}));
+$('shield-refresh').addEventListener('click',render);window.addEventListener('focus',render);window.addEventListener('storage',render);render();
 })();
 </script>
 </body>
