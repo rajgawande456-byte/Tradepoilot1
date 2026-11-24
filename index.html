@@ -543,6 +543,12 @@ async function updateChart(){
       .sort((a,b)=>a.time-b.time);
     if(realBars.length<2)throw new Error("Historical API returned fewer than 2 valid candles");
     candles=realBars;
+    const asOf = body?.data?.asOf || new Date(realBars[realBars.length - 1].time * 1000).toISOString();
+    const asOfLabel = new Date(asOf).toLocaleString('en-IN', {
+      timeZone:'Asia/Kolkata', day:'2-digit', month:'short',
+      hour:'2-digit', minute:'2-digit', hour12:false
+    });
+    if(title) title.textContent = apiSymbol + " · HISTORICAL DATA · AS OF " + asOfLabel + " IST";
     candleSeries.setData(candles);
     const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),ema21=calcEMA(closes,21),vwap=calcVWAP(candles);
     emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
@@ -724,7 +730,7 @@ window.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 <script>
- // TRADEPILOT_LIVE_API_PATCH v2: quote cards use per-symbol verified snapshot response; charts remain demo.
+ // TRADEPILOT_LIVE_API_PATCH v3: quote cards use verified snapshots; charts use historical candles plus verified live ticks.
  (function(){
    const API='https://tradepoilot-api.onrender.com/api/v1/market/snapshot';
    const symbols=['NIFTY 50','BANKNIFTY','FINNIFTY'];

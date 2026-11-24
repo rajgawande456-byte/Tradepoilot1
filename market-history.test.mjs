@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProvider } from './market/provider.mjs';
 
-test('Upstox history normalizes intraday candles and sends bearer auth', async () => {
+test('Upstox history normalizes candles, sends bearer auth, and identifies historical data', async () => {
   const originalFetch = globalThis.fetch;
   let capturedUrl, capturedHeaders;
   globalThis.fetch = async (url, options) => {
@@ -21,7 +21,10 @@ test('Upstox history normalizes intraday candles and sends bearer auth', async (
     const history = await provider.getHistory('NIFTY 50', '5');
     assert.match(capturedUrl, /historical-candle\/intraday/);
     assert.equal(capturedHeaders.Authorization, 'Bearer test-token');
-    assert.equal(history.live, true);
+    assert.equal(history.live, false);
+    assert.equal(history.dataType, 'historical_candles');
+    assert.equal(history.asOf, new Date(Date.parse('2026-11-23T09:20:00+05:30')).toISOString());
+    assert.ok(Number.isFinite(Date.parse(history.receivedAt)));
     assert.equal(history.candles.length, 2);
     assert.equal(history.candles[0].open, 100);
     assert.equal(history.candles[1].close, 106);

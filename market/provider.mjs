@@ -266,9 +266,17 @@ function createUpstoxProvider(env) {
     if (!cleanCandles.length) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_INVALID', `Historical candle validation failed: received ${candles.length} rows, ${rowsWithShape.length} rows with expected shape, ${validCandles.length} valid rows.`, 502);
     }
+    const latestCandle = cleanCandles[cleanCandles.length - 1];
     return {
-      symbol: safeSymbol, instrumentKey, provider: 'UPSTOX', interval: safeInterval,
-      live: true, candles: cleanCandles
+      symbol: safeSymbol,
+      instrumentKey,
+      provider: 'UPSTOX',
+      dataType: 'historical_candles',
+      live: false,
+      interval: safeInterval,
+      asOf: new Date(latestCandle.time * 1000).toISOString(),
+      receivedAt: new Date().toISOString(),
+      candles: cleanCandles
     };
   }
 
