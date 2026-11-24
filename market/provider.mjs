@@ -189,11 +189,49 @@ function createUpstoxProvider(env) {
     if (!response.ok) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_ERROR', `Upstox historical candles returned HTTP ${response.status}.`, 502);
     }
-    const result = await response.json();
-    const candles = result?.data?.candles;
+    let result = await response.json();
+    let candles = result?.data?.candles;
     if (!Array.isArray(candles)) {
       throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Historical candle data is missing.', 502);
     }
+
+    // Intraday V3 only returns the current trading day's candles. If it returns
+    // an empty array, fall back to a recent date range so the chart can still load.
+    if (candles.length === 0) {
+      const dateParts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(new Date());
+      const part = type => dateParts.find(item => item.type === type)?.value;
+      const toDate = `${part('year')}-${part('month')}-${part('day')}`;
+      const from = new Date(`${toDate}T00:00:00+05:30`);
+      from.setUTCDate(from.getUTCDate() - 7);
+      const fromDate = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(from);
+      const historyUrl = new URL(
+        'https://api.upstox.com/v3/historical-candle/' +
+        encodeURIComponent(instrumentKey) + '/' + unit + '/' + providerInterval +
+        '/' + toDate + '/' + fromDate
+      );
+      const historyResponse = await fetch(historyUrl, {
+        method: 'GET',
+        headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10000)
+      });
+      if (historyResponse.ok) {
+        result = await historyResponse.json();
+        candles = result?.data?.candles;
+      } else {
+        const body = await historyResponse.text().catch(() => '');
+        console.error('Upstox historical fallback error', {
+          status: historyResponse.status, symbol: safeSymbol, body: body.slice(0, 400)
+        });
+      }
+      if (!Array.isArray(candles)) {
+        throw new MarketDataProviderError('UPSTOX_HISTORY_EMPTY', 'Intraday and date-range historical candle data are unavailable.', 502);
+      }
+    }
+
     const parseCandleTime = value => {
       if (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value.trim()))) {
         const numeric = Number(value);
