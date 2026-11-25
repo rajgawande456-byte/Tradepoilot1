@@ -1101,6 +1101,10 @@ window.addEventListener("DOMContentLoaded",()=>{
     const bucket = Math.floor(seconds / intervalSeconds()) * intervalSeconds();
 
     const lastHistorical = candles.length ? candles[candles.length - 1] : null;
+    // Ignore delayed/out-of-order ticks older than the last candle already
+    // rendered; Lightweight Charts rejects updates to an older time point.
+    if (lastHistorical && bucket < lastHistorical.time) return;
+
     if (!liveCandle || liveCandle.time !== bucket) {
       const sameBucket = lastHistorical && lastHistorical.time === bucket;
       liveCandle = {
@@ -1115,6 +1119,17 @@ window.addEventListener("DOMContentLoaded",()=>{
       liveCandle.high = Math.max(liveCandle.high, price);
       liveCandle.low = Math.min(liveCandle.low, price);
       liveCandle.close = price;
+    }
+
+    // Keep the selected instrument's headline quote synchronized with every
+    // WebSocket tick instead of waiting for the slower REST snapshot poll.
+    const priceEl = document.getElementById("price" + selectedMarket);
+    if (priceEl) priceEl.textContent = price.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+    const marketCard = document.getElementById("market" + selectedMarket);
+    const marketStatus = marketCard?.querySelector(".market-change");
+    if (marketStatus) {
+      marketStatus.textContent = "UPSTOX · LIVE TICK";
+      marketStatus.style.color = "var(--green)";
     }
 
     try {
