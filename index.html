@@ -1034,6 +1034,10 @@ window.addEventListener("DOMContentLoaded",()=>{
            finally{clearTimeout(timeout);}
            const body=await response.json().catch(()=>null);
            const q=response.ok?extractQuote(body):null;
+           const recentWsTick=Number(priceEl?.dataset.liveTickAt||0);
+           if(i===selectedMarket && recentWsTick>0 && Date.now()-recentWsTick<20000){
+             status.textContent='UPSTOX · LIVE WEBSOCKET';status.style.color='var(--green)';return;
+           }
            if(q && q.live){
              priceEl.textContent=q.price.toLocaleString('en-IN',{maximumFractionDigits:2});
              const tradedAt=formatTradeTime(q.timestamp);
@@ -1099,21 +1103,21 @@ window.addEventListener("DOMContentLoaded",()=>{
     if (!Number.isFinite(parsed)) return;
     const seconds = Math.floor(parsed / 1000);
     const bucket = Math.floor(seconds / intervalSeconds()) * intervalSeconds();
+    const lastBar = candles.length ? candles[candles.length - 1] : null;
 
-    const lastHistorical = candles.length ? candles[candles.length - 1] : null;
-    // Ignore delayed/out-of-order ticks older than the last candle already
-    // rendered; Lightweight Charts rejects updates to an older time point.
-    if (lastHistorical && bucket < lastHistorical.time) return;
+    // Never send an older timestamp to Lightweight Charts. A delayed tick
+    // must not move the chart backwards or overwrite a later candle.
+    if (lastBar && bucket < lastBar.time) return;
 
     if (!liveCandle || liveCandle.time !== bucket) {
-      const sameBucket = lastHistorical && lastHistorical.time === bucket;
+      const sameBucket = lastBar && lastBar.time === bucket;
       liveCandle = {
         time: bucket,
-        open: sameBucket ? lastHistorical.open : price,
-        high: Math.max(sameBucket ? lastHistorical.high : price, price),
-        low: Math.min(sameBucket ? lastHistorical.low : price, price),
+        open: sameBucket ? lastBar.open : price,
+        high: Math.max(sameBucket ? lastBar.high : price, price),
+        low: Math.min(sameBucket ? lastBar.low : price, price),
         close: price,
-        volume: sameBucket ? Number(lastHistorical.volume || 0) : 0
+        volume: sameBucket ? Number(lastBar.volume || 0) : 0
       };
     } else {
       liveCandle.high = Math.max(liveCandle.high, price);
@@ -1121,18 +1125,34 @@ window.addEventListener("DOMContentLoaded",()=>{
       liveCandle.close = price;
     }
 
-    // Keep the selected instrument's headline quote synchronized with every
-    // WebSocket tick instead of waiting for the slower REST snapshot poll.
+    // One WebSocket tick is the source of truth for both the selected quote
+    // card and the active chart candle.
     const priceEl = document.getElementById("price" + selectedMarket);
-    if (priceEl) priceEl.textContent = price.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+    if (priceEl) {
+      priceEl.textContent = price.toLocaleString("en-IN", {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+      });
+      priceEl.dataset.liveTickAt = String(Date.now());
+      priceEl.dataset.live = "true";
+    }
     const marketCard = document.getElementById("market" + selectedMarket);
     const marketStatus = marketCard?.querySelector(".market-change");
     if (marketStatus) {
-      marketStatus.textContent = "UPSTOX · LIVE TICK";
+      marketStatus.textContent = "UPSTOX · LIVE WEBSOCKET";
       marketStatus.style.color = "var(--green)";
     }
 
     try {
+      // Persist the forming candle in the same array used by history, EMA,
+      // VWAP and analysis. This prevents indicators from being rebuilt from
+      // stale history on every tick.
+      const lastIndex = candles.length - 1;
+      if (lastIndex >= 0 && candles[lastIndex].time === liveCandle.time) {
+        candles[lastIndex] = { ...liveCandle };
+      } else {
+        candles.push({ ...liveCandle });
+      }
+
       candleSeries.update({
         time: liveCandle.time,
         open: liveCandle.open,
@@ -1141,23 +1161,15 @@ window.addEventListener("DOMContentLoaded",()=>{
         close: liveCandle.close
       });
 
-      // Recalculate the displayed EMA overlays and trend from the live candle.
-      const liveBars = candles.slice();
-      if (liveBars.length && liveBars[liveBars.length - 1].time === liveCandle.time) {
-        liveBars[liveBars.length - 1] = { ...liveCandle };
-      } else if (!liveBars.length || liveBars[liveBars.length - 1].time < liveCandle.time) {
-        liveBars.push({ ...liveCandle });
-      }
-      const closes = liveBars.map(bar => bar.close);
+      const closes = candles.map(bar => bar.close);
       const ema9 = calcEMA(closes, 9);
       const ema21 = calcEMA(closes, 21);
-      emaSeries.setData(liveBars.map((bar, i) => ({ time: bar.time, value: ema9[i] })));
-      ema21Series.setData(liveBars.map((bar, i) => ({ time: bar.time, value: ema21[i] })));
-      const originalCandles = candles;
-      candles = liveBars;
-      updateAnalysis();
-      candles = originalCandles;
+      const vwap = calcVWAP(candles);
+      emaSeries.setData(candles.map((bar, i) => ({ time: bar.time, value: ema9[i] })));
+      ema21Series.setData(candles.map((bar, i) => ({ time: bar.time, value: ema21[i] })));
+      vwapSeries.setData(candles.map((bar, i) => ({ time: bar.time, value: vwap[i] })));
 
+      updateAnalysis();
       setStatus("● UPSTOX · LIVE WEBSOCKET TICKS", "var(--green)");
       const title = document.getElementById("chart-title");
       if (title) title.textContent = activeSymbol + " · " + selectedTF + " · LIVE TICK";
