@@ -238,22 +238,33 @@ const server = http.createServer(async (req, res) => {
       );
     }
 
-    if (isRateLimited(req)) {
+    const url = new URL(
+      req.url || '/',
+      `http://${req.headers.host || 'localhost'}`
+    );
+
+    // Apply the per-IP API budget only to API routes. Static dashboard assets,
+    // health checks, and CORS preflight must not consume market/auth API quota.
+    if (url.pathname.startsWith('/api/') && isRateLimited(req)) {
+      const retryAfterSeconds = Math.max(
+        1,
+        60 - Math.floor((Date.now() % 60000) / 1000)
+      );
       return sendJson(
         res,
         429,
         {
           error: 'RATE_LIMITED',
+          message: 'API request limit reached. Retry after the indicated delay.',
+          retryAfterSeconds,
           requestId: requestID
         },
-        corsHeaders
+        {
+          ...corsHeaders,
+          'retry-after': String(retryAfterSeconds)
+        }
       );
     }
-
-    const url = new URL(
-      req.url || '/',
-      `http://${req.headers.host || 'localhost'}`
-    );
 
     const authResponse = await handleAuthRequest(req);
 
