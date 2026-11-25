@@ -112,9 +112,10 @@ export function startUpstoxStream({ token, marketStream, onStatus = () => {} } =
               feed.firstLevelWithGreeks?.ltpc;
 
             const price = Number(ltpc?.ltp);
-            // currentTs is the feed event time; use the instrument trade time
-            // only when the envelope timestamp is absent.
-            const rawTs = obj.currentTs ?? ltpc?.ltt ?? Date.now();
+            // Use only timestamps supplied by Upstox. If both the feed-event
+            // and instrument trade timestamps are absent, reject the tick below
+            // instead of assigning a local receipt time that could look live.
+            const rawTs = obj.currentTs ?? ltpc?.ltt;
             const timestampMs = toEpochMilliseconds(rawTs);
 
             if (
