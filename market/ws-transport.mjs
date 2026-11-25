@@ -29,16 +29,25 @@ export function createWebSocketClient(socket) {
     send(payload) {
       const body = Buffer.from(String(payload));
 
-      if (body.length >= 126) {
-        throw new Error('FRAME_TOO_LARGE');
+      // RFC 6455 server frames use a 7-bit, 16-bit, or 64-bit payload length.
+      // Market tick JSON is normally larger than 125 bytes, so a short-only
+      // frame silently disconnected every live dashboard subscriber.
+      let header;
+      if (body.length < 126) {
+        header = Buffer.from([0x81, body.length]);
+      } else if (body.length <= 0xffff) {
+        header = Buffer.allocUnsafe(4);
+        header[0] = 0x81;
+        header[1] = 126;
+        header.writeUInt16BE(body.length, 2);
+      } else {
+        header = Buffer.allocUnsafe(10);
+        header[0] = 0x81;
+        header[1] = 127;
+        header.writeBigUInt64BE(BigInt(body.length), 2);
       }
 
-      const frame = Buffer.concat([
-        Buffer.from([0x81, body.length]),
-        body
-      ]);
-
-      socket.write(frame);
+      socket.write(Buffer.concat([header, body]));
     },
 
     close(code = 1000) {
