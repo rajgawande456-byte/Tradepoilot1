@@ -1005,7 +1005,8 @@ window.addEventListener("DOMContentLoaded",()=>{
      const p=Number(q.lastPrice ?? q.last_price ?? q.ltp ?? q.price);
      return Number.isFinite(p)&&p>0 ? {
        price:p,live:q.live===true,provider:q.provider||'API',
-       timestamp:q.timestamp??q.last_trade_time??null
+       timestamp:q.timestamp??q.last_trade_time??null,
+       freshnessStatus:q.freshnessStatus||'timestamp_unavailable'
      } : null;
    }
    function formatTradeTime(value){
@@ -1044,7 +1045,7 @@ window.addEventListener("DOMContentLoaded",()=>{
              status.textContent=q.provider+' · '+(tradedAt?'last traded '+tradedAt+' IST':'latest available quote · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
              status.style.color=tradedAt?'var(--muted)':'var(--green)';
            }else{
-             priceEl.textContent='—';status.textContent=(body?.message||'Quote unavailable')+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';
+             priceEl.textContent='—';const unavailable=q?.freshnessStatus==='stale'?'Quote stale':q?.freshnessStatus==='timestamp_unavailable'?'Provider timestamp unavailable':(body?.message||'Quote unavailable');status.textContent=unavailable+' · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';
            }
          }catch(err){priceEl.textContent='—';status.textContent='API offline · checked '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});status.style.color='var(--yellow)';}
        }));

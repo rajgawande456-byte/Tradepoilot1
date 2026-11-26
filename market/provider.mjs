@@ -1,3 +1,5 @@
+import { assessUpstoxSnapshotFreshness } from './upstox-snapshot-freshness.mjs';
+
 const ALLOWED_SYMBOLS = new Set([
   'NIFTY 50',
   'BANKNIFTY',
@@ -217,11 +219,15 @@ function createUpstoxProvider(env) {
       );
     }
 
+    const freshness = assessUpstoxSnapshotFreshness(
+      quote.last_trade_time ?? quote.timestamp ?? null
+    );
+
     return {
       symbol: safeSymbol,
       instrumentKey,
       provider: 'UPSTOX',
-      live: true,
+      live: freshness.live,
       lastPrice,
       open: parsedOHLC.open,
       high: parsedOHLC.high,
@@ -230,7 +236,9 @@ function createUpstoxProvider(env) {
       volume,
       averagePrice,
       netChange,
-      timestamp: quote.last_trade_time ?? quote.timestamp ?? null,
+      timestamp: freshness.timestamp,
+      freshnessMs: freshness.freshnessMs,
+      freshnessStatus: freshness.freshnessStatus,
       receivedAt: new Date().toISOString(),
       raw: quote
     };
