@@ -6,6 +6,7 @@
 <title>TradePilot AI</title>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script type="module" src="/market/chart-context.mjs"></script>
 
 <style>
 :root{
@@ -749,13 +750,31 @@ function initChart(){
 }
 
 let chartRequestId=0;
+let loadedChartContextKey=null;
 async function updateChart(){
   if(!chart)return;
   const requestId=++chartRequestId;
   const symbols=["NIFTY 50","BANKNIFTY","FINNIFTY"];
   const apiSymbol=symbols[selectedMarket]||"NIFTY 50";
   const apiInterval=selectedTF==="1m"?"1":selectedTF==="5m"?"5":selectedTF==="15m"?"15":"60";
+  const contextKey=window.TradePilotChartContext?.chartContextKey(apiSymbol,apiInterval)||apiSymbol+":"+apiInterval;
+  const canReuse=window.TradePilotChartContext?.canReuseChartData(loadedChartContextKey,contextKey,candles.length>0)??Boolean(candles.length&&loadedChartContextKey===contextKey);
   const title=document.getElementById("chart-title");
+  if(!canReuse){
+    // Never leave one symbol/timeframe's candles visible under another label.
+    candles=[];
+    candleSeries.setData([]);
+    emaSeries.setData([]);
+    ema21Series.setData([]);
+    vwapSeries.setData([]);
+    const trend=document.getElementById("trend-value");if(trend)trend.textContent="LOADING";
+    const strength=document.getElementById("strength-value");if(strength)strength.textContent="—";
+    const status=document.getElementById("trend-status");if(status)status.textContent="LOADING HISTORICAL DATA";
+    const rsi=document.getElementById("rsi-value");if(rsi)rsi.textContent="—";
+    const macd=document.getElementById("macd-value");if(macd)macd.textContent="—";
+    const support=document.getElementById("support-value");if(support)support.textContent="—";
+    const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent="—";
+  }
   if(title)title.textContent=apiSymbol+" · UPSTOX HISTORICAL API";
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),10000);
@@ -770,6 +789,7 @@ async function updateChart(){
       .sort((a,b)=>a.time-b.time);
     if(realBars.length<2)throw new Error("Historical API returned fewer than 2 valid candles");
     candles=realBars;
+    loadedChartContextKey=contextKey;
     const asOf = body?.data?.asOf || new Date(realBars[realBars.length - 1].time * 1000).toISOString();
     const asOfLabel = new Date(asOf).toLocaleString('en-IN', {
       timeZone:'Asia/Kolkata', day:'2-digit', month:'short',
@@ -785,21 +805,22 @@ async function updateChart(){
     updateAnalysis();
   }catch(err){
     if(requestId!==chartRequestId)return;
-    // Preserve the last valid chart during temporary API/network failures.
-    if(!candles.length){
+    const retainedCurrentContext=canReuse&&candles.length>0;
+    if(!retainedCurrentContext){
+      candles=[];
       candleSeries.setData([]);
       emaSeries.setData([]);
       ema21Series.setData([]);
       vwapSeries.setData([]);
+      const trend=document.getElementById("trend-value");if(trend)trend.textContent="DATA UNAVAILABLE";
+      const strength=document.getElementById("strength-value");if(strength)strength.textContent="—";
+      const status=document.getElementById("trend-status");if(status)status.textContent="DATA UNAVAILABLE";
+      const rsi=document.getElementById("rsi-value");if(rsi)rsi.textContent="—";
+      const macd=document.getElementById("macd-value");if(macd)macd.textContent="—";
+      const support=document.getElementById("support-value");if(support)support.textContent="—";
+      const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent="—";
     }
-    if(title)title.textContent=apiSymbol+" · "+(candles.length?"SHOWING LAST LOADED DATA · REFRESH FAILED":"HISTORICAL DATA UNAVAILABLE");
-    const trend=document.getElementById("trend-value");if(trend)trend.textContent="DATA UNAVAILABLE";
-    const strength=document.getElementById("strength-value");if(strength)strength.textContent="—";
-    const status=document.getElementById("trend-status");if(status)status.textContent="DATA UNAVAILABLE";
-    const rsi=document.getElementById("rsi-value");if(rsi)rsi.textContent="—";
-    const macd=document.getElementById("macd-value");if(macd)macd.textContent="—";
-    const support=document.getElementById("support-value");if(support)support.textContent="—";
-    const resistance=document.getElementById("resistance-value");if(resistance)resistance.textContent="—";
+    if(title)title.textContent=apiSymbol+" · "+(retainedCurrentContext?"LAST VALID DATA · REFRESH FAILED":"HISTORICAL DATA UNAVAILABLE");
   }finally{
     clearTimeout(timeout);
   }
