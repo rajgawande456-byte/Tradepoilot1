@@ -7,6 +7,7 @@
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script type="module" src="/market/chart-context.mjs"></script>
+<script type="module" src="/market/live-candle.mjs"></script>
 
 <style>
 :root{
@@ -684,10 +685,13 @@ function calcMACD(values){
 function calcVWAP(bars){
   let totalPV=0,totalV=0;
   return bars.map(b=>{
-    const typical=(b.high+b.low+b.close)/3;
-    totalPV+=typical*b.volume;
-    totalV+=b.volume;
-    return totalPV/totalV;
+    const volume=Number(b.volume);
+    if(Number.isFinite(volume)&&volume>0){
+      const typical=(b.high+b.low+b.close)/3;
+      totalPV+=typical*volume;
+      totalV+=volume;
+    }
+    return totalV>0?totalPV/totalV:null;
   });
 }
 
@@ -800,7 +804,7 @@ async function updateChart(){
     const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),ema21=calcEMA(closes,21),vwap=calcVWAP(candles);
     emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
     ema21Series.setData(candles.map((c,i)=>({time:c.time,value:ema21[i]})));
-    vwapSeries.setData(candles.map((c,i)=>({time:c.time,value:vwap[i]})));
+    vwapSeries.setData(candles.map((c,i)=>({time:c.time,value:vwap[i]})).filter(point=>Number.isFinite(point.value)));
     chart.timeScale().fitContent();
     updateAnalysis();
   }catch(err){
@@ -1116,39 +1120,32 @@ window.addEventListener("DOMContentLoaded",()=>{
       selectedTF === "15m" ? 900 : 3600;
   }
 
+  let lastTickSequence = null;
+  let lastTickAtMs = null;
+
   function applyTick(tick) {
     if (!tick || tick.symbol !== activeSymbol || !candleSeries) return;
-    const price = Number(tick.price);
-    if (!Number.isFinite(price) || price <= 0) return;
+    const mergeTick = window.TradePilotLiveCandle?.applyLiveTick;
+    if (typeof mergeTick !== "function") return;
 
-    const parsed = tick.asOf ? Date.parse(tick.asOf) : Date.now();
-    if (!Number.isFinite(parsed)) return;
-    const seconds = Math.floor(parsed / 1000);
-    const bucket = Math.floor(seconds / intervalSeconds()) * intervalSeconds();
-    const lastBar = candles.length ? candles[candles.length - 1] : null;
+    const result = mergeTick({
+      candles,
+      tick,
+      symbol: activeSymbol,
+      intervalSeconds: intervalSeconds(),
+      nowMs: Date.now(),
+      lastSequence: lastTickSequence,
+      lastTickAtMs
+    });
+    if (!result.accepted) return;
 
-    // Never send an older timestamp to Lightweight Charts. A delayed tick
-    // must not move the chart backwards or overwrite a later candle.
-    if (lastBar && bucket < lastBar.time) return;
+    candles = result.candles;
+    liveCandle = result.liveCandle;
+    lastTickSequence = result.lastSequence;
+    lastTickAtMs = result.lastTickAtMs;
+    const price = result.price;
 
-    if (!liveCandle || liveCandle.time !== bucket) {
-      const sameBucket = lastBar && lastBar.time === bucket;
-      liveCandle = {
-        time: bucket,
-        open: sameBucket ? lastBar.open : price,
-        high: Math.max(sameBucket ? lastBar.high : price, price),
-        low: Math.min(sameBucket ? lastBar.low : price, price),
-        close: price,
-        volume: sameBucket ? Number(lastBar.volume || 0) : 0
-      };
-    } else {
-      liveCandle.high = Math.max(liveCandle.high, price);
-      liveCandle.low = Math.min(liveCandle.low, price);
-      liveCandle.close = price;
-    }
-
-    // One WebSocket tick is the source of truth for both the selected quote
-    // card and the active chart candle.
+    // The same accepted provider tick updates the selected quote and candle.
     const priceEl = document.getElementById("price" + selectedMarket);
     if (priceEl) {
       priceEl.textContent = price.toLocaleString("en-IN", {
@@ -1165,16 +1162,6 @@ window.addEventListener("DOMContentLoaded",()=>{
     }
 
     try {
-      // Persist the forming candle in the same array used by history, EMA,
-      // VWAP and analysis. This prevents indicators from being rebuilt from
-      // stale history on every tick.
-      const lastIndex = candles.length - 1;
-      if (lastIndex >= 0 && candles[lastIndex].time === liveCandle.time) {
-        candles[lastIndex] = { ...liveCandle };
-      } else {
-        candles.push({ ...liveCandle });
-      }
-
       candleSeries.update({
         time: liveCandle.time,
         open: liveCandle.open,
@@ -1189,7 +1176,7 @@ window.addEventListener("DOMContentLoaded",()=>{
       const vwap = calcVWAP(candles);
       emaSeries.setData(candles.map((bar, i) => ({ time: bar.time, value: ema9[i] })));
       ema21Series.setData(candles.map((bar, i) => ({ time: bar.time, value: ema21[i] })));
-      vwapSeries.setData(candles.map((bar, i) => ({ time: bar.time, value: vwap[i] })));
+      vwapSeries.setData(candles.map((bar, i) => ({ time: bar.time, value: vwap[i] })).filter(point => Number.isFinite(point.value)));
 
       updateAnalysis();
       setStatus("● UPSTOX · LIVE WEBSOCKET TICKS", "var(--green)");
@@ -1245,6 +1232,8 @@ window.addEventListener("DOMContentLoaded",()=>{
     if (next === activeSymbol) return;
     activeSymbol = next;
     liveCandle = null;
+    lastTickSequence = null;
+    lastTickAtMs = null;
     closeSocket();
     connect();
   }
