@@ -2,12 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyLiveTick } from './live-candle.mjs';
 
-const nowMs = Date.parse('2026-11-28T03:00:30+05:30');
 const tick = (overrides = {}) => ({
   symbol: 'NIFTY 50', sequence: 10, price: 25001.5,
-  asOf: '2026-11-28T03:00:20+05:30', provider: 'UPSTOX V3 WS', ...overrides
+  asOf: '2026-11-28T03:00:20+05:30', provider: 'UPSTOX V3 WS', freshnessMs: 10000, ...overrides
 });
-const options = { symbol: 'NIFTY 50', intervalSeconds: 60, nowMs };
+const options = { symbol: 'NIFTY 50', intervalSeconds: 60 };
 
 test('creates a live OHLC candle without inventing volume', () => {
   const result = applyLiveTick({ ...options, tick: tick() });
@@ -40,7 +39,7 @@ test('updates the current candle OHLC and preserves historical volume', () => {
 test('starts a new interval candle when the timestamp enters the next bucket', () => {
   const first = applyLiveTick({ ...options, tick: tick() });
   const second = applyLiveTick({
-    ...options, nowMs: Date.parse('2026-11-28T03:01:05+05:30'),
+    ...options,
     candles: first.candles, lastSequence: first.lastSequence, lastTickAtMs: first.lastTickAtMs,
     tick: tick({ sequence: 11, price: 25005, asOf: '2026-11-28T03:01:02+05:30' })
   });
@@ -58,8 +57,9 @@ test('rejects missing timestamps instead of substituting local receipt time', ()
 
 test('rejects stale, future, wrong-symbol and provider-less ticks', () => {
   for (const candidate of [
-    tick({ asOf: '2026-11-28T02:59:00+05:30' }),
-    tick({ asOf: '2026-11-28T03:01:00+05:30' }),
+    tick({ freshnessMs: 20000 }),
+    tick({ freshnessMs: -1 }),
+    tick({ freshnessMs: undefined }),
     tick({ symbol: 'BANKNIFTY' }),
     tick({ provider: '' })
   ]) assert.equal(applyLiveTick({ ...options, tick: candidate }).accepted, false);
@@ -88,6 +88,16 @@ test('accepts a restarted backend sequence only when exchange time advances', ()
   });
   assert.equal(result.accepted, true);
   assert.equal(result.lastSequence, 1);
+});
+
+test('anchors hourly candles to the NSE 09:15 IST session open', () => {
+  const result = applyLiveTick({
+    symbol: 'NIFTY 50',
+    intervalSeconds: 3600,
+    tick: tick({ asOf: '2026-11-27T10:20:00+05:30' })
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.liveCandle.time, Math.floor(Date.parse('2026-11-27T10:15:00+05:30') / 1000));
 });
 
 test('rejects a tick whose candle bucket predates the chart', () => {
