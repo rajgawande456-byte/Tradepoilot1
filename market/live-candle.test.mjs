@@ -79,6 +79,17 @@ test('rejects duplicate sequence and backward exchange timestamps', () => {
   );
 });
 
+test('accepts a restarted backend sequence only when exchange time advances', () => {
+  const result = applyLiveTick({
+    ...options,
+    lastSequence: 500,
+    lastTickAtMs: Date.parse('2026-11-28T03:00:15+05:30'),
+    tick: tick({ sequence: 1, asOf: '2026-11-28T03:00:25+05:30' })
+  });
+  assert.equal(result.accepted, true);
+  assert.equal(result.lastSequence, 1);
+});
+
 test('rejects a tick whose candle bucket predates the chart', () => {
   const later = [{
     time: Math.floor(Date.parse('2026-11-28T03:01:00+05:30') / 1000),

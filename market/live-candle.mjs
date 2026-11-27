@@ -16,7 +16,6 @@ export function applyLiveTick({
   if (tick.symbol !== symbol) return rejected('symbol_mismatch');
   if (typeof tick.provider !== 'string' || !tick.provider.trim()) return rejected('unverified_provider');
   if (!Number.isSafeInteger(tick.sequence) || tick.sequence < 0) return rejected('invalid_sequence');
-  if (lastSequence != null && tick.sequence <= lastSequence) return rejected('out_of_order_sequence');
   if (typeof tick.price !== 'number' || !Number.isFinite(tick.price) || tick.price <= 0) return rejected('invalid_price');
   if (typeof tick.asOf !== 'string' || !tick.asOf.trim()) return rejected('missing_timestamp');
 
@@ -30,6 +29,11 @@ export function applyLiveTick({
   }
   const age = now - timestampMs;
   if (age > maxAge || age < -futureTolerance) return rejected('stale_or_future_tick');
+  const sequenceRegressed = lastSequence != null && tick.sequence < lastSequence;
+  const exchangeTimeAdvanced = lastTickAtMs != null && timestampMs > lastTickAtMs;
+  if (lastSequence != null && tick.sequence <= lastSequence && !(sequenceRegressed && exchangeTimeAdvanced)) {
+    return rejected('out_of_order_sequence');
+  }
   if (lastTickAtMs != null && timestampMs < lastTickAtMs) return rejected('out_of_order_timestamp');
 
   const seconds = Math.floor(timestampMs / 1000);
