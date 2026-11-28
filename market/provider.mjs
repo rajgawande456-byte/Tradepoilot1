@@ -49,6 +49,7 @@ function createUpstoxProvider(env) {
   const snapshotCache = new Map();
   const historyCache = new Map();
   const inFlight = new Map();
+  const MAX_STALE_HISTORY_CACHE_MS = 5 * 60 * 1000;
 
   // Serialize historical-candle requests so simultaneous index/timeframe loads
   // do not burst the Upstox historical API. Retry HTTP 429 using Retry-After.
@@ -344,11 +345,61 @@ function createUpstoxProvider(env) {
       () => getSnapshotRemote(safeSymbol));
   }
 
-  function getHistory(symbol, interval = '5') {
+  async function getHistory(symbol, interval = '5') {
     const safeSymbol = validateSymbol(symbol);
     const safeInterval = String(interval);
-    return cachedRequest('history:' + safeSymbol + ':' + safeInterval, historyCache, 30000,
-      () => getHistoryRemote(safeSymbol, safeInterval));
+    const key = 'history:' + safeSymbol + ':' + safeInterval;
+
+    try {
+      const value = await cachedRequest(
+        key,
+        historyCache,
+        30000,
+        () => getHistoryRemote(safeSymbol, safeInterval)
+      );
+      const cached = historyCache.get(key);
+      return {
+        ...value,
+        stale: false,
+        cacheStatus: 'fresh',
+        cacheAgeMs: cached ? Math.max(0, Date.now() - cached.at) : 0
+      };
+    } catch (error) {
+      const status = Number(error?.status);
+      const networkCodes = new Set([
+        'ECONNRESET', 'ETIMEDOUT', 'EAI_AGAIN', 'ENOTFOUND', 'ECONNREFUSED'
+      ]);
+      const networkCode = error?.code || error?.cause?.code;
+      const transientFailure =
+        (Number.isFinite(status) && status >= 500 && status <= 599) ||
+        ['TypeError', 'AbortError', 'TimeoutError'].includes(error?.name) ||
+        networkCodes.has(networkCode);
+
+      const cached = historyCache.get(key);
+      const cacheAgeMs = cached
+        ? Math.max(0, Date.now() - cached.at)
+        : Infinity;
+
+      // Keep a recent, previously validated historical chart available during
+      // transient provider outages, but never relabel it as live or refresh its
+      // original asOf/receivedAt timestamps.
+      if (
+        !transientFailure ||
+        !cached ||
+        cacheAgeMs > MAX_STALE_HISTORY_CACHE_MS
+      ) {
+        throw error;
+      }
+
+      return {
+        ...cached.value,
+        live: false,
+        stale: true,
+        cacheStatus: 'stale_fallback',
+        cacheAgeMs,
+        staleReason: error?.code || 'UPSTREAM_UNAVAILABLE'
+      };
+    }
   }
 
   return {

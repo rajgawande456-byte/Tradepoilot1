@@ -786,8 +786,10 @@ async function updateChart(){
     const response=await fetch("https://tradepoilot-api.onrender.com/api/v1/market/history?symbol="+encodeURIComponent(apiSymbol)+"&interval="+apiInterval,{cache:"no-store",signal:controller.signal});
     const body=await response.json();
     if(requestId!==chartRequestId)return;
-    const source=body?.data?.candles??body?.data?.data?.candles;
+    const historyData=body?.data;
+    const source=historyData?.candles??historyData?.data?.candles;
     if(!response.ok||!Array.isArray(source))throw new Error("History unavailable");
+    const staleHistory=historyData?.stale===true||historyData?.cacheStatus==="stale_fallback";
     const realBars=source.map(c=>({time:Number(c.time),open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close),volume:Number(c.volume||0)}))
       .filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close))
       .sort((a,b)=>a.time-b.time);
@@ -799,7 +801,8 @@ async function updateChart(){
       timeZone:'Asia/Kolkata', day:'2-digit', month:'short',
       hour:'2-digit', minute:'2-digit', hour12:false
     });
-    if(title) title.textContent = apiSymbol + " · HISTORICAL DATA · AS OF " + asOfLabel + " IST";
+    const historyLabel=staleHistory?"CACHED HISTORICAL DATA · UPSTREAM UNAVAILABLE":"HISTORICAL DATA";
+    if(title) title.textContent = apiSymbol + " · " + historyLabel + " · AS OF " + asOfLabel + " IST";
     candleSeries.setData(candles);
     const closes=candles.map(c=>c.close),ema=calcEMA(closes,9),ema21=calcEMA(closes,21),vwap=calcVWAP(candles);
     emaSeries.setData(candles.map((c,i)=>({time:c.time,value:ema[i]})));
